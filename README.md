@@ -11,7 +11,7 @@ Keine npm-Dependencies, kein Build-Step, kein Backend.
 ## Schnellstart
 
 ```bash
-git clone <repo-url> yijing
+git clone https://codeberg.org/jkaindl/Yijing.git yijing
 cd yijing
 ./serve.sh
 ```
