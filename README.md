@@ -8,6 +8,11 @@ mit Pīnyīn, Trigramme mit Stammdaten.
 
 Keine npm-Dependencies, kein Build-Step, kein Backend.
 
+**Live-Demo:** <https://jkaindl.codeberg.page/Yijing/> — funktioniert
+ohne lokales Setup für Hexagramm-Wurf und Wilhelm-Text. Die KI-Deutung
+erfordert einen lokal laufenden LLM-Server (Ollama oder MLX), siehe
+[Schnellstart](#schnellstart).
+
 ## Schnellstart
 
 ```bash
