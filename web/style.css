@@ -82,6 +82,8 @@ footer em { color: var(--ink-soft); }
 footer .copyright {
   margin-top: 0.6rem;
   color: var(--ink-faint);
+  max-width: 720px;
+  font-size: 0.75rem;
 }
 footer .copyright a {
   color: var(--accent);
