@@ -27,7 +27,7 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 - Druckfreundliches PDF-Layout via `@media print`
 - Dev-Server mit `Cache-Control: no-store`
 - Dokumentation: `docs/ARCHITECTURE.md`, `docs/DATA.md`, `docs/LLM.md`,
-  `docs/DEVELOPMENT.md`, `AGENTS.md`, `CONTRIBUTING.md`, `LICENSE` (MIT)
+  `docs/DEVELOPMENT.md`, `AGENTS.md`, `CONTRIBUTING.md`, `LICENSE` (AGPL-3.0)
 
 ### Bekannte Fragen
 

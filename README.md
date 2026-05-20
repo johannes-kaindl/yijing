@@ -76,7 +76,7 @@ yijing/
 ├── AGENTS.md                  # Konventionen für KI-Coding-Sessions
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
-├── LICENSE                    # MIT
+├── LICENSE                    # AGPL-3.0
 └── README.md                  # diese Datei
 ```
 
@@ -109,7 +109,7 @@ Zuordnung erfolgt im Browser über eine vollständige Lookup-Tabelle.
 
 ## Lizenz
 
-[MIT](LICENSE) für den Code in diesem Repository.
+[AGPL-3.0](LICENSE) für den Code in diesem Repository.
 
 Die Wilhelm-Übersetzung (1924) in `data/hexagrams.json` ist gemeinfrei
 (Wilhelm † 1930; Gemeinfreiheit in Deutschland seit 2001). Bei

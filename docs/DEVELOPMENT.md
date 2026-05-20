@@ -36,7 +36,7 @@ yijing/
 ├── AGENTS.md              # Konventionen für KI-Sessions
 ├── CHANGELOG.md           # Versionshistorie
 ├── CONTRIBUTING.md        # Beitragshinweise
-├── LICENSE                # MIT
+├── LICENSE                # AGPL-3.0
 ├── README.md              # Einstieg
 ├── docs/                  # Diese Dokumentation
 │   ├── ARCHITECTURE.md
