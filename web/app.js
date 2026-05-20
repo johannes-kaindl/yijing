@@ -789,8 +789,8 @@ function renderEndpointList() {
         </label>
       </div>
       <div class="ep-actions">
-        <button type="button" data-act="test">Verbindung</button>
-        <button type="button" data-act="thinkTest">Reasoning</button>
+        <button type="button" data-act="test">Verbindung testen</button>
+        <button type="button" data-act="thinkTest">Reasoning testen</button>
         <button type="button" data-act="remove" class="ghost danger">Entfernen</button>
       </div>
       <div class="ep-status" data-status></div>
@@ -856,8 +856,12 @@ function renderEndpointList() {
           status.innerHTML = `<span class="err">Keine Modelle verfügbar</span>`;
           return;
         }
-        // Erstes Modell, das nicht 'embedding' im Namen hat
-        const model = models.find((m) => !/embed/i.test(m)) || models[0];
+        // Bevorzugt das vom User gewählte Standard-Modell; sonst erstes
+        // Nicht-Embedding-Modell, sonst irgendeines.
+        const model =
+          (ep.defaultModel && models.includes(ep.defaultModel) && ep.defaultModel) ||
+          models.find((m) => !/embed/i.test(m)) ||
+          models[0];
         status.innerHTML = `<span class="muted">teste mit <code>${escapeHTML(model)}</code> …</span>`;
 
         const onRes = await testThinkingMode({ endpoint: ep, model, thinking: true });
