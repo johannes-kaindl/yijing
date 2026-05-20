@@ -1,0 +1,27 @@
+# Frühere Anläufe — nicht versionieren.
+# Enthält u.a. den Klartext-API-Key in yijing_1/.env und ist groß (Bilder,
+# Notebooks, alte venv). Das _archiv ist die Substrat-Quelle für scripts/
+# build_data.py, der Output liegt unter data/ und wird mit committet.
+_archiv/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Server-Runtime
+/tmp/
+*.pid
+
+# Lokale Notizen / Memory (nicht für Versionierung)
+.remember/

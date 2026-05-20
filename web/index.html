@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yijing Orakel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-row">
+      <button id="openSettings" type="button" class="icon-btn" title="Einstellungen" aria-label="Einstellungen">⚙</button>
+      <h1>易經 <span class="subtle">Yijing Orakel</span></h1>
+      <span class="spacer"></span>
+    </div>
+    <p class="tagline">Drei-Münzen-Methode · Wilhelm-Übersetzung · lokale Modelle</p>
+  </header>
+
+  <main>
+    <section class="ask" id="ask">
+      <label for="question">Deine Frage</label>
+      <textarea
+        id="question"
+        rows="2"
+        placeholder="Worum geht es? (optional – aber Konzentration hilft)"
+      ></textarea>
+      <div class="controls">
+        <button id="cast" type="button">Münzen werfen</button>
+        <button id="reset" type="button" class="ghost" hidden>Neue Frage</button>
+        <button id="exportMd" type="button" class="ghost" hidden title="Als Markdown exportieren">Markdown</button>
+        <button id="exportPdf" type="button" class="ghost" hidden title="Als PDF drucken / speichern">PDF</button>
+      </div>
+    </section>
+
+    <section class="reading" id="reading" hidden>
+      <div class="question-echo" id="questionEcho" hidden></div>
+
+      <div class="hexagrams">
+        <article class="hex-card" id="primary">
+          <h2 class="hex-title">Ursprungsbild</h2>
+          <div class="hex-figure" data-figure="primary"></div>
+          <div class="hex-chinese"></div>
+          <h3 class="hex-name"></h3>
+          <p class="hex-trigrams"></p>
+        </article>
+
+        <article class="hex-card" id="resulting" hidden>
+          <h2 class="hex-title">Zielbild</h2>
+          <div class="hex-figure" data-figure="resulting"></div>
+          <div class="hex-chinese"></div>
+          <h3 class="hex-name"></h3>
+          <p class="hex-trigrams"></p>
+        </article>
+      </div>
+
+      <!-- KI-Interpretation -->
+      <section class="interpretation" id="interpretation" hidden>
+        <div class="interp-controls">
+          <h2 class="section-title">KI-Interpretation</h2>
+          <div class="interp-picker">
+            <select id="endpointSelect" aria-label="LLM-Endpunkt"></select>
+            <select id="modelSelect" aria-label="Modell"></select>
+            <select id="thinkingSelect" aria-label="Reasoning-Modus" title="Reasoning / Thinking">
+              <option value="default">Reasoning: Default</option>
+              <option value="on">Reasoning: An</option>
+              <option value="off">Reasoning: Aus</option>
+            </select>
+            <button id="interpretBtn" type="button">Interpretieren</button>
+            <button id="stopInterpretBtn" type="button" class="ghost" hidden>Abbrechen</button>
+          </div>
+        </div>
+        <details id="interpThinkingDetails" class="thinking-details" hidden>
+          <summary>Denkprozess <span class="thinking-marker">●</span></summary>
+          <div class="thinking-body" id="interpThinking"></div>
+        </details>
+        <div class="interp-body" id="interpBody"></div>
+        <div class="interp-status" id="interpStatus"></div>
+      </section>
+
+      <!-- Wilhelm-Texte -->
+      <section class="texts">
+        <details open>
+          <summary>Das Urteil</summary>
+          <div class="text-body" id="judgmentText"></div>
+        </details>
+        <details>
+          <summary>Das Bild</summary>
+          <div class="text-body" id="imageText"></div>
+        </details>
+        <details>
+          <summary>Bedeutung</summary>
+          <div class="text-body" id="meaningText"></div>
+        </details>
+        <details id="associationDetails" hidden>
+          <summary>Bildmeditation</summary>
+          <div class="text-body" id="associationText"></div>
+        </details>
+        <details id="trigramDetails">
+          <summary>Trigramme</summary>
+          <div class="text-body" id="trigramText"></div>
+        </details>
+
+        <div id="changingSection" hidden>
+          <h2 class="section-title">Wandelnde Linien</h2>
+          <div id="changingLines"></div>
+        </div>
+
+        <div id="resultingSection" hidden>
+          <h2 class="section-title">Zielbild</h2>
+          <details>
+            <summary id="resultingSummary">Urteil des Zielbilds</summary>
+            <div class="text-body" id="resultingJudgment"></div>
+          </details>
+        </div>
+      </section>
+    </section>
+
+    <section class="history" id="history" hidden>
+      <h2>Verlauf</h2>
+      <ul id="historyList"></ul>
+      <button id="clearHistory" type="button" class="ghost">Verlauf löschen</button>
+    </section>
+  </main>
+
+  <!-- Settings-Modal -->
+  <dialog id="settingsModal" class="settings-modal">
+    <form method="dialog" class="settings-form">
+      <h2>Einstellungen</h2>
+
+      <fieldset>
+        <legend>LLM-Endpunkte</legend>
+        <p class="hint">
+          Lokale Modelle via <strong>Ollama</strong> (Standardport <code>11434</code>) oder
+          <strong>OpenAI-kompatibel</strong> (MLX, LM Studio …). CORS auf dem Server muss erlaubt sein —
+          für Ollama z.&nbsp;B. <code>OLLAMA_ORIGINS=*</code>.
+        </p>
+        <ul id="endpointList" class="endpoint-list"></ul>
+        <details class="add-endpoint">
+          <summary>+ Endpunkt hinzufügen</summary>
+          <div class="grid">
+            <label>Name <input type="text" id="newEpName" placeholder="z.B. Ollama lokal" /></label>
+            <label>Typ
+              <select id="newEpType">
+                <option value="ollama">Ollama</option>
+                <option value="openai">OpenAI-kompatibel</option>
+              </select>
+            </label>
+            <label>URL <input type="text" id="newEpUrl" placeholder="http://localhost:11434" /></label>
+            <label>API-Key (optional) <input type="text" id="newEpKey" autocomplete="off" /></label>
+          </div>
+          <button type="button" id="addEndpointBtn">Hinzufügen</button>
+        </details>
+      </fieldset>
+
+      <fieldset>
+        <legend>Reasoning-Default</legend>
+        <p class="hint">
+          Wird pro Wurf in der UI überschrieben. „Auto" = keine Steuerung,
+          Modell entscheidet selbst. „An" / „Aus" setzt für jede Anfrage
+          den passenden Parameter (Ollama: <code>think</code>, OpenAI-kompatibel:
+          <code>reasoning_effort</code> + <code>chat_template_kwargs</code>).
+        </p>
+        <label class="row-inline">
+          <span>Default-Modus:</span>
+          <select id="defaultThinking">
+            <option value="default">Auto (Modell entscheidet)</option>
+            <option value="on">An (Reasoning erzwingen)</option>
+            <option value="off">Aus (Reasoning unterdrücken)</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Beratungs-Prompt</legend>
+        <p class="hint">System-Prompt für die Interpretation. Wird mit Würde-/Mitgefühls-Default vorbelegt.</p>
+        <textarea id="systemPromptInput" rows="8"></textarea>
+        <div class="row">
+          <button type="button" id="resetSystemPrompt" class="ghost">Default wiederherstellen</button>
+        </div>
+      </fieldset>
+
+      <div class="settings-footer">
+        <button type="button" id="closeSettings">Schließen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer>
+    <p>
+      Text: Richard Wilhelm, <em>I Ging — Das Buch der Wandlungen</em>.
+      Drei-Münzen-Methode (Verteilung 1:3:3:1).
+    </p>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
