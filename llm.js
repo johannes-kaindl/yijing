@@ -254,20 +254,6 @@ export const Endpoints = {
     const id = this.getSelectedId();
     return this.list().find((e) => e.id === id) || null;
   },
-  ensureDefaults() {
-    if (this.list().length === 0) {
-      const id = crypto.randomUUID();
-      this.add({
-        id,
-        name: "Ollama lokal",
-        type: "ollama",
-        baseUrl: "http://localhost:11434",
-        apiKey: "",
-        defaultModel: "",
-      });
-      this.setSelectedId(id);
-    }
-  },
   /**
    * Probt typische lokale Endpunkte (Ollama 11434, MLX/LM-Studio 8080/1234)
    * und legt erreichbare automatisch an, sofern noch nicht vorhanden.
