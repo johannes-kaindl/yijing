@@ -76,7 +76,8 @@ yijing/
 ├── AGENTS.md                  # Konventionen für KI-Coding-Sessions
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
-├── LICENSE                    # AGPL-3.0
+├── LICENSE                    # AGPL-3.0-or-later (Code)
+├── LICENSE-DOCS               # CC BY-SA 4.0 (Doku)
 └── README.md                  # diese Datei
 ```
 
@@ -109,11 +110,40 @@ Zuordnung erfolgt im Browser über eine vollständige Lookup-Tabelle.
 
 ## Lizenz
 
-[AGPL-3.0](LICENSE) für den Code in diesem Repository.
+- **Code:** GNU Affero General Public License v3.0 oder später —
+  [AGPL-3.0-or-later](LICENSE).
+- **Dokumentation** (`README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`,
+  `AGENTS.md`, `docs/`): Creative Commons Attribution-ShareAlike 4.0
+  International — [CC BY-SA 4.0](LICENSE-DOCS).
+- **Wilhelm-Übersetzung** in `data/hexagrams.json`: gemeinfrei
+  (Wilhelm † 1930; Gemeinfreiheit in Deutschland seit 2001). Bei
+  Weiterverwendung bitte Richard Wilhelm als Quelle nennen.
 
-Die Wilhelm-Übersetzung (1924) in `data/hexagrams.json` ist gemeinfrei
-(Wilhelm † 1930; Gemeinfreiheit in Deutschland seit 2001). Bei
-Weiterverwendung bitte Richard Wilhelm als Quelle nennen.
+### Warum AGPL?
+
+Diese Lizenzwahl ist nicht zufällig. AGPL ist der rechtliche
+Mechanismus, der eine bestimmte Logik schützt: Beiträge zur Allmende
+bleiben in der Allmende — auch wenn jemand versucht, sie über einen
+Netzwerkdienst zu kommerzialisieren.
+
+Anders als permissive Lizenzen (MIT, Apache) oder file-level Copyleft
+(MPL) verhindert die Network-Klausel der AGPL (§13), dass dieser Code
+zur Grundlage geschlossener, kommerziell kontrollierter Infrastruktur
+wird. Wer eine modifizierte Variante als Netzwerkdienst betreibt, muss
+den Quellcode für die Nutzer dieses Dienstes verfügbar machen.
+
+Das ist eine bewusste Entscheidung gegen maximale Verbreitung und für
+theoretische Kohärenz: Was als Beitrag zur Allmende veröffentlicht
+wurde, sollte in der Allmende bleiben — auch wenn das die Adoption
+durch Akteure einschränkt, deren Geschäftsmodell auf der
+Re-Privatisierung dieser Beiträge basiert.
+
+yijing hat keine externen Code-Abhängigkeiten — kein npm, kein
+Build-Step, keine Drittanbieter-JS-Bibliotheken. Die AGPL-Verpflichtungen
+gelten vollständig auf den ausgelieferten JavaScript-Code, der im
+Browser ohnehin direkt einsehbar ist. Externe LLM-Server (Ollama, MLX)
+werden via HTTP-API aufgerufen — kein Code-Linking; deren Lizenzen
+wirken separat.
 
 ## Quellen
 
