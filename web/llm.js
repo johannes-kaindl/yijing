@@ -1,4 +1,24 @@
-// LLM-Adapter: Ollama-API und OpenAI-kompatibel, beide mit Streaming.
+/**
+ * LLM-Adapter für lokale Modell-Server.
+ *
+ * Unterstützt zwei Backend-Typen mit einheitlicher Schnittstelle:
+ *
+ *  - "ollama"  → native Ollama-API (/api/tags, /api/chat als ND-JSON-Stream)
+ *  - "openai"  → OpenAI-kompatibel (/v1/models, /v1/chat/completions als SSE)
+ *                Nutzbar für Ollama-OpenAI-Endpunkt, MLX (mlx_lm.server),
+ *                LM Studio, vLLM, OpenClaw u.ä.
+ *
+ * Beide Clients implementieren:
+ *  - listModels(): Promise<string[]>
+ *  - chatStream({ model, messages, thinking, onToken, onThinking, signal }): Promise<void>
+ *
+ * Reasoning/Thinking wird über `thinking: true|false|null` gesteuert und
+ * je nach Backend in die passende Schnittstelle übersetzt:
+ *  - Ollama-native: `think` + großzügiges `num_predict`
+ *  - OpenAI-kompatibel: `reasoning_effort` + `chat_template_kwargs.enable_thinking`
+ *
+ * Persistenz von Endpunkten und System-Prompt erfolgt in localStorage.
+ */
 
 export class LLMError extends Error {
   constructor(msg, cause) {

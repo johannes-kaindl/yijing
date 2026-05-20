@@ -1,4 +1,17 @@
-// Yijing Orakel – Frontend
+/**
+ * Yijing-Orakel — Frontend-Hauptmodul.
+ *
+ * Verantwortlich für:
+ *  - Cast-Mechanik (Drei-Münzen-Methode → Hypergram → Ursprungs-/Zielbild)
+ *  - Rendering von Hexagramm-Figuren, Wilhelm-Texten und wandelnden Linien
+ *  - Settings-Modal (Endpoint-Verwaltung, Reasoning-Defaults, System-Prompt)
+ *  - LLM-Interpretation mit Streaming + Thinking-Anzeige
+ *  - Verlauf in localStorage + Tiefe Links via URL-Hash (#r=<uuid>)
+ *  - Export als Markdown und PDF-Druck
+ *
+ * Stack: Vanilla ES-Module, keine Build-Tools, keine externen Abhängigkeiten.
+ * Daten werden zur Laufzeit aus ../data/hexagrams.json geladen.
+ */
 
 import {
   Endpoints,
@@ -13,7 +26,12 @@ import { renderMarkdown } from "./markdown.js";
 
 const HISTORY_KEY = "yijing-history-v1";
 
-// Bottom-to-top Binärstring → King-Wen-Nummer (1–64)
+/**
+ * Lookup: bottom-to-top Binärstring (6 Zeichen, 1 = Yang, 0 = Yin) → King-Wen-Nummer.
+ * Beispiele: "111111" → 1 (Kien/Schöpferisches), "000000" → 2 (Kun/Empfangendes).
+ * Die King-Wen-Reihenfolge ist nicht-binär; diese Tabelle ist die kanonische Quelle
+ * und entspricht der Unicode-Reihenfolge des Bereichs U+4DC0…U+4DFF.
+ */
 const BINARY_TO_KING_WEN = {
   "111111":  1, "000000":  2, "100010":  3, "010001":  4,
   "111010":  5, "010111":  6, "010000":  7, "000010":  8,
@@ -33,16 +51,38 @@ const BINARY_TO_KING_WEN = {
   "110011": 61, "001100": 62, "101010": 63, "010101": 64,
 };
 
+/**
+ * Drei-Münzen-Wurf für eine einzelne Linie.
+ *
+ * Pro Münze 0 (Yin/Zahl) oder 1 (Yang/Kopf), jeweils p=0.5.
+ * Linienwert = Summe + 6, also 6–9:
+ *
+ *   6  3× Yin   wandelndes Yin   (○) p = 1/8
+ *   7  2× Yin   festes Yang          p = 3/8
+ *   8  1× Yin   festes Yin           p = 3/8
+ *   9  0× Yin   wandelndes Yang  (○) p = 1/8
+ *
+ * Die Drei-Münzen-Methode hat eine andere Verteilung als die historisch
+ * ältere Schafgarben-Stab-Methode (5/16 : 7/16 : 3/16 : 1/16) — wir nutzen
+ * die heute gängigere Münzmethode.
+ */
 function tossLine() {
   const coins = [0, 1, 2].map(() => (Math.random() < 0.5 ? 0 : 1));
   const value = 6 + coins.reduce((a, b) => a + b, 0);
   return { value, coins };
 }
 
+/** Sechs Linien werfen — Index 0 ist die unterste Linie (traditionell zuerst gebaut). */
 function castHypergram() {
   return Array.from({ length: 6 }, () => tossLine());
 }
 
+/**
+ * Eigenschaften einer Linie ableiten.
+ * - yang:     Linienwert 7 oder 9
+ * - changing: Linienwert 6 oder 9 (verwandelt sich in das Zielbild)
+ * - target:   Bit (0/1) im Zielbild — wandelnde Linien drehen sich, feste bleiben
+ */
 function lineState(value) {
   const yang = value === 7 || value === 9;
   const changing = value === 6 || value === 9;

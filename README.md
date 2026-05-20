@@ -1,116 +1,129 @@
 # Yijing Orakel
 
-Schlankes I-Ging-Orakel als Static-Site. Drei-Münzen-Wurf im Browser,
-Wilhelm-Übersetzung aller 64 Hexagramme inkl. Urteil, Bild, Bedeutung,
-wandelnde Linien. Mit optionaler KI-Deutung über **lokale LLM-Server**
-(Ollama oder OpenAI-kompatibel, z.&nbsp;B. MLX / LM Studio).
+Ein schlankes I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und
+optionaler KI-Deutung über lokale LLM-Server (Ollama oder OpenAI-
+kompatibel wie MLX/LM Studio). Drei-Münzen-Methode, vollständige
+Wilhelm-Texte inklusive aller wandelnden Linien, chinesisches Schrift­zeichen
+mit Pīnyīn, Trigramme mit Stammdaten.
 
-## Starten
+Keine npm-Dependencies, kein Build-Step, kein Backend.
+
+## Schnellstart
 
 ```bash
+git clone <repo-url> yijing
+cd yijing
 ./serve.sh
 ```
 
 Öffnet `http://localhost:8765/web/index.html` automatisch.
 
-> `index.html` lädt `data/hexagrams.json` per `fetch()`, daher ist ein
-> kleiner HTTP-Server nötig — `file://` würde an CORS scheitern.
+> Voraussetzung: Python 3.9+.
 
-## Funktionen
+## Features
 
 - **Drei-Münzen-Methode** mit korrekter Verteilung (1/8 : 3/8 : 3/8 : 1/8)
-- **Ursprungs- und Zielbild** bei wandelnden Linien
-- **Wilhelm-Übersetzung** (Urteil, Bild, Bedeutung, alle 6 Linientexte)
+- **Ursprungs- und Zielbild** bei wandelnden Linien, mit visueller
+  Markierung
+- **Wilhelm-Übersetzung** (1924, gemeinfrei): Urteil, Bild, Bedeutung,
+  alle sechs Linientexte mit Konfuzius-Kommentar
 - **Chinesisches Schriftzeichen + Pīnyīn** pro Hexagramm
-- **Trigramme** mit Familie, Natur, Jahreszeit, Himmelsrichtung und Assoziationen
+- **Trigramme** mit Familie, Natur, Jahreszeit, Himmelsrichtung,
+  Assoziationen
 - **Bildmeditation** (atmosphärische Stichworte) für 19 Hexagramme
-- **KI-Interpretation** via lokalem LLM-Server (optional)
-- **Verlauf** der letzten 20 Würfe (lokal im Browser)
+- **KI-Interpretation** via lokalem LLM-Server (Ollama, MLX, LM Studio,
+  vLLM, OpenClaw) mit Streaming, Reasoning-Steuerung und Markdown-
+  Rendering
+- **Verlauf** der letzten 20 Würfe in localStorage, einzelne Würfe via
+  URL-Hash teilbar/wiederherstellbar
+- **Export** als Markdown oder druckfreundliches PDF
 
-## LLM-Anbindung
+## Lokale LLM-Anbindung
 
-Klick auf das ⚙-Symbol oben links. Im Settings-Modal kannst du beliebig
-viele Endpunkte konfigurieren:
+Klick auf das ⚙-Symbol oben links öffnet das Settings-Modal. Beim ersten
+Start probiert die App automatisch die typischen lokalen Endpunkte:
 
-| Typ | URL-Beispiel | Hinweis |
-|---|---|---|
-| **Ollama** | `http://localhost:11434` | Native API, nutzt `/api/tags` und `/api/chat` |
-| **OpenAI-kompatibel** | `http://localhost:8080/v1` | Für MLX-Server, LM Studio, vLLM, OpenClaw, … |
+| Server | URL-Beispiel |
+|---|---|
+| Ollama | `http://localhost:11434` |
+| MLX (`mlx_lm.server`) | `http://localhost:8080/v1` |
+| LM Studio | `http://localhost:1234/v1` |
 
-Pro Endpunkt: Name, Typ, URL, optional API-Key. Modelle werden automatisch
-gelistet. Die Auswahl wird pro Wurf in der UI getroffen.
+Weitere Endpunkte lassen sich manuell hinzufügen.
 
 ### CORS
 
-Die Web-App ruft die LLM-Server **direkt aus dem Browser** auf. Beide
-Seiten müssen CORS erlauben, sonst blockt der Browser.
-
-**Ollama:** Vor dem Start exportieren:
+Die Web-App ruft die LLM-Server direkt aus dem Browser auf — beide Seiten
+müssen CORS erlauben. Für Ollama:
 
 ```bash
-export OLLAMA_ORIGINS="http://localhost:8765"
-ollama serve
+launchctl setenv OLLAMA_ORIGINS "*"
+# Ollama neu starten
 ```
 
-oder permanent (macOS):
+MLX und LM Studio sind standardmäßig offen. Details:
+[`docs/LLM.md`](docs/LLM.md#cors-fehlersuche).
 
-```bash
-launchctl setenv OLLAMA_ORIGINS "http://localhost:8765"
-```
-
-**MLX/LM Studio:** CORS ist meistens standardmäßig offen. Bei eigenem
-`mlx_lm.server`/vLLM den entsprechenden Flag aktivieren.
-
-### System-Prompt
-
-Im Settings-Modal kannst du den Beratungs-System-Prompt anpassen — der
-Default folgt der Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige
-Beratungsstruktur).
-
-## Struktur
+## Verzeichnisstruktur
 
 ```
 yijing/
-├── web/                        # Frontend (HTML/CSS/JS, abhängigkeitsfrei)
-│   ├── index.html
-│   ├── style.css
-│   ├── app.js                  # UI, Cast-Logik, Verlauf
-│   └── llm.js                  # Adapter Ollama + OpenAI-kompatibel
-├── data/
-│   ├── hexagrams.json          # 64 Hexagramme, einheitliches Schema
-│   └── trigrams.json           # 8 Trigramme mit Stammdaten
-├── scripts/build_data.py       # Konsolidiert aus _archiv/
-├── serve.sh
-└── _archiv/                    # ältere Anläufe (yijing_1 … Yijing_6)
+├── web/                       # Frontend (HTML/CSS/JS, vanilla)
+├── data/                      # 64 Hexagramme + 8 Trigramme als JSON
+├── scripts/                   # Build- und Dev-Server-Skripte
+├── docs/                      # Architektur, Daten, LLM, Entwicklung
+├── _archiv/                   # alte Anläufe — per .gitignore ausgeschlossen
+├── AGENTS.md                  # Konventionen für KI-Coding-Sessions
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+├── LICENSE                    # MIT
+└── README.md                  # diese Datei
 ```
 
-## Daten neu bauen
+## Dokumentation
 
-```bash
-python3 scripts/build_data.py
-```
+| Datei | Inhalt |
+|---|---|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Modulaufbau, Datenfluss, Persistenz |
+| [`docs/DATA.md`](docs/DATA.md) | Schema von `hexagrams.json` und `trigrams.json` |
+| [`docs/LLM.md`](docs/LLM.md) | LLM-Backends, Reasoning-Modi, CORS-Fehlersuche |
+| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Entwicklungs-Setup, Tests, Debugging |
+| [`AGENTS.md`](AGENTS.md) | Konventionen für KI-getriebene Sessions |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Beitragshinweise |
+| [`CHANGELOG.md`](CHANGELOG.md) | Versionshistorie |
 
-Quellen:
-- `_archiv/Yijing_6` → Wilhelm-Texte
-- `_archiv/yijing_5` → Schriftzeichen, Pinyin, Trigramm-Stammdaten
-- `_archiv/yijing_3` → Bild-Assoziationen (aus Dateinamen extrahiert)
+## Drei-Münzen-Methode
 
-## Wurfmethode
+Pro Linie drei Münzen (Yin = 0, Yang = 1), Summe + 6 ergibt den
+Linienwert:
 
-Pro Linie drei Münzen (Yin = 0, Yang = 1), Summe + 6 ergibt den Linienwert:
+| Wert | Bedeutung | Wahrscheinlichkeit |
+|---|---|---|
+| 6 | wandelndes Yin (○) | 1/8 (12,5 %) |
+| 7 | festes Yang | 3/8 (37,5 %) |
+| 8 | festes Yin | 3/8 (37,5 %) |
+| 9 | wandelndes Yang (○) | 1/8 (12,5 %) |
 
-| Wert | Bedeutung           | Wahrscheinlichkeit |
-|------|---------------------|--------------------|
-| 6    | wandelndes Yin (○)  | 1/8 (12,5 %)       |
-| 7    | festes Yang         | 3/8 (37,5 %)       |
-| 8    | festes Yin          | 3/8 (37,5 %)       |
-| 9    | wandelndes Yang (○) | 1/8 (12,5 %)       |
+Die Auflösung wandelnder Linien zu einem Zielbild und die King-Wen-
+Zuordnung erfolgt im Browser über eine vollständige Lookup-Tabelle.
 
-Die Auflösung wandelnder Linien zu einem Zielbild sowie die King-Wen-
-Nummerierung erfolgen im Browser über eine vollständige Lookup-Tabelle.
+## Lizenz
 
-## Quelle
+[MIT](LICENSE) für den Code in diesem Repository.
 
-Wilhelm, Richard: *I Ging — Das Buch der Wandlungen*. Texte aus dem
-letzten Anlauf (`_archiv/Yijing_6`) übernommen, Schriftzeichen und
-Trigramm-Stammdaten aus `_archiv/yijing_5`.
+Die Wilhelm-Übersetzung (1924) in `data/hexagrams.json` ist gemeinfrei
+(Wilhelm † 1930; Gemeinfreiheit in Deutschland seit 2001). Bei
+Weiterverwendung bitte Richard Wilhelm als Quelle nennen.
+
+## Quellen
+
+- Wilhelm, Richard: *I Ging — Das Buch der Wandlungen*, Diederichs, 1924
+- Trigramm-Stammdaten und chinesische Bezeichnungen aus
+  Standardliteratur und chinesischen Originalquellen
+
+## Status
+
+Hobbyprojekt nach sechs verworfenen Anläufen — siehe `_archiv/`. Dieser
+Anlauf ist absichtlich anders: schlank, abhängigkeitsfrei, lokal.
+Funktioniert vollständig im Browser; die KI-Anbindung ist optional und
+ausschließlich für lokale Server gedacht.
