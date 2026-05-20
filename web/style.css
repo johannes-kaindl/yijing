@@ -79,6 +79,20 @@ footer {
 footer p { margin: 0; max-width: 540px; margin-inline: auto; }
 footer em { color: var(--ink-soft); }
 
+footer .copyright {
+  margin-top: 0.6rem;
+  color: var(--ink-faint);
+}
+footer .copyright a {
+  color: var(--accent);
+  text-decoration-color: var(--accent-soft);
+  text-underline-offset: 0.15em;
+}
+footer .copyright a:hover {
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+}
+
 /* Ask section */
 .ask {
   background: var(--bg-card);
