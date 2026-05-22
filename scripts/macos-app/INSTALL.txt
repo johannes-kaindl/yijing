@@ -2,30 +2,36 @@
   YIJING ORAKEL — Installation auf dem Mac
 ════════════════════════════════════════════════════════════════════
 
-Diese App startet das Yijing-Orakel auf deinem eigenen Mac und öffnet
-es in Safari. Es werden keine Daten ins Internet gesendet — alles
-läuft lokal auf deinem Rechner.
+Diese App startet das Yijing-Orakel in einem eigenen Fenster auf
+deinem Mac. Es werden keine Daten ins Internet gesendet — alles läuft
+lokal auf deinem Rechner.
 
 Weil die App nicht aus dem App Store kommt, sind beim ALLERSTEN Start
 ein paar zusätzliche Klicks nötig. Das ist normal und nur einmal so.
 
 
 ────────────────────────────────────────────────────────────────────
- SCHRITT 1 — Entpacken
+ SCHRITT 1 — Installieren
 ────────────────────────────────────────────────────────────────────
 
-Doppelklick auf die Datei „Yijing.app.zip".
-Daneben erscheint dann „Yijing" (mit App-Symbol).
+1. Doppelklick auf „Yijing.dmg".
+   Es öffnet sich ein Fenster mit dem „Yijing"-Symbol und einem
+   „Programme"-Ordner daneben.
 
-Tipp: Schiebe „Yijing" in deinen Programme-Ordner — dann findest du
-es später leicht wieder.
+2. Ziehe „Yijing" mit der Maus auf den „Programme"-Ordner.
+   Damit ist die App installiert.
+
+3. Wirf das „Yijing Orakel"-Laufwerk wieder aus: im Finder auf das
+   Auswerf-Symbol neben „Yijing Orakel" klicken (oder das Symbol vom
+   Schreibtisch in den Papierkorb ziehen).
 
 
 ────────────────────────────────────────────────────────────────────
  SCHRITT 2 — Der erste Start (einmalig)
 ────────────────────────────────────────────────────────────────────
 
-1. Doppelklick auf „Yijing".
+1. Öffne den Programme-Ordner und mache einen Doppelklick auf
+   „Yijing".
 
 2. Es erscheint ein Hinweis, dass die App nicht geöffnet werden kann,
    weil sie nicht aus dem App Store stammt.
@@ -47,16 +53,15 @@ es später leicht wieder.
 7. Es erscheint noch ein letzter Dialog.
    → Klicke dort auf „Trotzdem öffnen".
 
-Fertig — die App startet, und nach ein paar Sekunden öffnet sich
-Safari mit dem Yijing-Orakel.
+Fertig — die App öffnet sich in einem eigenen Fenster.
 
 
 ────────────────────────────────────────────────────────────────────
  AB DEM ZWEITEN MAL
 ────────────────────────────────────────────────────────────────────
 
-Einfach Doppelklick auf „Yijing" — sonst nichts. Die Schritte aus
-Abschnitt 2 sind nie wieder nötig.
+Einfach Doppelklick auf „Yijing" im Programme-Ordner — sonst nichts.
+Die Schritte aus Abschnitt 2 sind nie wieder nötig.
 
 
 ────────────────────────────────────────────────────────────────────
@@ -78,12 +83,8 @@ Fremdes nach.
  DIE APP BEENDEN
 ────────────────────────────────────────────────────────────────────
 
-Das Schließen des Safari-Fensters beendet die App noch NICHT —
-sie läuft im Hintergrund weiter.
-
-Zum vollständigen Beenden:
-   → Rechtsklick auf das „Yijing"-Symbol unten im Dock
-   → „Beenden" wählen.
+Schließe einfach das Fenster oder drücke Cmd+Q. Damit ist die App
+vollständig beendet.
 
 
 ════════════════════════════════════════════════════════════════════

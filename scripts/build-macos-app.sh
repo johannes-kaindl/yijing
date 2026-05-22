@@ -2,13 +2,11 @@
 #
 # build-macos-app.sh — baut Yijing.app als macOS-App-Bundle nach dist/.
 #
-# Bettet den committeten Repo-Stand (git archive HEAD) ein, kompiliert den
-# nativen Launcher (universal arm64 + x86_64) und erzeugt ein verteilbares
-# Zip. Der native Launcher ist nötig, weil macOS .app-Bundles mit einem
-# Shell-Skript als CFBundleExecutable auf Apple Silicon faelschlich als
-# Intel-App einstuft und Rosetta verlangt. Details: docs/MACOS-APP.md.
+# Bettet den committeten Repo-Stand (git archive HEAD) ein, kompiliert die
+# native Swift-App (universal arm64 + x86_64) und erzeugt ein verteilbares
+# Disk-Image (Yijing.dmg). Details: docs/MACOS-APP.md.
 #
-# Voraussetzung: Xcode Command Line Tools (clang, sips, iconutil, ditto).
+# Voraussetzung: Xcode Command Line Tools (swiftc, sips, iconutil, hdiutil).
 #
 set -euo pipefail
 
@@ -20,13 +18,13 @@ DIST="dist"
 APP="$DIST/Yijing.app"
 
 echo "==> Voraussetzungen pruefen"
-for tool in swiftc lipo sips iconutil ditto git tar; do
+for tool in swiftc lipo sips iconutil hdiutil git tar; do
   command -v "$tool" >/dev/null 2>&1 \
     || { echo "FEHLT: $tool — bitte Xcode Command Line Tools installieren (xcode-select --install)"; exit 1; }
 done
 
 echo "==> Bundle-Grundgeruest (dist/Yijing.app)"
-rm -rf "$APP" "$DIST/Yijing.app.zip"
+rm -rf "$APP" "$DIST/Yijing.dmg" "$DIST/Yijing.app.zip"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/yijing"
 
 echo "==> Repo-Inhalt einbetten (committeter Stand via git archive HEAD)"
@@ -69,15 +67,22 @@ rm -rf "$ICONSET"
 echo "==> LICENSE einbetten"
 cp LICENSE "$APP/Contents/Resources/LICENSE"
 
-echo "==> Aufraeumen und zippen"
+echo "==> Aufraeumen und Disk-Image erzeugen"
 find "$APP" -name '.DS_Store' -delete 2>/dev/null || true
-ditto -c -k --sequesterRsrc --keepParent "$APP" "$DIST/Yijing.app.zip"
+STAGING="$DIST/dmg-staging"
+rm -rf "$STAGING"; mkdir -p "$STAGING"
+cp -R "$APP" "$STAGING/Yijing.app"
+cp "$ASSETS/INSTALL.txt" "$STAGING/INSTALL.txt"
+ln -s /Applications "$STAGING/Applications"
+hdiutil create -volname "Yijing Orakel" -srcfolder "$STAGING" \
+  -ov -format UDZO "$DIST/Yijing.dmg" >/dev/null
+rm -rf "$STAGING"
 cp "$ASSETS/INSTALL.txt" "$DIST/INSTALL.txt"
 
 echo
 echo "Fertig:"
 echo "  App :  $REPO/$APP"
-echo "  Zip :  $REPO/$DIST/Yijing.app.zip"
+echo "  DMG :  $REPO/$DIST/Yijing.dmg"
 echo "  Doku:  $REPO/$DIST/INSTALL.txt"
 echo
-echo "Zum Weitergeben: Yijing.app.zip + INSTALL.txt verschicken."
+echo "Zum Weitergeben: Yijing.dmg verschicken."

@@ -34,14 +34,14 @@ Orakel als doppelklickbare macOS-App bündeln:
 ./scripts/build-macos-app.sh
 ```
 
-Das erzeugt `dist/Yijing.app.zip` und `dist/INSTALL.txt`. Beide Dateien
-zusammen weitergeben (Mail, AirDrop) — die App startet einen lokalen
-Server und öffnet das Orakel in Safari, ganz ohne Terminal.
+Das erzeugt `dist/Yijing.dmg` — ein Disk-Image, in dem die `Yijing.app`
+per Drag & Drop in den Programme-Ordner gezogen wird. Die App zeigt das
+Orakel in einem eigenen Fenster, ganz ohne Terminal und ohne Browser.
 
 Die App ist nicht Apple-notarisiert; der erste Start erfordert daher
-einmalig die in `INSTALL.txt` beschriebenen Gatekeeper-Schritte.
-Voraussetzung zum Bauen: Xcode Command Line Tools. Details:
-[`docs/MACOS-APP.md`](docs/MACOS-APP.md).
+einmalig die im Disk-Image beiliegenden Gatekeeper-Schritte
+(`INSTALL.txt`). Voraussetzung zum Bauen: Xcode Command Line Tools.
+Details: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 
 ## Features
 

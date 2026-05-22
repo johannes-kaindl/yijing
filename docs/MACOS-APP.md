@@ -15,7 +15,8 @@ Voraussetzung: **Xcode Command Line Tools** (`xcode-select --install`)
 — liefert `clang`, `sips`, `iconutil`, `ditto`. Das Skript erzeugt:
 
 - `dist/Yijing.app` — das App-Bundle
-- `dist/Yijing.app.zip` — verteilbares Archiv
+- `dist/Yijing.dmg` — verteilbares Disk-Image (App + Programme-Alias +
+  INSTALL.txt)
 - `dist/INSTALL.txt` — Installationsanleitung für Endnutzer
 
 `dist/` ist nicht versioniert — Build-Artefakte gehören nicht ins Git.
@@ -74,10 +75,11 @@ nicht im App-Fenster.
 
 ## Weitergabe und Installation
 
-`Yijing.app.zip` und `INSTALL.txt` zusammen verschicken. Die App ist
-**nicht Apple-notarisiert** (kein Developer-Account) — beim ersten
-Start ist daher einmalig der Gatekeeper-Weg nötig: Systemeinstellungen
-→ Datenschutz & Sicherheit → „Trotzdem öffnen". `INSTALL.txt` führt
+`Yijing.dmg` verschicken — es enthält die App, einen Programme-Alias
+zum Hineinziehen und die `INSTALL.txt`. Die App ist **nicht
+Apple-notarisiert** (kein Developer-Account) — beim ersten Start ist
+daher einmalig der Gatekeeper-Weg nötig: Systemeinstellungen →
+Datenschutz & Sicherheit → „Trotzdem öffnen". `INSTALL.txt` führt
 Schritt für Schritt durch den Vorgang.
 
 ## Aktualisieren
