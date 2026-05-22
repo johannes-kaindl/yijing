@@ -32,6 +32,8 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 - PWA-Unterstützung: Web-App-Manifest, Icon-Set (favicon, Apple-Touch-
   Icon, maskable Icons), Theme-Color — die Seite ist installierbar und
   bekommt ein Homescreen-/Dock-Icon
+- Offline-Betrieb über Service Worker (network-first) — die App lädt
+  und läuft nach dem ersten Besuch ohne Internet
 
 ### Bekannte Fragen
 

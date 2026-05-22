@@ -1045,3 +1045,11 @@ els.stopInterpretBtn.addEventListener("click", () => interpretAbortCtrl?.abort()
     );
   }
 })();
+
+// ——— Service Worker (Offline-Betrieb) ———
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("../sw.js").catch(() => {});
+  });
+}
