@@ -1,0 +1,94 @@
+════════════════════════════════════════════════════════════════════
+  YIJING ORAKEL — Installation auf dem Mac
+════════════════════════════════════════════════════════════════════
+
+Diese App startet das Yijing-Orakel auf deinem eigenen Mac und öffnet
+es in Safari. Es werden keine Daten ins Internet gesendet — alles
+läuft lokal auf deinem Rechner.
+
+Weil die App nicht aus dem App Store kommt, sind beim ALLERSTEN Start
+ein paar zusätzliche Klicks nötig. Das ist normal und nur einmal so.
+
+
+────────────────────────────────────────────────────────────────────
+ SCHRITT 1 — Entpacken
+────────────────────────────────────────────────────────────────────
+
+Doppelklick auf die Datei „Yijing.app.zip".
+Daneben erscheint dann „Yijing" (mit App-Symbol).
+
+Tipp: Schiebe „Yijing" in deinen Programme-Ordner — dann findest du
+es später leicht wieder.
+
+
+────────────────────────────────────────────────────────────────────
+ SCHRITT 2 — Der erste Start (einmalig)
+────────────────────────────────────────────────────────────────────
+
+1. Doppelklick auf „Yijing".
+
+2. Es erscheint ein Hinweis, dass die App nicht geöffnet werden kann,
+   weil sie nicht aus dem App Store stammt.
+   → Klicke auf „Fertig" bzw. „OK".
+   → NICHT auf „In den Papierkorb legen" klicken!
+
+3. Öffne die Systemeinstellungen:
+   Apple-Menü (  oben links)  →  „Systemeinstellungen…"
+
+4. Klicke links auf „Datenschutz & Sicherheit".
+
+5. Scrolle auf der rechten Seite ganz nach unten.
+   Dort steht sinngemäß:
+   „„Yijing" wurde blockiert, um deinen Mac zu schützen."
+   → Klicke daneben auf den Knopf „Trotzdem öffnen".
+
+6. Bestätige mit deinem Anmelde-Passwort oder per Touch ID.
+
+7. Es erscheint noch ein letzter Dialog.
+   → Klicke dort auf „Trotzdem öffnen".
+
+Fertig — die App startet, und nach ein paar Sekunden öffnet sich
+Safari mit dem Yijing-Orakel.
+
+
+────────────────────────────────────────────────────────────────────
+ AB DEM ZWEITEN MAL
+────────────────────────────────────────────────────────────────────
+
+Einfach Doppelklick auf „Yijing" — sonst nichts. Die Schritte aus
+Abschnitt 2 sind nie wieder nötig.
+
+
+────────────────────────────────────────────────────────────────────
+ MÖGLICHER ZUSATZ-HINWEIS BEIM ERSTEN START
+────────────────────────────────────────────────────────────────────
+
+Falls beim allerersten Start ein Apple-Fenster erscheint, das nach
+den „Command Line Tools" fragt:
+
+   → Klicke auf „Installieren" und folge dem Apple-Dialog.
+   → Das dauert einige Minuten (einmalig).
+   → Starte „Yijing" danach noch einmal neu.
+
+Diese Komponente bringt macOS selbst mit; die App lädt nichts
+Fremdes nach.
+
+
+────────────────────────────────────────────────────────────────────
+ DIE APP BEENDEN
+────────────────────────────────────────────────────────────────────
+
+Das Schließen des Safari-Fensters beendet die App noch NICHT —
+sie läuft im Hintergrund weiter.
+
+Zum vollständigen Beenden:
+   → Rechtsklick auf das „Yijing"-Symbol unten im Dock
+   → „Beenden" wählen.
+
+
+════════════════════════════════════════════════════════════════════
+  Viel Freude mit dem Orakel.
+
+  Yijing Orakel · © Jay Kaindl · Lizenz: AGPL-3.0-or-later
+  Quellcode: https://codeberg.org/jkaindl/Yijing
+════════════════════════════════════════════════════════════════════

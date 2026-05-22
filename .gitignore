@@ -8,6 +8,9 @@ _archiv/
 # genutzten Assets liegen versioniert unter web/icons/.
 graphics/
 
+# Build-Output des macOS-App-Bundles (scripts/build-macos-app.sh).
+dist/
+
 # macOS
 .DS_Store
 

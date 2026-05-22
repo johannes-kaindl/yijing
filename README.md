@@ -25,6 +25,24 @@ cd yijing
 
 > Voraussetzung: Python 3.9+.
 
+## Als macOS-App
+
+Für die Weitergabe an Nutzer ohne Terminal-Erfahrung lässt sich das
+Orakel als doppelklickbare macOS-App bündeln:
+
+```bash
+./scripts/build-macos-app.sh
+```
+
+Das erzeugt `dist/Yijing.app.zip` und `dist/INSTALL.txt`. Beide Dateien
+zusammen weitergeben (Mail, AirDrop) — die App startet einen lokalen
+Server und öffnet das Orakel in Safari, ganz ohne Terminal.
+
+Die App ist nicht Apple-notarisiert; der erste Start erfordert daher
+einmalig die in `INSTALL.txt` beschriebenen Gatekeeper-Schritte.
+Voraussetzung zum Bauen: Xcode Command Line Tools. Details:
+[`docs/MACOS-APP.md`](docs/MACOS-APP.md).
+
 ## Features
 
 - **Drei-Münzen-Methode** mit korrekter Verteilung (1/8 : 3/8 : 3/8 : 1/8)
@@ -94,6 +112,7 @@ yijing/
 | [`docs/DATA.md`](docs/DATA.md) | Schema von `hexagrams.json` und `trigrams.json` |
 | [`docs/LLM.md`](docs/LLM.md) | LLM-Backends, Reasoning-Modi, CORS-Fehlersuche |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Entwicklungs-Setup, Tests, Debugging |
+| [`docs/MACOS-APP.md`](docs/MACOS-APP.md) | macOS-App bauen, Bundle-Aufbau, Weitergabe |
 | [`AGENTS.md`](AGENTS.md) | Konventionen für KI-getriebene Sessions |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Beitragshinweise |
 | [`CHANGELOG.md`](CHANGELOG.md) | Versionshistorie |
