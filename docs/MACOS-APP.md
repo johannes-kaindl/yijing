@@ -85,6 +85,17 @@ Schritt für Schritt durch den Vorgang.
 
 ## Aktualisieren
 
-Neue App-Version: Änderungen committen, dann `./scripts/build-macos-app.sh`
-erneut ausführen. Der `no-store`-Header des Servers verhindert, dass
-Nutzer nach einem Update veraltete Stände sehen.
+Neue App-Version:
+
+1. Änderungen committen.
+2. `./scripts/build-macos-app.sh` erneut ausführen.
+3. Auf Codeberg ein neues Release mit neuem Tag anlegen und die frische
+   `dist/Yijing.dmg` als Anhang hochladen.
+4. Die **direkten Download-Links** auf den neuen Tag aktualisieren:
+   der Link im `README.md` und der `href` des `#macDownload`-Buttons in
+   `web/index.html` (danach `pages`-Sync). Sie zeigen auf eine
+   versionierte URL (`releases/download/<tag>/Yijing.dmg`) — Codeberg
+   kennt keinen `latest`-Alias für direkte Asset-Links.
+
+Der `no-store`-Header des Servers verhindert, dass Nutzer nach einem
+Update veraltete Stände sehen.

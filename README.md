@@ -6,17 +6,18 @@ kompatibel wie MLX/LM Studio). Drei-Münzen-Methode, vollständige
 Wilhelm-Texte inklusive aller wandelnden Linien, chinesisches Schrift­zeichen
 mit Pīnyīn, Trigramme mit Stammdaten.
 
+### ⬇ [Yijing Orakel für macOS herunterladen](https://codeberg.org/jkaindl/Yijing/releases/download/v1.0/Yijing.dmg)
+
+Disk-Image öffnen, „Yijing" in den Programme-Ordner ziehen — fertig.
+Beim ersten Start einmalig die Gatekeeper-Schritte, siehe
+[`docs/MACOS-APP.md`](docs/MACOS-APP.md).
+
 Keine npm-Dependencies, kein Build-Step, kein Backend.
 
 **Live-Demo:** <https://jkaindl.codeberg.page/Yijing/> — funktioniert
 ohne lokales Setup für Hexagramm-Wurf und Wilhelm-Text. Die KI-Deutung
 erfordert einen lokal laufenden LLM-Server (Ollama oder MLX), siehe
 [Schnellstart](#schnellstart).
-
-**⬇ Download für macOS:** Die fertige App als `.dmg` gibt es im
-[neuesten Release](https://codeberg.org/jkaindl/Yijing/releases/latest)
-— herunterladen, öffnen, „Yijing" in den Programme-Ordner ziehen.
-Bauanleitung und Details: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 
 ## Schnellstart
 
