@@ -4,6 +4,10 @@
 # build_data.py, der Output liegt unter data/ und wird mit committet.
 _archiv/
 
+# Grafik-Quellmaterial (Icon-Sets, Export-Rohdaten). Die produktiv
+# genutzten Assets liegen versioniert unter web/icons/.
+graphics/
+
 # macOS
 .DS_Store
 

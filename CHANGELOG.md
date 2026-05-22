@@ -29,6 +29,9 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 - Dokumentation: `docs/ARCHITECTURE.md`, `docs/DATA.md`, `docs/LLM.md`,
   `docs/DEVELOPMENT.md`, `AGENTS.md`, `CONTRIBUTING.md`,
   `LICENSE` (AGPL-3.0-or-later), `LICENSE-DOCS` (CC BY-SA 4.0)
+- PWA-Unterstützung: Web-App-Manifest, Icon-Set (favicon, Apple-Touch-
+  Icon, maskable Icons), Theme-Color — die Seite ist installierbar und
+  bekommt ein Homescreen-/Dock-Icon
 
 ### Bekannte Fragen
 
