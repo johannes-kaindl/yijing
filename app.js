@@ -1087,6 +1087,16 @@ function applyTheme(mode) {
   }
 })();
 
+// ——— macOS-Download-Hinweis (nur auf der öffentlichen Demo, nur Mac) ———
+
+(function initMacDownload() {
+  const btn = document.getElementById("macDownload");
+  if (!btn) return;
+  const isMac = /Mac/i.test(navigator.platform || navigator.userAgent);
+  const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
+  if (isMac && !isLocal) btn.hidden = false;
+})();
+
 // ——— Service Worker (Offline-Betrieb) ———
 
 if ("serviceWorker" in navigator) {
