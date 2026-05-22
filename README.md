@@ -60,6 +60,10 @@ Voraussetzung zum Bauen: Xcode Command Line Tools. Details:
 - **Verlauf** der letzten 20 Würfe in localStorage, einzelne Würfe via
   URL-Hash teilbar/wiederherstellbar
 - **Export** als Markdown oder druckfreundliches PDF
+- **Offline-fähig** — Service Worker; nach dem ersten Besuch lädt und
+  läuft die App ohne Internet. Als PWA installierbar.
+- **Theme-Umschalter** — Dark, Light oder automatisch nach
+  System­einstellung
 
 ## Lokale LLM-Anbindung
 

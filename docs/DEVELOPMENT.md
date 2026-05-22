@@ -5,6 +5,8 @@
 - Python 3.9+ (für den Dev-Server)
 - Optional: Node.js (nur für `node --check` als Syntax-Linter)
 - Optional: Ollama oder MLX für die KI-Interpretation
+- Optional: Xcode Command Line Tools — nur zum Bauen der macOS-App
+  (`scripts/build-macos-app.sh`), siehe [`MACOS-APP.md`](MACOS-APP.md)
 
 Keine npm-Dependencies, keine Build-Tools.
 
@@ -39,24 +41,30 @@ yijing/
 ├── LICENSE                # AGPL-3.0-or-later (Code)
 ├── LICENSE-DOCS           # CC BY-SA 4.0 (Doku)
 ├── README.md              # Einstieg
+├── sw.js                  # Service Worker (Offline-Caching)
 ├── docs/                  # Diese Dokumentation
 │   ├── ARCHITECTURE.md
 │   ├── DATA.md
 │   ├── DEVELOPMENT.md
-│   └── LLM.md
+│   ├── LLM.md
+│   └── MACOS-APP.md
 ├── data/
 │   ├── hexagrams.json     # 64 Hexagramme normalisiert
 │   └── trigrams.json      # 8 Trigramme als Stammdaten
 ├── scripts/
 │   ├── build_data.py      # Daten aus _archiv/ konsolidieren
+│   ├── build-macos-app.sh # baut die macOS-App nach dist/
+│   ├── macos-app/         # Bausteine für den App-Build
 │   └── serve.py           # Dev-Server mit no-cache
 ├── serve.sh               # Wrapper für serve.py + auto-open
 ├── web/
-│   ├── app.js             # UI, Cast, Verlauf, Settings
+│   ├── app.js             # UI, Cast, Verlauf, Settings, Theme
 │   ├── llm.js             # Ollama/OpenAI-Adapter
 │   ├── markdown.js        # Streaming-MD→HTML
 │   ├── index.html         # Single-Page-App
-│   └── style.css          # Dunkles Theme + Print-Layout
+│   ├── style.css          # Theme (Dark/Light) + Print-Layout
+│   ├── manifest.webmanifest  # PWA-Manifest
+│   └── icons/             # PWA-Icons
 └── _archiv/               # alte Anläufe (per .gitignore ausgeschlossen)
 ```
 
@@ -91,11 +99,15 @@ Abweichungen das Build-Skript debuggen, nicht das JSON von Hand patchen.
 
 ### CSS
 
-Drei Layout-Modi prüfen:
+Layout-Modi prüfen:
 
 - **Desktop**: Browser-Fenster ≥ 760 px breit
 - **Mobile**: Browser-Tools → Geräte-Emulation, Breite ≤ 540 px
 - **Print**: Cmd+P → „Als PDF sichern" — Vorschau prüfen
+
+Außerdem das Theme: Umschalter im Header (◐) durch Dark / Light /
+System klicken. Farben kommen aus den `:root`-Variablen, Light aus
+`:root[data-theme="light"]`.
 
 ### LLM-Anbindung testen
 
@@ -149,6 +161,10 @@ ES-Module trotz `Cache-Control: no-store`.
 
 Fix: in DevTools → Network → „Disable cache" anhaken solange DevTools
 offen sind. Oder `?t=$(date +%s)` an die URL hängen.
+
+Greift der Service Worker (`sw.js`), kann er zusätzlich alte Stände
+ausliefern. Beim Entwickeln: DevTools → Application → Service Workers →
+„Update on reload" aktivieren oder den Worker dort abmelden.
 
 ## Code-Stil
 

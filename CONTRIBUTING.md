@@ -34,7 +34,8 @@ Bitte vor größeren Änderungen lesen.
 
 - [ ] `node --check web/*.js` ist sauber
 - [ ] Im Browser getestet (hard-reload, Wurf, ggf. KI-Interpretation)
-- [ ] CSS-Änderungen in Desktop + Mobile + Print-Vorschau geprüft
+- [ ] CSS-Änderungen in Desktop + Mobile + Print-Vorschau und in
+      beiden Themes (Dark/Light) geprüft
 - [ ] Bei Daten-Änderungen: `python3 scripts/build_data.py` läuft ohne
       Fehler
 - [ ] `CHANGELOG.md` ergänzt

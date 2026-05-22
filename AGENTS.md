@@ -72,6 +72,42 @@ Output: `data/hexagrams.json` (~580 KB, alle 64 Hexagramme normalisiert),
 Beide Files **gehören zum Commit** (sind keine Build-Artefakte im strengen
 Sinn, sondern primäre Daten-Assets der App).
 
+## Branches: `main` und `pages`
+
+Das Repo hat zwei Branches:
+
+- **`main`** — die Entwicklung. `index.html` liegt im Unterordner
+  `web/`, die Daten in `data/` (von `web/` aus: `../data/`).
+- **`pages`** — das Deployment für Codeberg Pages
+  (`https://jkaindl.codeberg.page/Yijing/`). **Flaches Layout:** der
+  Inhalt von `web/` liegt direkt im Branch-Root, `data/` daneben.
+
+Jede Änderung an `web/`, `sw.js` oder den Daten muss **manuell nach
+`pages` nachgezogen** werden — am einfachsten über einen temporären
+`git worktree`. `index.html`, `style.css`, `manifest.webmanifest` und
+`sw.js` sind in beiden Branches identisch; `app.js` unterscheidet sich
+nur in den Pfaden (`data/`, `sw.js` statt `../data/`, `../sw.js`).
+
+## PWA, Service Worker, Theme
+
+- **`sw.js`** (Repo-Root) ist ein Service Worker — network-first-Caching
+  für den Offline-Betrieb. Liegt im Root, damit sein Scope `web/` und
+  `data/` erfasst. Bei Änderungen an `web/` daran denken, dass der SW
+  im Browser cachen kann.
+- **`web/manifest.webmanifest` + `web/icons/`** machen die Seite als
+  PWA installierbar.
+- **Theme:** Dark/Light/System. Farben sind `:root`-CSS-Variablen,
+  Light über `:root[data-theme="light"]`. Auswahl in `localStorage`
+  (`yijing-theme`). Ein Inline-Script im `<head>` setzt das Theme vor
+  dem ersten Paint.
+
+## macOS-App
+
+`scripts/build-macos-app.sh` bündelt das Orakel als `Yijing.app`. Der
+Launcher (`scripts/macos-app/launcher.c`) **muss** eine kompilierte
+Binary sein — ein Shell-Skript als `CFBundleExecutable` löst auf Apple
+Silicon einen Rosetta-Prompt aus. Details: `docs/MACOS-APP.md`.
+
 ## CORS — wichtiger Setup-Hinweis
 
 Der Browser ruft die LLM-Server direkt. Beide müssen CORS für die Origin
@@ -115,7 +151,7 @@ oder eine Migration anbieten.
 
 ## Wenn du den Code splittest
 
-`app.js` ist mit ~1000 Zeilen am oberen Ende dessen, was in eine Datei
+`app.js` ist mit ~1100 Zeilen am oberen Ende dessen, was in eine Datei
 gehört. Beim weiteren Wachstum erst splitten, wenn ein konkretes Feature
 sich klar isolieren lässt — nicht prophylaktisch. Sinnvolle Schnitte
 wären:
@@ -123,6 +159,7 @@ wären:
 - `history.js` (loadHistory, saveHistory, renderHistory, applyHashIfAny)
 - `settings.js` (renderEndpointList, openSettings, closeSettings)
 - `export.js` (buildMarkdownExport, downloadFile, Print-Handler)
+- `theme.js` (applyTheme, initTheme, Service-Worker-Registrierung)
 
 Aber: das geht nur, wenn jeder Schnitt eine klare öffentliche API hat.
 Sonst lieber lassen.

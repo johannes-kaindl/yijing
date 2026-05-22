@@ -54,6 +54,8 @@ Frontend-Hauptmodul. Enthält:
 - **LLM-Interpretation:** `runInterpretation()` mit Streaming + Reasoning-
   Anzeige
 - **Export:** `buildMarkdownExport()`, `downloadFile()`, Print-Handler
+- **Theme:** `applyTheme()` / `initTheme()` — Dark/Light/System-Umschaltung
+  über `data-theme`; außerdem die Service-Worker-Registrierung
 
 ### `web/llm.js`
 
@@ -91,12 +93,27 @@ mit `http(s):` und `mailto:` zugelassen.
 
 ### `web/style.css`
 
-Drei Layout-Modi:
+Farben sind durchgängig CSS-Variablen (`:root`). Dark ist der Default;
+`:root[data-theme="light"]` überschreibt das Variablen-Set für den
+Light-Modus. Drei Layout-Modi:
 
-- **Bildschirm** (Default) — dunkles Theme, serifenbetonte Typografie
+- **Bildschirm** (Default) — serifenbetonte Typografie, Dark oder Light
+  je nach Theme-Auswahl
 - **Mobile** (≤ 540 px) — Hexagramme stapeln vertikal
 - **Print** (`@media print`) — heller Hintergrund, keine Rahmen, alle
   `<details>` aufgeklappt (JS-seitig zusätzlich erzwungen)
+
+### `sw.js`
+
+Service Worker im Repo-Root. Cacht same-origin-GET-Requests
+network-first: online wird stets frisch geladen, der Cache dient als
+Offline-Reserve — die App lädt und läuft nach dem ersten Besuch ohne
+Internet. Liegt im Root, damit sein Scope `web/` und `data/` umfasst.
+
+### `web/manifest.webmanifest` + `web/icons/`
+
+Web-App-Manifest und Icon-Set — machen die Seite als PWA installierbar
+(Homescreen-/Dock-Icon, Standalone-Anzeige, Theme-Color).
 
 ### `scripts/build_data.py`
 
@@ -170,6 +187,7 @@ Alle Daten leben im `localStorage` unter den Keys:
 | `yijing-endpoint-selected-v1` | Aktuell gewählter Endpunkt (UUID) |
 | `yijing-system-prompt-v1` | Anpasster System-Prompt (nur wenn vom Default abweichend) |
 | `yijing-default-thinking` | Globaler Reasoning-Default (`"default" | "on" | "off"`) |
+| `yijing-theme` | Theme-Auswahl (`"dark" | "light" | "system"`) |
 
 Keine Migration vorhanden — Schemaänderungen brauchen eine neue Version
 im Key-Namen (`v2`, `v3`, …) und Fallback-Logik.
