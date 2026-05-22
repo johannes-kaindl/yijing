@@ -2,8 +2,9 @@
 
 Das Yijing-Orakel lässt sich als eigenständige `Yijing.app` für macOS
 bündeln — eine doppelklickbare App für Nutzer ohne Terminal-Erfahrung.
-Die App startet den lokalen Static-Server und öffnet das Orakel in
-Safari; sie enthält keinen eigenen Browser und keine Frameworks.
+Die App startet den lokalen Static-Server und zeigt das Orakel in einem
+eigenen Fenster mit eingebettetem WebKit — kein Browser-Tab, kein
+gebündeltes Framework.
 
 ## Bauen
 
@@ -12,7 +13,7 @@ Safari; sie enthält keinen eigenen Browser und keine Frameworks.
 ```
 
 Voraussetzung: **Xcode Command Line Tools** (`xcode-select --install`)
-— liefert `clang`, `sips`, `iconutil`, `ditto`. Das Skript erzeugt:
+— liefert `swiftc`, `sips`, `iconutil`, `hdiutil`. Das Skript erzeugt:
 
 - `dist/Yijing.app` — das App-Bundle
 - `dist/Yijing.dmg` — verteilbares Disk-Image (App + Programme-Alias +
