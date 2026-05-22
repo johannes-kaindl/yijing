@@ -1019,6 +1019,47 @@ els.modelSelect.addEventListener("change", () => {
 els.interpretBtn.addEventListener("click", () => void runInterpretation());
 els.stopInterpretBtn.addEventListener("click", () => interpretAbortCtrl?.abort());
 
+// ——— Theme (Dark / Light / System) ———
+
+const THEME_KEY = "yijing-theme";
+const THEME_ICONS = { dark: "☾", light: "☀", system: "◐" };
+const THEME_LABELS = { dark: "Dunkel", light: "Hell", system: "System" };
+const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+/** Wendet den Modus an: setzt data-theme und aktualisiert den Knopf. */
+function applyTheme(mode) {
+  const effective =
+    mode === "dark" || (mode === "system" && themeQuery.matches)
+      ? "dark"
+      : "light";
+  document.documentElement.dataset.theme = effective;
+  const btn = document.getElementById("themeToggle");
+  if (btn) {
+    btn.textContent = THEME_ICONS[mode];
+    btn.title = `Erscheinungsbild: ${THEME_LABELS[mode]}`;
+    btn.setAttribute("aria-label", btn.title);
+  }
+}
+
+(function initTheme() {
+  let mode = localStorage.getItem(THEME_KEY) || "system";
+  applyTheme(mode);
+  const btn = document.getElementById("themeToggle");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      mode = mode === "dark" ? "light" : mode === "light" ? "system" : "dark";
+      localStorage.setItem(THEME_KEY, mode);
+      applyTheme(mode);
+    });
+  }
+  // Bei Modus „System": auf OS-Wechsel reagieren.
+  themeQuery.addEventListener("change", () => {
+    if ((localStorage.getItem(THEME_KEY) || "system") === "system") {
+      applyTheme("system");
+    }
+  });
+})();
+
 // ——— Init ———
 
 (async () => {
@@ -1045,3 +1086,11 @@ els.stopInterpretBtn.addEventListener("click", () => interpretAbortCtrl?.abort()
     );
   }
 })();
+
+// ——— Service Worker (Offline-Betrieb) ———
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}

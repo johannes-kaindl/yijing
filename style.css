@@ -11,6 +11,23 @@
   --max: 760px;
   --radius: 6px;
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+/* Light-Theme — überschreibt die Farb-Variablen. Aktiviert via
+   data-theme="light" auf <html> (gesetzt durch das Theme-Script). */
+:root[data-theme="light"] {
+  --bg: #f4efe4;
+  --bg-card: #fffdf7;
+  --ink: #2a2620;
+  --ink-soft: #5c5444;
+  --ink-faint: #8a8068;
+  --accent: #9c7220;
+  --accent-soft: #bf9a52;
+  --line: #ddd4bf;
+  --danger: #c25f2a;
+  --shadow: 0 2px 12px rgba(60, 50, 30, 0.14);
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -498,8 +515,6 @@ button.ghost:hover {
   border-color: var(--accent-soft);
   background: transparent;
 }
-
-.spacer { width: 38px; height: 1px; }
 
 /* ——— Chinesische Bezeichnung ——— */
 .hex-chinese {
@@ -1030,7 +1045,6 @@ button.ghost:hover {
   #thinkingSelect,
   .thinking-details,
   .icon-btn,
-  .spacer,
   dialog {
     display: none !important;
   }

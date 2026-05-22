@@ -4,6 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Yijing Orakel</title>
+
+  <!-- Theme sofort setzen — vermeidet Flackern beim Laden. -->
+  <script>
+    (function () {
+      var m = localStorage.getItem("yijing-theme") || "system";
+      var dark = m === "dark" || (m === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    })();
+  </script>
+
   <link rel="stylesheet" href="style.css" />
 
   <!-- PWA: Manifest, Icons, Theme-Color. Pfade relativ — identisch nutzbar
@@ -20,7 +31,7 @@
     <div class="header-row">
       <button id="openSettings" type="button" class="icon-btn" title="Einstellungen" aria-label="Einstellungen">⚙</button>
       <h1>易經 <span class="subtle">Yijing Orakel</span></h1>
-      <span class="spacer"></span>
+      <button id="themeToggle" type="button" class="icon-btn" title="Erscheinungsbild" aria-label="Erscheinungsbild umschalten">◐</button>
     </div>
     <p class="tagline">Drei-Münzen-Methode · Wilhelm-Übersetzung · lokale Modelle</p>
   </header>
