@@ -13,6 +13,11 @@ ohne lokales Setup für Hexagramm-Wurf und Wilhelm-Text. Die KI-Deutung
 erfordert einen lokal laufenden LLM-Server (Ollama oder MLX), siehe
 [Schnellstart](#schnellstart).
 
+**⬇ Download für macOS:** Die fertige App als `.dmg` gibt es im
+[neuesten Release](https://codeberg.org/jkaindl/Yijing/releases/latest)
+— herunterladen, öffnen, „Yijing" in den Programme-Ordner ziehen.
+Bauanleitung und Details: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
+
 ## Schnellstart
 
 ```bash

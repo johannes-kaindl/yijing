@@ -187,6 +187,24 @@ button.ghost:hover {
   color: var(--accent);
 }
 
+/* macOS-Download-Hinweis — per JS nur auf der öffentlichen Demo (nicht
+   localhost) und nur für Mac-Besucher eingeblendet. */
+.mac-download:not([hidden]) {
+  display: block;
+  max-width: var(--max);
+  margin: 1rem auto 0;
+  padding: 0.6rem 1rem;
+  background: var(--btn);
+  color: #1a1814;
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.mac-download:hover { background: #d8ae5e; }
+
 /* Reading */
 .reading {
   margin-top: 2rem;
