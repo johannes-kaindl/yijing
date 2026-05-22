@@ -30,41 +30,47 @@ also bewusst nicht in der App.
 Yijing.app/Contents/
 ├── Info.plist                 Bundle-Metadaten
 ├── MacOS/
-│   └── Yijing                 nativer Launcher (kompilierte Binary)
+│   └── Yijing                 native App (kompilierte Swift-Binary)
 └── Resources/
-    ├── launch.sh              Server-Start-Skript (Bash)
     ├── AppIcon.icns           App-Icon
     ├── LICENSE                AGPL-3.0-or-later
     └── yijing/                eingebetteter Repo-Inhalt (web/, data/, …)
 ```
 
 Die Build-Bausteine liegen versioniert unter `scripts/macos-app/`:
-`launcher.c`, `launch.sh`, `Info.plist`, `INSTALL.txt`, `icon-1024.png`.
+`Yijing.swift`, `Info.plist`, `INSTALL.txt`, `icon-1024.png`.
 
-## Warum ein nativer Launcher
+## Aufbau der App
 
-`Contents/MacOS/Yijing` ist eine kleine, in C geschriebene und als
-universal Binary (arm64 + x86_64) kompilierte Datei — **kein**
-Shell-Skript.
+`Contents/MacOS/Yijing` ist eine native, mit `swiftc` kompilierte
+Swift-App (universal arm64 + x86_64) — kein Shell-Skript. Das ist aus
+zwei Gründen nötig:
 
-Das ist notwendig: macOS bestimmt die Architektur einer App aus der
-Mach-O-Binary ihres `CFBundleExecutable`. Ist das ein Shell-Skript
-(keine Binary), kann macOS auf Apple Silicon die Architektur nicht
-feststellen, stuft die App als Intel-Programm ein und verlangt beim
-Start die Installation von Rosetta. Der native Launcher (`launcher.c`)
-löst das; er tut nichts weiter, als `Contents/Resources/launch.sh`
-über `/bin/bash` zu starten.
+1. **Eigenes Fenster.** Die App zeigt das Orakel in einem `WKWebView`
+   (Apples System-WebKit) in einem eigenen Fenster — kein Browser-Tab.
+2. **Architektur-Erkennung.** macOS bestimmt die Architektur einer App
+   aus der Mach-O-Binary ihres `CFBundleExecutable`. Ein Shell-Skript
+   hat keine — auf Apple Silicon führte das zu einer Rosetta-
+   Aufforderung. Eine kompilierte Binary löst das.
 
-## Startverhalten (`launch.sh`)
+## Startverhalten
+
+Beim Start (`Yijing.swift`):
 
 1. Sucht `python3` (Homebrew zuerst, dann System-Python). Fehlt es,
-   stößt die App die Installation der Command Line Tools an.
-2. Sucht einen freien Port im Bereich 8765–8775.
-3. Startet `scripts/serve.py` (Static-Server mit `no-store`-Headern).
-4. Pollt bis zu 5 s, bis der Server antwortet, und öffnet dann Safari
-   auf `http://localhost:<port>/web/index.html`.
-5. Der Server läuft via `exec` als Hauptprozess der App — beendet der
-   Nutzer die App, endet der Server zwangsläufig mit (kein Zombie).
+   erscheint ein Hinweisdialog und die Command Line Tools werden
+   installiert.
+2. Sucht einen freien Port (8765–8775).
+3. Startet `scripts/serve.py` als Subprozess (Static-Server mit
+   `no-store`-Headern), wartet bis er antwortet.
+4. Öffnet ein Fenster mit `WKWebView` auf
+   `http://localhost:<port>/web/index.html`.
+5. Beim Beenden der App wird der Server-Subprozess gestoppt. Für den
+   Härtefall (Force Quit) beendet sich `serve.py` über einen
+   Parent-Watchdog selbst, sobald die App-PID verschwindet.
+
+Externe Links (Footer: Codeberg, Lizenzen) öffnen im Standard-Browser,
+nicht im App-Fenster.
 
 ## Weitergabe und Installation
 

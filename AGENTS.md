@@ -103,10 +103,12 @@ nur in den Pfaden (`data/`, `sw.js` statt `../data/`, `../sw.js`).
 
 ## macOS-App
 
-`scripts/build-macos-app.sh` bündelt das Orakel als `Yijing.app`. Der
-Launcher (`scripts/macos-app/launcher.c`) **muss** eine kompilierte
-Binary sein — ein Shell-Skript als `CFBundleExecutable` löst auf Apple
-Silicon einen Rosetta-Prompt aus. Details: `docs/MACOS-APP.md`.
+`scripts/build-macos-app.sh` bündelt das Orakel als `Yijing.app` — eine
+native Swift-App (`scripts/macos-app/Yijing.swift`), die `serve.py`
+startet und das Orakel in einem WKWebView-Fenster zeigt. Das
+`CFBundleExecutable` **muss** eine kompilierte Binary sein — ein
+Shell-Skript löst auf Apple Silicon einen Rosetta-Prompt aus. Details:
+`docs/MACOS-APP.md`.
 
 ## CORS — wichtiger Setup-Hinweis
 

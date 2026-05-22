@@ -36,8 +36,9 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
   und läuft nach dem ersten Besuch ohne Internet
 - Theme-Umschalter (Dark / Light / System) im Header, Auswahl bleibt
   in localStorage erhalten
-- macOS-App-Build (`scripts/build-macos-app.sh`): bündelt das Orakel
-  als doppelklickbare `Yijing.app` mit nativem Launcher
+- macOS-App (`scripts/build-macos-app.sh`): bündelt das Orakel als
+  doppelklickbare `Yijing.app` — native Swift-App mit eigenem Fenster
+  (WKWebView), öffnet sich eigenständig statt als Browser-Tab
 
 ### Bekannte Fragen
 

@@ -20,7 +20,7 @@ DIST="dist"
 APP="$DIST/Yijing.app"
 
 echo "==> Voraussetzungen pruefen"
-for tool in clang sips iconutil ditto git tar; do
+for tool in swiftc lipo sips iconutil ditto git tar; do
   command -v "$tool" >/dev/null 2>&1 \
     || { echo "FEHLT: $tool — bitte Xcode Command Line Tools installieren (xcode-select --install)"; exit 1; }
 done
@@ -32,13 +32,21 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/yijing"
 echo "==> Repo-Inhalt einbetten (committeter Stand via git archive HEAD)"
 git archive HEAD | tar -x -C "$APP/Contents/Resources/yijing"
 
-echo "==> Nativen Launcher kompilieren (arm64 + x86_64)"
-clang -arch arm64 -arch x86_64 -O2 \
-  -o "$APP/Contents/MacOS/Yijing" "$ASSETS/launcher.c"
+echo "==> Native App kompilieren (Swift, universal arm64 + x86_64)"
+swiftc -O -target arm64-apple-macosx12.0 \
+  -o "$DIST/Yijing-arm64" "$ASSETS/Yijing.swift"
+if swiftc -O -target x86_64-apple-macosx12.0 \
+  -o "$DIST/Yijing-x86_64" "$ASSETS/Yijing.swift" 2>/dev/null; then
+  lipo -create "$DIST/Yijing-arm64" "$DIST/Yijing-x86_64" \
+    -output "$APP/Contents/MacOS/Yijing"
+  rm -f "$DIST/Yijing-arm64" "$DIST/Yijing-x86_64"
+else
+  echo "   (x86_64-Build nicht moeglich — arm64-only)"
+  mv "$DIST/Yijing-arm64" "$APP/Contents/MacOS/Yijing"
+fi
+chmod +x "$APP/Contents/MacOS/Yijing"
 
-echo "==> Server-Skript und Info.plist einbetten"
-cp "$ASSETS/launch.sh" "$APP/Contents/Resources/launch.sh"
-chmod +x "$APP/Contents/Resources/launch.sh"
+echo "==> Info.plist einbetten"
 cp "$ASSETS/Info.plist" "$APP/Contents/Info.plist"
 
 echo "==> App-Icon erzeugen (.icns aus icon-1024.png)"
