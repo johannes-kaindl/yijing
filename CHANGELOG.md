@@ -34,6 +34,8 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
   bekommt ein Homescreen-/Dock-Icon
 - Offline-Betrieb über Service Worker (network-first) — die App lädt
   und läuft nach dem ersten Besuch ohne Internet
+- Theme-Umschalter (Dark / Light / System) im Header, Auswahl bleibt
+  in localStorage erhalten
 
 ### Bekannte Fragen
 
