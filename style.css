@@ -6,6 +6,8 @@
   --ink-faint: #847b66;
   --accent: #c79a4a;
   --accent-soft: #8a6a30;
+  /* Primär-Button: in beiden Themes leuchtendes Gold mit dunklem Text. */
+  --btn: #c79a4a;
   --line: #443f35;
   --danger: #d97742;
   --max: 760px;
@@ -153,13 +155,14 @@ footer .copyright a:hover {
   gap: 0.5rem;
   margin-top: 1rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 button {
   font-family: inherit;
   font-size: 1rem;
   padding: 0.7rem 1.4rem;
-  background: var(--accent);
+  background: var(--btn);
   color: #1a1814;
   border: none;
   border-radius: var(--radius);
