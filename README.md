@@ -6,7 +6,7 @@ kompatibel wie MLX/LM Studio). Drei-Münzen-Methode, vollständige
 Wilhelm-Texte inklusive aller wandelnden Linien, chinesisches Schrift­zeichen
 mit Pīnyīn, Trigramme mit Stammdaten.
 
-[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.0/Yijing.dmg)
+[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.1/Yijing.dmg)
 [![Live-Demo öffnen](https://img.shields.io/badge/Live--Demo_%C3%B6ffnen-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
 
 Disk-Image öffnen, „Yijing" in den Programme-Ordner ziehen — fertig.
