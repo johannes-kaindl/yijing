@@ -36,24 +36,6 @@
     <p class="tagline">Drei-Münzen-Methode · Wilhelm-Übersetzung · lokale Modelle</p>
   </header>
 
-  <div id="macDownloadBlock" class="mac-download-block" hidden>
-    <a class="mac-download"
-       href="https://codeberg.org/jkaindl/Yijing/releases/download/v1.0/Yijing.dmg">
-      <span class="mac-download-main"><span class="mac-download-glyph" aria-hidden="true"></span>Yijing für macOS herunterladen</span>
-      <small class="mac-download-hint">Disk-Image · ca. 4 MB · erster Start: einmalig „Trotzdem öffnen"</small>
-    </a>
-    <details class="mac-install-help">
-      <summary>Apple meldet „App konnte nicht geprüft werden" — was tun?</summary>
-      <ol>
-        <li>Auf die Warnung <strong>„Fertig"</strong> klicken (nicht „In den Papierkorb"!).</li>
-        <li>Apple-Menü → <strong>Systemeinstellungen → Datenschutz &amp; Sicherheit</strong>.</li>
-        <li>Ganz nach unten scrollen → <strong>„Trotzdem öffnen"</strong> neben dem Yijing-Hinweis → mit Passwort oder Touch ID bestätigen.</li>
-        <li>Letzter Dialog: nochmal <strong>„Trotzdem öffnen"</strong>.</li>
-      </ol>
-      <p>Beim zweiten Start ist nichts mehr nötig. Falls der „Trotzdem öffnen"-Knopf fehlt (neuere macOS-Versionen), im Terminal:</p>
-      <pre><code>xattr -dr com.apple.quarantine /Applications/Yijing.app</code></pre>
-    </details>
-  </div>
 
   <main>
     <section class="ask" id="ask">
@@ -228,6 +210,12 @@
     <p>
       Text: Richard Wilhelm, <em>I Ging — Das Buch der Wandlungen</em>.
       Drei-Münzen-Methode (Verteilung 1:3:3:1).
+    </p>
+    <p class="footer-mac" id="macFooterLink" hidden>
+      Auch als
+      <a href="https://codeberg.org/jkaindl/Yijing/releases/download/v1.0/Yijing.dmg">macOS-App</a>
+      verfügbar ·
+      <a href="https://codeberg.org/jkaindl/Yijing#-yijing-orakel-für-macos-herunterladen">Installations-Hinweis</a>
     </p>
     <p class="copyright">
       © 2026 Johannes Kaindl ·

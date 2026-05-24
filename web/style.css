@@ -187,113 +187,12 @@ button.ghost:hover {
   color: var(--accent);
 }
 
-/* macOS-Download-Block — per JS nur auf der öffentlichen Demo (nicht
-   localhost) und nur für Mac-Besucher eingeblendet. */
-.mac-download-block:not([hidden]) {
-  display: block;
-  max-width: var(--max);
-  margin: 1.25rem auto 0;
-}
-
-.mac-download {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.9rem 1.25rem;
-  background: var(--btn);
-  color: #1a1814;
-  text-align: center;
-  text-decoration: none;
-  border-radius: var(--radius);
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  box-shadow: var(--shadow);
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-
-.mac-download:hover {
-  background: #d8ae5e;
-  transform: translateY(-1px);
-}
-
-.mac-download-main {
-  font-size: 1.05rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Apple-Glyph (U+F8FF) rendert auf Apple-Systemen als Apple-Logo;
-   der Block wird per JS nur Mac-Besuchern angezeigt. */
-.mac-download-glyph {
-  font-size: 1.15em;
-  line-height: 1;
-}
-
-.mac-download-hint {
-  font-weight: 400;
-  font-size: 0.8rem;
-  opacity: 0.78;
-  letter-spacing: 0;
-}
-
-.mac-install-help {
-  margin-top: 0.6rem;
-  padding: 0.5rem 0.85rem;
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-size: 0.88rem;
+/* Footer-Hinweis auf die macOS-App — per JS nur auf der öffentlichen
+   Demo (nicht localhost) und nur für Mac-Besucher eingeblendet. */
+.footer-mac:not([hidden]) {
+  font-size: 0.85rem;
   color: var(--ink-soft);
-}
-
-.mac-install-help summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--ink);
-  list-style: none;
-  padding: 0.15rem 0;
-}
-
-.mac-install-help summary::-webkit-details-marker { display: none; }
-
-.mac-install-help summary::before {
-  content: "▸ ";
-  color: var(--accent);
-  display: inline-block;
-  width: 1em;
-  transition: transform 0.15s ease;
-}
-
-.mac-install-help[open] summary::before {
-  content: "▾ ";
-}
-
-.mac-install-help ol {
-  margin: 0.5rem 0 0.4rem;
-  padding-left: 1.4rem;
-}
-
-.mac-install-help li { margin-bottom: 0.25rem; }
-
-.mac-install-help p {
-  margin: 0.5rem 0 0.3rem;
-}
-
-.mac-install-help pre {
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 0.5rem 0.7rem;
-  margin: 0;
-  font-size: 0.82rem;
-  overflow-x: auto;
-}
-
-.mac-install-help code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--ink);
+  margin-top: 0.6rem;
 }
 
 /* Reading */

@@ -1090,11 +1090,11 @@ function applyTheme(mode) {
 // ——— macOS-Download-Hinweis (nur auf der öffentlichen Demo, nur Mac) ———
 
 (function initMacDownload() {
-  const block = document.getElementById("macDownloadBlock");
-  if (!block) return;
+  const link = document.getElementById("macFooterLink");
+  if (!link) return;
   const isMac = /Mac/i.test(navigator.platform || navigator.userAgent);
   const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
-  if (isMac && !isLocal) block.hidden = false;
+  if (isMac && !isLocal) link.hidden = false;
 })();
 
 // ——— Service Worker (Offline-Betrieb) ———
