@@ -57,15 +57,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        if let url = navigationAction.request.url,
-           let host = url.host,
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.cancel)
+            return
+        }
+        if let host = url.host,
            host != "localhost", host != "127.0.0.1",
            url.scheme == "http" || url.scheme == "https" {
             NSWorkspace.shared.open(url)
             decisionHandler(.cancel)
             return
         }
-        decisionHandler(.allow)
+        // Allowlist — javascript:, data:, file: usw. werden bewusst geblockt.
+        let allowed: Set<String> = ["http", "https", "about"]
+        decisionHandler(allowed.contains(url.scheme ?? "") ? .allow : .cancel)
     }
 
     private func fail(_ message: String) {

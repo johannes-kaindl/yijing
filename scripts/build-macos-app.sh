@@ -28,7 +28,8 @@ rm -rf "$APP" "$DIST/Yijing.dmg" "$DIST/Yijing.app.zip"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 echo "==> Web-Assets einbetten (committeter Stand — nur web/, data/, sw.js)"
-git archive HEAD web/ data/ sw.js | tar -x -C "$APP/Contents/Resources"
+git archive HEAD web/ data/ sw.js | tar -x -C "$APP/Contents/Resources" \
+  || { echo "FEHLER: git archive HEAD fehlgeschlagen — gibt es einen committeten HEAD?"; exit 1; }
 
 echo "==> Native App kompilieren (Swift, universal arm64 + x86_64)"
 SOURCES=("$ASSETS/Yijing.swift" "$ASSETS/StaticServer.swift")

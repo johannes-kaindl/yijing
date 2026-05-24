@@ -32,10 +32,30 @@ final class StaticServer {
                 l.newConnectionHandler = { [weak self] conn in
                     self?.handle(conn)
                 }
+                // NWListener.start() ist asynchron — wir warten hier explizit
+                // auf den .ready-State, damit der WebView nicht gegen einen
+                // noch nicht aufgeschlagenen Port lädt.
+                let sem = DispatchSemaphore(value: 0)
+                var ready = false
+                l.stateUpdateHandler = { state in
+                    switch state {
+                    case .ready:
+                        ready = true
+                        sem.signal()
+                    case .failed, .cancelled:
+                        sem.signal()
+                    default:
+                        break
+                    }
+                }
                 l.start(queue: queue)
-                listener = l
-                port = candidate
-                return true
+                sem.wait()
+                if ready {
+                    listener = l
+                    port = candidate
+                    return true
+                }
+                l.cancel()
             } catch {
                 continue
             }
@@ -115,10 +135,12 @@ final class StaticServer {
         if path == "/" || path.isEmpty { path = "/web/index.html" }
         guard path.hasPrefix("/") else { return nil }
 
-        // Pfad-Traversal verhindern: keine ..-Segmente, keine Backslashes.
+        // Pfad-Traversal verhindern. Achtung: Swifts split(separator:)
+        // verwirft leere Subsequences, deshalb fängt es Doppel-Slashes
+        // nicht — die müssen direkt geprüft werden.
         let segments = path.split(separator: "/").map(String.init)
-        if segments.contains("..") || segments.contains("") { return nil }
-        if path.contains("\\") { return nil }
+        if segments.contains("..") { return nil }
+        if path.contains("\\") || path.contains("//") { return nil }
 
         let candidate = resourceRoot.appendingPathComponent(segments.joined(separator: "/"))
         let resolved = candidate.standardizedFileURL
