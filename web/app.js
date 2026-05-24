@@ -443,7 +443,12 @@ function loadHistory() {
 function saveHistory(entry) {
   const h = loadHistory();
   h.unshift(entry);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, 20)));
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, 20)));
+  } catch {
+    // QuotaExceededError o.ä. — Verlauf ist nicht kritisch, lieber stumm
+    // schlucken als den ganzen Init zu kippen.
+  }
 }
 
 function renderHistory(activeId = null) {
@@ -875,7 +880,7 @@ function renderEndpointList() {
             <div><strong>Modell:</strong> <code>${escapeHTML(model)}</code></div>
             <div>think=on  → reasoning: ${onRes.thinkingChars} · content: ${onRes.contentChars} · ${onRes.durationSec}s  ${onIcon}</div>
             <div>think=off → reasoning: ${offRes.thinkingChars} · content: ${offRes.contentChars} · ${offRes.durationSec}s  ${offIcon}</div>
-            <div class="think-test-verdict">${verdictText(verdict, onRes, offRes)}</div>
+            <div class="think-test-verdict">${escapeHTML(verdictText(verdict, onRes, offRes))}</div>
           </div>
         `;
       } catch (e) {
@@ -903,7 +908,14 @@ function openSettings() {
   if (typeof els.settingsModal.showModal === "function") {
     els.settingsModal.showModal();
   } else {
+    // Fallback ohne native <dialog>-Unterstützung: showModal() würde sonst
+    // den ersten fokussierbaren Knoten automatisch fokussieren — hier
+    // manuell, damit Tastatur- und Screen-Reader-Nutzer:innen ankommen.
     els.settingsModal.setAttribute("open", "");
+    const first = els.settingsModal.querySelector(
+      "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+    );
+    if (first) first.focus();
   }
 }
 

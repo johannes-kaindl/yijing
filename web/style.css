@@ -659,7 +659,7 @@ button.ghost:hover {
 }
 
 .interp-body:empty::before {
-  content: "Wähle Endpunkt + Modell und klick „Interpretieren\".";
+  content: "Wähle Endpunkt + Modell und klick „Interpretieren“.";
   color: var(--ink-faint);
   font-style: italic;
 }
