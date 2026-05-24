@@ -5,6 +5,8 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [1.1] — 2026-05-24
+
 ### Geändert
 
 - macOS-App: Python-Backend (`serve.py`) durch einen Swift-internen
@@ -13,7 +15,15 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
   mehr — Nutzer:innen ohne Python können sie installieren und starten,
   ohne Apples 700 MB–3 GB CLT-Download zu triggern. Bundle-Layout
   vereinfacht: `Resources/web/`, `Resources/data/`, `Resources/sw.js`
-  direkt statt Subordner `Resources/yijing/…`.
+  direkt statt Subordner `Resources/yijing/…`. DMG kleiner geworden
+  (3,0 MB statt 3,7 MB).
+- Web-UI: macOS-App-Hinweis aus dem prominenten Header-Block in eine
+  dezente Footer-Zeile verlegt; die ausführliche Gatekeeper-Anleitung
+  steht weiter in der README und `INSTALL.txt` im DMG.
+- README: shields.io-Badges (`for-the-badge`) für Download und
+  Live-Demo statt einfachem Markdown-Link.
+
+## [1.0] — 2026-05-22
 
 ### Hinzugefügt
 

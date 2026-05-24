@@ -98,20 +98,21 @@ footer {
 footer p { margin: 0; max-width: 540px; margin-inline: auto; }
 footer em { color: var(--ink-soft); }
 
+footer a {
+  color: var(--accent);
+  text-decoration-color: var(--accent-soft);
+  text-underline-offset: 0.15em;
+}
+footer a:hover {
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+}
+
 footer .copyright {
   margin-top: 0.6rem;
   color: var(--ink-faint);
   max-width: 720px;
   font-size: 0.75rem;
-}
-footer .copyright a {
-  color: var(--accent);
-  text-decoration-color: var(--accent-soft);
-  text-underline-offset: 0.15em;
-}
-footer .copyright a:hover {
-  color: var(--ink);
-  text-decoration-color: var(--accent);
 }
 
 /* Ask section */

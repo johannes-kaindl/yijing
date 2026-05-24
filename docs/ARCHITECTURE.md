@@ -30,9 +30,13 @@ Eine Übersicht über Aufbau und Datenfluss des Yijing-Orakels.
        └─────────────────────────┘    └────────────────────┘
 
                   ┌──────────────────────────────────┐
-                  │   Static Server (python3)        │
-                  │   serves: web/, data/            │
-                  │   no-cache headers for dev       │
+                  │   Static Server                  │
+                  │   • Dev: python3 (scripts/       │
+                  │     serve.py)                    │
+                  │   • macOS-App: Swift NWListener  │
+                  │     (StaticServer.swift)         │
+                  │   serves: web/, data/, sw.js     │
+                  │   Cache-Control: no-store        │
                   └──────────────────────────────────┘
 ```
 
@@ -128,6 +132,16 @@ Siehe [`docs/DATA.md`](DATA.md) für Detail.
 
 Python-basierter Dev-HTTP-Server. Sendet `Cache-Control: no-store` —
 verhindert das Caching alter JS-Modul-Versionen während der Entwicklung.
+**Nur fürs Dev-Setup (`./serve.sh`); die macOS-App bringt einen eigenen
+Swift-Server mit (siehe `scripts/macos-app/StaticServer.swift`).**
+
+### `scripts/macos-app/StaticServer.swift`
+
+Minimaler HTTP/1.1-Server in Swift (Network.framework / `NWListener`).
+GET/HEAD only, MIME-Map, Pfad-Traversal-Schutz, `Cache-Control: no-store`
+analog zu `serve.py`. Wird von der gebündelten `Yijing.app` benutzt, um
+die Bundle-Resources (`web/`, `data/`, `sw.js`) lokal an die WKWebView
+auszuliefern — keine Python-Abhängigkeit auf der Nutzerseite.
 
 ## Datenfluss eines Wurfs
 
