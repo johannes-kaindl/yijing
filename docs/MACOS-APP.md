@@ -2,9 +2,11 @@
 
 Das Yijing-Orakel lässt sich als eigenständige `Yijing.app` für macOS
 bündeln — eine doppelklickbare App für Nutzer ohne Terminal-Erfahrung.
-Die App startet den lokalen Static-Server und zeigt das Orakel in einem
-eigenen Fenster mit eingebettetem WebKit — kein Browser-Tab, kein
-gebündeltes Framework.
+Die App bedient die Orakel-Seite über einen **Swift-internen
+Static-Server** (Network.framework / `NWListener`) und zeigt sie in
+einem eigenen Fenster mit eingebettetem WebKit. Kein Browser-Tab, kein
+Python, keine Command-Line-Tools auf der Nutzerseite — die App bringt
+alles selbst mit.
 
 ## Bauen
 
@@ -36,11 +38,14 @@ Yijing.app/Contents/
 └── Resources/
     ├── AppIcon.icns           App-Icon
     ├── LICENSE                AGPL-3.0-or-later
-    └── yijing/                eingebetteter Repo-Inhalt (web/, data/, …)
+    ├── sw.js                  Service Worker
+    ├── web/                   Static-Site-Quellen (HTML, JS, CSS, Icons)
+    └── data/                  Hexagramm-/Trigramm-JSONs
 ```
 
 Die Build-Bausteine liegen versioniert unter `scripts/macos-app/`:
-`Yijing.swift`, `Info.plist`, `INSTALL.txt`, `icon-1024.png`.
+`Yijing.swift`, `StaticServer.swift`, `Info.plist`, `INSTALL.txt`,
+`icon-1024.png`.
 
 ## Aufbau der App
 
@@ -55,21 +60,27 @@ zwei Gründen nötig:
    hat keine — auf Apple Silicon führte das zu einer Rosetta-
    Aufforderung. Eine kompilierte Binary löst das.
 
+Die Binary wird aus zwei Swift-Sources kompiliert:
+`scripts/macos-app/Yijing.swift` (AppDelegate, Fenster, Menü) und
+`scripts/macos-app/StaticServer.swift` (interner HTTP-Server). Keine
+externen Dependencies, kein Swift-Package-Manager nötig — direkt mit
+`swiftc` gebaut.
+
 ## Startverhalten
 
 Beim Start (`Yijing.swift`):
 
-1. Sucht `python3` (Homebrew zuerst, dann System-Python). Fehlt es,
-   erscheint ein Hinweisdialog und die Command Line Tools werden
-   installiert.
-2. Sucht einen freien Port (8765–8775).
-3. Startet `scripts/serve.py` als Subprozess (Static-Server mit
-   `no-store`-Headern), wartet bis er antwortet.
-4. Öffnet ein Fenster mit `WKWebView` auf
+1. Initialisiert den `StaticServer` mit `Bundle.main.resourceURL!` als
+   Document-Root (die `web/`-, `data/`- und `sw.js`-Files im Bundle).
+2. Sucht einen freien Port im Bereich 8765–8775 und startet einen
+   `NWListener` darauf (Network.framework, loopback-only).
+3. Öffnet ein Fenster mit `WKWebView` auf
    `http://localhost:<port>/web/index.html`.
-5. Beim Beenden der App wird der Server-Subprozess gestoppt. Für den
-   Härtefall (Force Quit) beendet sich `serve.py` über einen
-   Parent-Watchdog selbst, sobald die App-PID verschwindet.
+4. Bei jedem GET/HEAD-Request liest der Server die Datei aus den
+   Bundle-Resources, ermittelt den MIME-Type und antwortet mit
+   `Cache-Control: no-store` (analog zum ehemaligen `serve.py`).
+5. Beim Beenden der App wird der Listener gestoppt — alle offenen
+   Connections schließen sich, da loopback-only.
 
 Externe Links (Footer: Codeberg, Lizenzen) öffnen im Standard-Browser,
 nicht im App-Fenster.

@@ -5,6 +5,16 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Geändert
+
+- macOS-App: Python-Backend (`serve.py`) durch einen Swift-internen
+  Static-Server (Network.framework / `NWListener`) ersetzt. Die App
+  braucht jetzt **kein System-Python und keine Command-Line-Tools**
+  mehr — Nutzer:innen ohne Python können sie installieren und starten,
+  ohne Apples 700 MB–3 GB CLT-Download zu triggern. Bundle-Layout
+  vereinfacht: `Resources/web/`, `Resources/data/`, `Resources/sw.js`
+  direkt statt Subordner `Resources/yijing/…`.
+
 ### Hinzugefügt
 
 - Initialer Static-Site-Build mit Drei-Münzen-Methode

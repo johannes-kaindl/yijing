@@ -65,21 +65,6 @@ Die Schritte aus Abschnitt 2 sind nie wieder nötig.
 
 
 ────────────────────────────────────────────────────────────────────
- MÖGLICHER ZUSATZ-HINWEIS BEIM ERSTEN START
-────────────────────────────────────────────────────────────────────
-
-Falls beim allerersten Start ein Apple-Fenster erscheint, das nach
-den „Command Line Tools" fragt:
-
-   → Klicke auf „Installieren" und folge dem Apple-Dialog.
-   → Das dauert einige Minuten (einmalig).
-   → Starte „Yijing" danach noch einmal neu.
-
-Diese Komponente bringt macOS selbst mit; die App lädt nichts
-Fremdes nach.
-
-
-────────────────────────────────────────────────────────────────────
  DIE APP BEENDEN
 ────────────────────────────────────────────────────────────────────
 

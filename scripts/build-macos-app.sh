@@ -25,16 +25,17 @@ done
 
 echo "==> Bundle-Grundgeruest (dist/Yijing.app)"
 rm -rf "$APP" "$DIST/Yijing.dmg" "$DIST/Yijing.app.zip"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/yijing"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-echo "==> Repo-Inhalt einbetten (committeter Stand via git archive HEAD)"
-git archive HEAD | tar -x -C "$APP/Contents/Resources/yijing"
+echo "==> Web-Assets einbetten (committeter Stand — nur web/, data/, sw.js)"
+git archive HEAD web/ data/ sw.js | tar -x -C "$APP/Contents/Resources"
 
 echo "==> Native App kompilieren (Swift, universal arm64 + x86_64)"
+SOURCES=("$ASSETS/Yijing.swift" "$ASSETS/StaticServer.swift")
 swiftc -O -target arm64-apple-macosx12.0 \
-  -o "$DIST/Yijing-arm64" "$ASSETS/Yijing.swift"
+  -o "$DIST/Yijing-arm64" "${SOURCES[@]}"
 if swiftc -O -target x86_64-apple-macosx12.0 \
-  -o "$DIST/Yijing-x86_64" "$ASSETS/Yijing.swift" 2>/dev/null; then
+  -o "$DIST/Yijing-x86_64" "${SOURCES[@]}" 2>/dev/null; then
   lipo -create "$DIST/Yijing-arm64" "$DIST/Yijing-x86_64" \
     -output "$APP/Contents/MacOS/Yijing"
   rm -f "$DIST/Yijing-arm64" "$DIST/Yijing-x86_64"
