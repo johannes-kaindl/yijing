@@ -18,6 +18,8 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
+HEXAGRAM_COUNT = 64
+
 ROOT = Path(__file__).resolve().parent.parent
 ARCHIV = ROOT / "_archiv"
 SRC_HEX_JSON = ARCHIV / "Yijing_6" / "yijing" / "resources" / "hexagram_json"
@@ -68,8 +70,13 @@ def join_text(value) -> str:
 
 def load_wilhelm_text(number: int) -> dict:
     path = SRC_HEX_JSON / f"hexagram_{number:02d}.json"
-    with path.open(encoding="utf-8") as f:
-        raw = json.load(f)
+    try:
+        with path.open(encoding="utf-8") as f:
+            raw = json.load(f)
+    except FileNotFoundError:
+        raise SystemExit(f"Hexagramm-Quelldatei fehlt: {path}")
+    except json.JSONDecodeError as e:
+        raise SystemExit(f"JSON-Fehler in {path}: {e}")
     return normalize_text(raw, number)
 
 
@@ -167,9 +174,15 @@ def load_trigrams() -> dict[str, dict]:
             sym = (row.get("symbol") or "").strip()
             if not sym:
                 continue
+            binary = next(
+                (b for b, s in TRIGRAM_BINARY_TO_SYMBOL.items() if s == sym),
+                None,
+            )
+            if binary is None:
+                continue  # Unbekanntes Trigramm-Symbol in der CSV — überspringen.
             out[sym] = {
                 "symbol": sym,
-                "binary": next(b for b, s in TRIGRAM_BINARY_TO_SYMBOL.items() if s == sym),
+                "binary": binary,
                 "name": (row.get("familie_zeichen") or "").strip(),       # 乾
                 "pinyin": (row.get("familie_aussprache") or "").strip(),  # qián
                 "family": (row.get("familie") or "").strip(),             # Vater
@@ -215,8 +228,11 @@ def load_image_prompts() -> dict[int, str]:
                 # Normalisiere die Großschreibung
                 cleaned = cleaned[0].upper() + cleaned[1:]
                 out[n].add(cleaned)
-    # Pro Hexagramm den längsten / vollständigsten Prompt wählen (mehr Substanz)
-    return {n: max(prompts, key=len) for n, prompts in out.items()}
+    # Pro Hexagramm den längsten / vollständigsten Prompt wählen (mehr Substanz).
+    # sorted() macht die Auswahl deterministisch — ohne diesen Sort entscheidet
+    # bei gleich langen Kandidaten die Set-Iteration, was zwischen Runs wechseln
+    # kann.
+    return {n: max(sorted(prompts), key=len) for n, prompts in out.items()}
 
 
 # ---------- Zusammenführen -----------------------------------------------
@@ -230,7 +246,7 @@ def build() -> None:
     image_prompts = load_image_prompts()
 
     hexagrams = []
-    for n in range(1, 65):
+    for n in range(1, HEXAGRAM_COUNT + 1):
         text = load_wilhelm_text(n)
         binary = KING_WEN_BINARY[n]
 
@@ -260,19 +276,27 @@ def build() -> None:
         })
 
     OUT_HEX.parent.mkdir(exist_ok=True)
-    with OUT_HEX.open("w", encoding="utf-8") as f:
-        json.dump(hexagrams, f, ensure_ascii=False, indent=2)
+    _write_json_atomic(OUT_HEX, hexagrams)
     print(f"OK: {len(hexagrams)} Hexagramme → {OUT_HEX.relative_to(ROOT)}")
 
     # Trigramm-Stammdaten separat (für UI-Tooltips)
-    with OUT_TRIGRAMS.open("w", encoding="utf-8") as f:
-        json.dump(list(trigrams_db.values()), f, ensure_ascii=False, indent=2)
+    _write_json_atomic(OUT_TRIGRAMS, list(trigrams_db.values()))
     print(f"OK: {len(trigrams_db)} Trigramme → {OUT_TRIGRAMS.relative_to(ROOT)}")
 
     # Statistik
     with_img = sum(1 for h in hexagrams if h["image_association"])
     with_chinese = sum(1 for h in hexagrams if h["name_chinese"])
-    print(f"   Schriftzeichen: {with_chinese}/64, Bild-Assoziationen: {with_img}/64")
+    print(f"   Schriftzeichen: {with_chinese}/{HEXAGRAM_COUNT}, "
+          f"Bild-Assoziationen: {with_img}/{HEXAGRAM_COUNT}")
+
+
+def _write_json_atomic(target: Path, data) -> None:
+    """Schreibt JSON über ein temporäres File und benennt am Ende um —
+    so kann ein Abbruch mitten im Dump kein halbfertiges Ziel hinterlassen."""
+    tmp = target.with_suffix(target.suffix + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    tmp.replace(target)
 
 
 if __name__ == "__main__":

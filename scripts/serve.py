@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import functools
 import http.server
 import os
 import sys
@@ -45,9 +46,11 @@ def _watch_parent() -> None:
 
 
 def main() -> None:
-    os.chdir(ROOT)
     _watch_parent()
-    server = http.server.ThreadingHTTPServer(("", PORT), NoCacheHandler)
+    handler = functools.partial(NoCacheHandler, directory=str(ROOT))
+    # An 127.0.0.1 binden statt "" (= 0.0.0.0). Dev-Server soll nicht
+    # versehentlich für andere Geräte im LAN erreichbar werden.
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), handler)
     print(f"Yijing Orakel:  http://localhost:{PORT}/web/index.html")
     print("(Strg-C zum Beenden)")
     try:
