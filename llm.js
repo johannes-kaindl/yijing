@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Johannes Kaindl
 /**
  * LLM-Adapter für lokale Modell-Server.
  *
@@ -91,25 +93,32 @@ class OllamaClient {
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buf = "";
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      let nl;
-      while ((nl = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, nl).trim();
-        buf = buf.slice(nl + 1);
-        if (!line) continue;
-        try {
-          const obj = JSON.parse(line);
-          const msg = obj?.message || {};
-          if (msg.thinking && onThinking) onThinking(msg.thinking);
-          if (msg.content) onToken(msg.content);
-          if (obj.done) return;
-        } catch {
-          /* unvollständiger JSON-Chunk – ignorieren */
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (!line) continue;
+          try {
+            const obj = JSON.parse(line);
+            const msg = obj?.message || {};
+            if (msg.thinking && onThinking) onThinking(msg.thinking);
+            if (msg.content) onToken(msg.content);
+            if (obj.done) return;
+          } catch {
+            /* unvollständiger JSON-Chunk – ignorieren */
+          }
         }
       }
+    } finally {
+      // Wichtig: Reader explizit freigeben, sonst bleibt der Stream-Lock
+      // nach AbortError bestehen und der nächste Request scheitert mit
+      // „ReadableStream is locked".
+      reader.cancel().catch(() => {});
     }
   }
 }
@@ -157,31 +166,36 @@ class OpenAIClient {
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buf = "";
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      let sep;
-      while ((sep = buf.indexOf("\n")) >= 0) {
-        const raw = buf.slice(0, sep).replace(/\r$/, "");
-        buf = buf.slice(sep + 1);
-        if (!raw.startsWith("data:")) continue;
-        const data = raw.slice(5).trim();
-        if (data === "[DONE]") return;
-        if (!data) continue;
-        try {
-          const obj = JSON.parse(data);
-          const choice = obj?.choices?.[0] || {};
-          const delta = choice.delta || choice.message || {};
-          // reasoning_content (DeepSeek-Stil), thinking (manche Forks),
-          // reasoning (MLX mlx_lm.server)
-          const reason = delta.reasoning_content || delta.reasoning || delta.thinking;
-          if (reason && onThinking) onThinking(reason);
-          if (delta.content) onToken(delta.content);
-        } catch {
-          /* ignorieren */
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let sep;
+        while ((sep = buf.indexOf("\n")) >= 0) {
+          const raw = buf.slice(0, sep).replace(/\r$/, "");
+          buf = buf.slice(sep + 1);
+          if (!raw.startsWith("data:")) continue;
+          const data = raw.slice(5).trim();
+          if (data === "[DONE]") return;
+          if (!data) continue;
+          try {
+            const obj = JSON.parse(data);
+            const choice = obj?.choices?.[0] || {};
+            const delta = choice.delta || choice.message || {};
+            // reasoning_content (DeepSeek-Stil), thinking (manche Forks),
+            // reasoning (MLX mlx_lm.server)
+            const reason = delta.reasoning_content || delta.reasoning || delta.thinking;
+            if (reason && onThinking) onThinking(reason);
+            if (delta.content) onToken(delta.content);
+          } catch {
+            /* ignorieren */
+          }
         }
       }
+    } finally {
+      // Reader-Lock freigeben (siehe OllamaClient.chatStream).
+      reader.cancel().catch(() => {});
     }
   }
 }
