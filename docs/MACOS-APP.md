@@ -83,6 +83,17 @@ daher einmalig der Gatekeeper-Weg nötig: Systemeinstellungen →
 Datenschutz & Sicherheit → „Trotzdem öffnen". `INSTALL.txt` führt
 Schritt für Schritt durch den Vorgang.
 
+**Fallback ohne UI-Weg** (falls auf neueren macOS-Versionen der
+„Trotzdem öffnen"-Knopf nicht erscheint oder direkt im Terminal
+geholfen werden soll):
+
+```bash
+xattr -dr com.apple.quarantine /Applications/Yijing.app
+```
+
+Entfernt nur das Quarantine-Flag, das macOS beim Download/Mount
+dranhängt. Danach startet die App ohne weitere Gatekeeper-Dialoge.
+
 ## Aktualisieren
 
 Neue App-Version:
