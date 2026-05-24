@@ -5,6 +5,32 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Behoben
+
+- `web/llm.js`: Stream-Reader wird jetzt in einem `finally`-Block
+  freigegeben. Beim schnellen „Abbrechen"-und-sofort-Wiederstarten der
+  Interpretation konnte sonst `ReadableStream is locked` auftreten
+  (Ollama- und OpenAI-kompatibler Pfad).
+- `scripts/macos-app/StaticServer.swift`: wartet beim Start explizit
+  auf den `NWListener`-State `.ready`. Vorher konnte der WebView in
+  seltenen Fällen gegen einen noch nicht aufgeschlagenen Port laden.
+- `scripts/build_data.py`: deterministische Auswahl unter gleich langen
+  Bild-Assoziations-Prompts (vorher abhängig von der Set-Iteration).
+
+### Geändert
+
+- Diverse Härtungen ohne sichtbare Verhaltensänderung: vollständiges
+  HTML-Escape an allen `innerHTML`-Stellen in `app.js`, Quota-Schutz
+  für `localStorage`-Schreibvorgänge, Focus-Management im `<dialog>`-
+  Fallback-Pfad, WKWebView-Scheme-Allowlist, klarerer Pfad-Traversal-
+  Guard im Swift-Server, atomarer Schreibvorgang und bessere Fehler-
+  meldungen in `build_data.py`.
+- `scripts/serve.py` bindet jetzt explizit auf `127.0.0.1` statt auf
+  allen Interfaces, und nutzt `directory=` statt `os.chdir()`.
+- SPDX-Header (AGPL-3.0-or-later) auf `web/app.js` und `web/llm.js`
+  ergänzt; `LICENSE-DOCS`-Geltungsbereich explizit um `CHANGELOG.md`,
+  `CONTRIBUTING.md` und `AGENTS.md` erweitert.
+
 ## [1.1] — 2026-05-24
 
 ### Geändert

@@ -23,6 +23,18 @@ Bitte vor größeren Änderungen lesen.
 - **Backend-Services** — die App ist Static-Site
 - **Cloud-LLM-Anbindungen ohne klaren Opt-in** — Default sind lokale Modelle
 
+## Branches
+
+Das Repo hat zwei Branches:
+
+- **`main`** — die Entwicklung. PRs gehen immer hier rein.
+- **`pages`** — das Deployment für [Codeberg Pages](https://jkaindl.codeberg.page/Yijing/).
+  Hat ein flaches Layout (Inhalt von `web/` direkt im Root) und wird vom
+  Maintainer manuell aus `main` nachgezogen. **Als Contributor musst du
+  `pages` nicht selbst anfassen** — fokussiere dich auf `main`.
+
+Details zur Sync-Konvention stehen in [`AGENTS.md`](AGENTS.md).
+
 ## Issue oder PR?
 
 - **Issue zuerst** bei größeren Änderungen, neuen Features, Architektur-
