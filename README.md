@@ -1,5 +1,9 @@
 # Yijing Orakel
 
+![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue?style=flat-square)
+[![Codeberg-Release](https://img.shields.io/gitea/v/release/jkaindl/Yijing?gitea_url=https%3A%2F%2Fcodeberg.org&label=codeberg&color=green&style=flat-square)](https://codeberg.org/jkaindl/Yijing/releases)
+![Status: aktiv](https://img.shields.io/badge/status-aktiv-success?style=flat-square)
+
 Ein schlankes I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und
 optionaler KI-Deutung über lokale LLM-Server (Ollama oder OpenAI-
 kompatibel wie MLX/LM Studio). Drei-Münzen-Methode, vollständige
