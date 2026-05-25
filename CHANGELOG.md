@@ -5,6 +5,8 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [1.1.1] — 2026-05-25
+
 ### Behoben
 
 - `web/llm.js`: Stream-Reader wird jetzt in einem `finally`-Block
