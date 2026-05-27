@@ -45,6 +45,13 @@ function parsePyLookup(src) {
 const jsSrc = readFileSync(resolve(ROOT, "web/app.js"), "utf8");
 const pySrc = readFileSync(resolve(ROOT, "scripts/build_data.py"), "utf8");
 const hexJson = JSON.parse(readFileSync(resolve(ROOT, "data/hexagrams.json"), "utf8"));
+// hexagrams.en.json ist optional — fehlt vor Phase B des i18n-Roll-outs.
+let hexEnJson = null;
+try {
+  hexEnJson = JSON.parse(readFileSync(resolve(ROOT, "data/hexagrams.en.json"), "utf8"));
+} catch {
+  /* not yet translated — skip EN checks */
+}
 
 const jsLookup = parseJsLookup(jsSrc);
 const pyLookup = parsePyLookup(pySrc);
@@ -101,11 +108,64 @@ for (const h of hexJson) {
   );
 }
 
+// 6. data/hexagrams.en.json (falls vorhanden): gleiche number/binary wie DE,
+//    parallele _en-Felder dort wo das DE-Pendant einen Wert hat.
+let enChecked = 0;
+if (hexEnJson) {
+  check(Array.isArray(hexEnJson) && hexEnJson.length === 64,
+    `hexagrams.en.json: ${Array.isArray(hexEnJson) ? hexEnJson.length : "kein Array"}, erwartet 64.`);
+
+  const deByN = Object.fromEntries(hexJson.map((h) => [h.number, h]));
+  for (const eh of hexEnJson) {
+    if (!eh || typeof eh.number !== "number") {
+      fail.push(`hexagrams.en.json: ungültiger Eintrag: ${JSON.stringify(eh).slice(0, 80)}`);
+      continue;
+    }
+    const dh = deByN[eh.number];
+    if (!dh) {
+      fail.push(`hexagrams.en.json Hex ${eh.number}: kein passender DE-Eintrag.`);
+      continue;
+    }
+    // Lookup-konsistenz: number/binary müssen 1:1 zum DE-Pendant sein.
+    check(eh.binary === dh.binary,
+      `hexagrams.en.json Hex ${eh.number}: binary "${eh.binary}" weicht von DE "${dh.binary}" ab.`);
+    // Field-Symmetrie: wenn DE einen Wert hat, muss EN den parallelen _en-Wert haben.
+    const fldPairs = [
+      ["name_de", "name_en"],
+      ["meaning", "meaning_en"],
+      ["judgment", "judgment_en"],
+      ["image", "image_en"],
+      ["image_association", "image_association_en"],
+    ];
+    for (const [de, en] of fldPairs) {
+      const deHas = !!(dh[de] && String(dh[de]).trim());
+      const enHas = !!(eh[en] && String(eh[en]).trim());
+      check(deHas === enHas,
+        `hexagrams.en.json Hex ${eh.number}: DE-${de}=${deHas} aber EN-${en}=${enHas}.`);
+    }
+    // Linien: jede DE-Linie soll _en-Pendants haben.
+    const deLines = dh.lines || [];
+    const enLines = eh.lines || [];
+    check(deLines.length === enLines.length,
+      `hexagrams.en.json Hex ${eh.number}: ${enLines.length} Linien, erwartet ${deLines.length}.`);
+    for (let i = 0; i < deLines.length; i++) {
+      for (const [de, en] of [["position", "position_en"], ["text", "text_en"], ["interpretation", "interpretation_en"]]) {
+        const deHas = !!(deLines[i]?.[de] && String(deLines[i][de]).trim());
+        const enHas = !!(enLines[i]?.[en] && String(enLines[i][en]).trim());
+        check(deHas === enHas,
+          `hexagrams.en.json Hex ${eh.number} line ${i+1}: DE-${de}=${deHas} aber EN-${en}=${enHas}.`);
+      }
+    }
+    enChecked++;
+  }
+}
+
 if (fail.length === 0) {
   console.log("OK  King-Wen-Lookups konsistent.");
   console.log(`    JS  BINARY_TO_KING_WEN: ${jsEntries.length} Einträge`);
   console.log(`    Py  KING_WEN_BINARY:    ${pyEntries.length} Einträge`);
   console.log(`    data/hexagrams.json:    ${hexJson.length} Hexagramme`);
+  if (hexEnJson) console.log(`    data/hexagrams.en.json: ${hexEnJson.length} Hexagramme (${enChecked} parallel-validated)`);
   process.exit(0);
 }
 

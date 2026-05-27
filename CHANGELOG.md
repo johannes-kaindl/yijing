@@ -7,6 +7,21 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ### Hinzugefügt
 
+- **Englische Hexagramm-Texte** — `data/hexagrams.en.json` mit parallelen
+  `*_en`-Feldern (`name_en`, `meaning_en`, `judgment_en`, `image_en`,
+  `image_association_en`, pro Linie `position_en`/`text_en`/
+  `interpretation_en`). Vollständig: 64/64 Hexagramme, 384/384 Linien.
+  Übersetzt mit Claude Opus 4.7 aus dem deutschen Wilhelm-Original
+  parallel über acht Subagenten — Wilhelm-Stil bewahrt, klassische
+  I-Ching-Vokabeln in englischer Standardform (the superior man, the
+  great man, the noble, the abyss, etc.), Absatzstruktur 1:1. Source
+  ist gemeinfrei (Wilhelm 1924), Übersetzung unter AGPL-3.0-or-later.
+- `scripts/test-kingwen.mjs` um EN-JSON-Strukturchecks erweitert —
+  prüft `number`/`binary`-Konsistenz mit DE-Source und Field-Symmetrie
+  (für jedes nicht-leere DE-Feld muss `*_en` existieren).
+- `docs/DATA.md` Sektion „Englische Variante" mit Schema-Beschreibung
+  und Generierungs-Hinweis.
+
 - **Englische UI** — vollständiger i18n-Layer mit Sprach-Toggle DE/EN
   (`web/i18n.js`). Sprachauswahl im Settings-Modal, persistiert in
   `localStorage["yijing-language-v1"]`, Default = Browser-Sprache (en → EN,

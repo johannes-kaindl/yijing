@@ -134,6 +134,31 @@ Andere bekannte Unregelmäßigkeiten:
   Die meisten Bilder dort haben `IMG_XXXX`-Dateinamen ohne semantischen
   Prompt.
 
+## Englische Variante: `data/hexagrams.en.json`
+
+Parallel zu `data/hexagrams.json` existiert eine englische Variante mit
+exakt gleicher Struktur plus zusätzlichen `*_en`-Feldern auf den
+übersetzbaren Texten:
+
+- `name_en` (z.B. „THE CREATIVE" für „DAS SCHÖPFERISCHE")
+- `meaning_en`, `judgment_en`, `image_en`, `image_association_en`
+- pro Linie: `position_en`, `text_en`, `interpretation_en`
+
+Lookup-Felder (`number`, `binary`, `unicode`, `name_chinese`, `pinyin`,
+`name_latin`, `trigrams`) sind 1:1 vom DE-JSON übernommen und unverändert.
+
+Die englische Variante wurde **mit Claude Opus 4.7 aus dem deutschen
+Wilhelm-Text übersetzt**, parallel über acht Subagenten (je 8 Hexagramme).
+Der Stil folgt der Wilhelm-Tradition (würdig, kontemplativ, leicht
+archaisierend) mit klassischen I-Ching-Vokabeln aus der englischen
+Standardliteratur — vergleichbar mit Cary F. Baynes' 1950er-Übersetzung,
+aber in eigenen Worten formuliert. Source ist gemeinfrei (Wilhelm 1924),
+die Übersetzung steht unter [AGPL-3.0-or-later](../LICENSE).
+
+Konsistenz-Check: `node scripts/test-kingwen.mjs` prüft, dass die EN-Datei
+strukturell symmetrisch zum DE-Source ist (gleiche `number`/`binary`,
+parallele `_en`-Felder dort wo das DE-Pendant einen Wert hat).
+
 ## Quellen-Lizenz
 
 - **Wilhelm-Texte** (`meaning`, `judgment`, `image`, `lines[].text`,
