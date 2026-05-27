@@ -5,6 +5,30 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- [`SECURITY.md`](SECURITY.md): Sicherheits-Meldewege, Threat-Model,
+  Scope, was rein gehört und was nicht.
+- [`.gitea/issue_template/`](.gitea/issue_template/): YAML-Vorlagen für
+  Bug-Report und Feature-Vorschlag plus `config.yaml` mit Kontaktlinks
+  auf SECURITY und README. Greift automatisch beim Anlegen neuer Issues
+  über Codeberg.
+
+### Geändert
+
+- README komplett überarbeitet — erweiterte Badge-Reihe (Platform,
+  PWA, Build), Inhaltsverzeichnis, Mermaid-Wurf-Ablauf, Release-
+  Historie-Tabelle mit Tag-Links, eigene „Sicherheit melden"- und
+  „Warum keine Build-Pipeline?"-Sektionen, Repo-Footer.
+- `CONTRIBUTING.md` erweitert um lokales Setup, Issue-Template-Hinweis,
+  Lizenz-Klausel für Beiträge, Verweis auf `SECURITY.md`, erweiterte
+  PR-Checkliste (macOS-App-Build, Pages-Sync-Vermerk).
+- Codeberg-Repo-Metadaten via API: Description präzisiert, Website auf
+  Pages-URL, Topics (20 Stück: yijing, iching, i-ging, oracle,
+  divination, hexagram, wilhelm, static-site, pwa, offline-first,
+  vanilla-js, zero-dependency, ollama, mlx, local-llm, macos-app,
+  swift, service-worker, german, agpl).
+
 ## [1.1.1] — 2026-05-25
 
 ### Behoben

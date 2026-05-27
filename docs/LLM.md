@@ -39,10 +39,16 @@ pip install mlx-lm
 mlx_lm.server \
   --model mlx-community/Qwen3.6-35B-A3B-4bit \
   --port 8080 \
-  --host 0.0.0.0
+  --host 127.0.0.1
 ```
 
 MLX hat CORS standardmäßig auf `*` — kein zusätzliches Setup nötig.
+
+> **Loopback statt `0.0.0.0`.** Bindet man den MLX-Server auf
+> `0.0.0.0`, ist er für alle Geräte im LAN erreichbar — bei einem
+> offenen Modell ohne Auth keine gute Idee. Yijing braucht nur
+> Loopback. Wenn du den Server bewusst LAN-weit anbieten willst:
+> Firewall vorschalten und/oder einen Reverse-Proxy mit Auth.
 
 ### LM Studio
 

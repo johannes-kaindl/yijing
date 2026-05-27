@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2026 Johannes Kaindl
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
 # Beitragen
 
 Schön, dass du mitmachen möchtest. Yijing-Orakel ist ein Hobbyprojekt mit
@@ -14,6 +19,7 @@ Bitte vor größeren Änderungen lesen.
 - **Sauberere Print-Styles** für PDF-Export
 - **Mehr LLM-Backend-Adapter** (vLLM, llama.cpp HTTP-Server, etc.)
 - **A11y-Verbesserungen** (ARIA-Labels, Keyboard-Navigation, Screenreader)
+- **Doku-Patches** — Tippfehler, präzisere Erklärungen, neue Diagramme
 
 ## Was nicht gut passt
 
@@ -38,9 +44,25 @@ Details zur Sync-Konvention stehen in [`AGENTS.md`](AGENTS.md).
 ## Issue oder PR?
 
 - **Issue zuerst** bei größeren Änderungen, neuen Features, Architektur-
-  fragen
+  fragen — verwende die Vorlagen unter
+  [Neue Issue → Vorlage wählen](https://codeberg.org/jkaindl/Yijing/issues/new/choose).
 - **Direkt PR** bei Tippfehlern, kleinen Daten-Korrekturen, offensichtlichen
-  Bugfixes
+  Bugfixes.
+- **Sicherheitsthemen** → niemals öffentliches Issue, sondern siehe
+  [`SECURITY.md`](SECURITY.md).
+
+## Lokales Setup
+
+```bash
+git clone https://codeberg.org/jkaindl/Yijing.git yijing
+cd yijing
+./serve.sh                   # öffnet http://localhost:8765/web/index.html
+```
+
+Voraussetzung: Python 3.9+. Für die KI-Deutung zusätzlich Ollama oder
+ein OpenAI-kompatibler lokaler Server (siehe [`docs/LLM.md`](docs/LLM.md)).
+Zum Bauen der macOS-App: Xcode Command Line Tools (siehe
+[`docs/MACOS-APP.md`](docs/MACOS-APP.md)).
 
 ## PR-Checkliste
 
@@ -49,8 +71,14 @@ Details zur Sync-Konvention stehen in [`AGENTS.md`](AGENTS.md).
 - [ ] CSS-Änderungen in Desktop + Mobile + Print-Vorschau und in
       beiden Themes (Dark/Light) geprüft
 - [ ] Bei Daten-Änderungen: `python3 scripts/build_data.py` läuft ohne
-      Fehler
-- [ ] `CHANGELOG.md` ergänzt
+      Fehler, Zähler im Output stimmig (64/64 Hexagramme, 64/64
+      Schriftzeichen)
+- [ ] Bei macOS-App-Änderungen: `./scripts/build-macos-app.sh` baut
+      durch, App startet, zeigt Inhalt, beendet sauber
+- [ ] `CHANGELOG.md` ergänzt (Sektion `[Unreleased]`)
+- [ ] Bei Änderungen an `web/`, `sw.js` oder `data/`: im PR-Kommentar
+      kurz vermerken, damit der `pages`-Sync nach Merge nicht
+      vergessen wird (macht der Maintainer)
 - [ ] Commit-Messages aussagekräftig (warum, nicht was)
 
 ## Commit-Stil
@@ -67,6 +95,22 @@ Fix CORS-Setup-Hinweis für Ollama auf macOS
 
 OLLAMA_ORIGINS muss vor `ollama serve` exportiert sein — die README hatte
 das in der falschen Reihenfolge dokumentiert.
+```
+
+## Lizenz von Beiträgen
+
+Mit dem Öffnen eines PRs erklärst du dich einverstanden, dass dein
+Beitrag unter denselben Lizenzen veröffentlicht wird wie das
+Gesamtprojekt:
+
+- **Code-Änderungen** unter [AGPL-3.0-or-later](LICENSE)
+- **Doku-Änderungen** unter [CC BY-SA 4.0](LICENSE-DOCS)
+
+Neue Code-Dateien bitte mit SPDX-Header anlegen:
+
+```js
+// SPDX-FileCopyrightText: 2026 <Dein Name>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 ```
 
 ## Code of Conduct

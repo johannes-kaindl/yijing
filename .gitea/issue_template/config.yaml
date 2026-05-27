@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Johannes Kaindl
+# SPDX-License-Identifier: CC-BY-SA-4.0
+blank_issues_enabled: true
+contact_links:
+  - name: Sicherheits-Meldung
+    url: https://codeberg.org/jkaindl/Yijing/src/branch/main/SECURITY.md
+    about: Sicherheitsrelevante Probleme bitte nicht öffentlich melden — siehe SECURITY.md.
+  - name: Frage zur Bedienung / Wilhelm-Text
+    url: https://codeberg.org/jkaindl/Yijing/src/branch/main/README.md
+    about: Erstmal in der README und docs/ schauen — oft schon dokumentiert.

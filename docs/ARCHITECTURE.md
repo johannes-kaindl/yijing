@@ -227,7 +227,15 @@ entfernt.
   keine Cross-User-Daten.
 - LLM-Server laufen **lokal** auf vertrauenswürdigen Ports — der Code
   vertraut den Server-Antworten.
+- Der Dev-Server (`scripts/serve.py`) und der Swift-Static-Server der
+  macOS-App binden explizit auf `127.0.0.1` / Loopback.
 - Markdown wird **escaped + sanitized** vor dem Rendern. Links nur mit
   erlaubtem Schema (`http(s):`, `mailto:`).
+- WKWebView in der macOS-App hat eine Scheme-Allowlist (`http`,
+  `https`, `about`) — externe Links öffnen im Standard-Browser, nicht
+  im App-Fenster.
 - API-Keys (für nicht-lokale OpenAI-kompatible Endpunkte) liegen im
   `localStorage` — also auf dem Gerät. Nicht synchronisiert.
+
+Sicherheitsrelevante Probleme bitte nicht öffentlich melden — siehe
+[`../SECURITY.md`](../SECURITY.md).

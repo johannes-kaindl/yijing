@@ -178,9 +178,55 @@ ausliefern. Beim Entwickeln: DevTools → Application → Service Workers →
 
 ## Release-Prozess
 
-Es gibt noch keinen formalen Release-Prozess. Bei Bedarf:
+Versionierung folgt [SemVer](https://semver.org/lang/de/), Changelog
+folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Schritte
+für einen Release (am Beispiel `v1.1.1`):
 
-1. `CHANGELOG.md` ergänzen
-2. Commit mit Tag-Vorbereitung
-3. `git tag -a v0.x.0 -m "…"`
-4. `git push origin v0.x.0`
+1. **CHANGELOG ziehen.** Sektion `[Unreleased]` umbenennen in
+   `[1.1.1] — YYYY-MM-DD`. Eine frische `[Unreleased]`-Sektion
+   darüber neu anlegen.
+2. **Version-Strings anpassen.** Footer in `web/index.html`
+   (z.B. „Yijing v1.1.1"). Sonst kommen Nutzer in die Verlegenheit,
+   sich zu fragen welche Version sie haben.
+3. **Commit + Tag.**
+   ```bash
+   git commit -am "Release v1.1.1: <Headline>"
+   git tag -a v1.1.1 -m "v1.1.1 — <kurze Headline>"
+   git push origin main
+   git push origin v1.1.1
+   ```
+4. **DMG bauen.**
+   ```bash
+   ./scripts/build-macos-app.sh
+   # → dist/Yijing.dmg
+   ```
+   Das Skript zieht den committeten Stand (`git archive HEAD`), nicht
+   das Arbeitsverzeichnis — Tag also vorher pushen, sonst landet ein
+   nicht-getaggter Stand in der App.
+5. **Codeberg-Release anlegen** (UI oder API):
+   ```bash
+   TOKEN=…
+   curl -X POST "https://codeberg.org/api/v1/repos/jkaindl/Yijing/releases" \
+     -H "Authorization: token $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"tag_name":"v1.1.1","name":"v1.1.1 — <Headline>",
+          "body":"<Markdown-Notes aus CHANGELOG>"}'
+   ```
+   Quirk: in seltenen Fällen meldet die API direkt nach Tag-Push
+   „HTTP 409 Release has no Tag" — Sekunden später durchprobieren,
+   dann mit `GET /releases` verifizieren statt blind auf den ersten
+   POST zu vertrauen.
+6. **DMG als Asset hochladen** (UI oder API mit
+   `POST .../releases/<id>/assets`). Download-URL kurz mit `curl -I`
+   verifizieren (HTTP 200).
+7. **Download-Links auf den neuen Tag aktualisieren.** Der Button im
+   `README.md` und der `href` des `#macDownload`-Buttons in
+   `web/index.html` zeigen auf eine versionierte URL
+   (`releases/download/<tag>/Yijing.dmg`) — Codeberg kennt keinen
+   `latest`-Alias für direkte Asset-Links. Der README-Status-Badge
+   für die Release-Version aktualisiert sich automatisch über
+   `shields.io/gitea/v/release`.
+8. **Pages-Sync.** Wenn `web/`, `sw.js` oder `data/` betroffen waren,
+   den Stand nach `pages` ziehen — am einfachsten über einen temporären
+   `git worktree`. Pfad-Anpassungen in `app.js` (`../data/` → `data/`,
+   `../sw.js` → `sw.js`) nicht vergessen.
