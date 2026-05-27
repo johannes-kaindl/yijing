@@ -5,6 +5,8 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-05-27
+
 ### Hinzugefügt
 
 - **Englische Hexagramm-Texte** — `data/hexagrams.en.json` mit parallelen
