@@ -17,6 +17,16 @@ final class StaticServer {
     private let queue = DispatchQueue(label: "de.kaindl.yijing.server")
     private(set) var port: Int = 0
 
+    // Connection-Limit: lokaler WebView braucht typischerweise 1–4 parallele
+    // Connections (HTML, dann CSS, JS, JSON). 32 ist großzügig genug für
+    // Reload-Bursts und Sub-Resource-Parallelität, aber schließt bösartige
+    // Local-Process-Floods (lokaler Loopback bedeutet nicht „vertrauenswürdig
+    // gegen jeden lokalen Prozess").
+    private let maxConnections = 32
+    private var activeConnections = 0
+    // Mit `queue` synchronisiert — alle Mutationen passieren in handle()
+    // bzw. im completion-Callback von send(), beide laufen serial auf `queue`.
+
     init(resourceRoot: URL) {
         self.resourceRoot = resourceRoot.standardizedFileURL
     }
@@ -71,10 +81,23 @@ final class StaticServer {
     // MARK: - Connection-Handling
 
     private func handle(_ connection: NWConnection) {
+        // Connection-Limit prüfen — alle Mutationen von activeConnections
+        // passieren auf der seriellen `queue` (handle() läuft im
+        // newConnectionHandler dispatched durch NWListener auf `queue`).
+        if activeConnections >= maxConnections {
+            connection.cancel()
+            return
+        }
+        activeConnections += 1
         connection.start(queue: queue)
         receiveRequest(connection, buffer: Data())
     }
 
+    /// receive() ist callback-basiert — die hier sichtbare "Rekursion"
+    /// ist konzeptionell asynchrone Iteration: jeder Aufruf läuft im
+    /// nächsten Queue-Tick mit frischem Stack, kein Stack-Wachstum.
+    /// Buffer-Cap (64 KB) und Connection-Limit (oben) sind die echten
+    /// Schutzmechanismen gegen Endlos-Reads.
     private func receiveRequest(_ connection: NWConnection, buffer: Data) {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 16 * 1024) {
             [weak self] data, _, isComplete, error in
@@ -97,11 +120,19 @@ final class StaticServer {
             }
 
             if isComplete || error != nil {
-                connection.cancel()
+                self.finishConnection(connection)
             } else {
                 self.receiveRequest(connection, buffer: buffer)
             }
         }
+    }
+
+    /// Connection-Cleanup auf einer Stelle gebündelt — dekrementiert
+    /// activeConnections und cancelt. Aufrufer dürfen nicht direkt
+    /// connection.cancel() machen, sonst läuft der Counter weg.
+    private func finishConnection(_ connection: NWConnection) {
+        activeConnections = max(0, activeConnections - 1)
+        connection.cancel()
     }
 
     private func respond(rawHeaders: Data, on connection: NWConnection) {
@@ -186,8 +217,8 @@ final class StaticServer {
         header += "\r\n"
         var response = Data(header.utf8)
         response.append(body)
-        connection.send(content: response, completion: .contentProcessed { _ in
-            connection.cancel()
+        connection.send(content: response, completion: .contentProcessed { [weak self] _ in
+            self?.queue.async { self?.finishConnection(connection) }
         })
     }
 

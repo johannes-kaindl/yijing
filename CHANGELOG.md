@@ -5,6 +5,58 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [1.2.1] — 2026-05-27
+
+### Hinzugefügt
+
+- **Hero-Bild für Social-Preview** (`web/assets/og-image.png`, 1200×630):
+  stilisiertes Hexagramm 1 + 易經 auf dunklem Hintergrund mit App-Theme-
+  Akzentfarbe. `og:image` + `twitter:image` als absolute URLs verlinkt,
+  Twitter-Card auf `summary_large_image`. SVG-Quelle in
+  `web/assets/og-image.svg` versioniert. Auch als README-Hero
+  zentriert eingebunden.
+
+### Geändert
+
+- `scripts/macos-app/StaticServer.swift`: **Connection-Limit (max 32
+  parallel)** plus zentraler `finishConnection()` für Cleanup —
+  schließt theoretischen lokalen-Prozess-Flood-Vektor (low real-world
+  risk; loopback-only + single-user, aber sauberer Hygiene-Stand).
+  Kommentar an `receiveRequest` erläutert, warum die Callback-basierte
+  „Rekursion" kein echtes Stack-Wachstum ist.
+- `scripts/serve.py`: **Tot-Code entfernt** — `_watch_parent()` plus
+  `threading`/`time`-Imports raus. Die Funktion war für die alte
+  Python-Backend-Variante der macOS-App (vor v1.1). Seit v1.1 ist die
+  App vollständig Swift-intern (`StaticServer.swift`), kein Python-
+  Subprocess mehr → `YIJING_PARENT_PID` wird nirgends mehr gesetzt.
+  SPDX-Header und präzisere Modul-Docstring ergänzt.
+
+### Behoben
+
+- **EN-Übersetzung — Stichproben-QA-Patches** in `data/hexagrams.en.json`:
+  - **Vokabel-Konsistenz für 君子 (der Edle):** 41 Vorkommen
+    „superior man" → „noble one". Subagent-Batches 25–32, 33–40 und
+    49–56 hatten uneinheitlich übersetzt; Datei wirkte zusammen-
+    gestückelt. Jetzt überall einheitlich „noble one".
+  - **Hex 11 image_en — Bedeutungsverfehlung:** „Himmelsrichtungen"
+    war zu „regions of heaven" (kosmologische Sphären) statt
+    „cardinal directions" (Kompass-Richtungen) übersetzt.
+  - **Hex 11 image_en — Redundanz/Tonalität:** „Heaven and earth
+    stand in intercourse" zu „come together and unite their effects"
+    (das Wort intercourse ist heute fast nur sexuell konnotiert; direkt
+    nach „Heaven and earth unite" wirkte es unfreiwillig komisch).
+  - **Hex 11 judgment_en:** „hold the rule in hand" → „hold the reins
+    of power" (englisches Idiom).
+  - **Hex 49 judgment_en:** „On your own day, then you are believed"
+    → „On your own day you are believed" (unmotiviertes „then" raus).
+  - **Hex 49 line 3 text_en:** „talk of revolution has gone round
+    three times" → „talk of the revolution has been heard three times"
+    (umgangssprachlich-modern → würdig-archaisch).
+  - **Hex 49 line 5 interp_en — Germanismus:** „the people fall to
+    him quite of their own accord" → „give him their allegiance of
+    their own accord" (wörtliches „fallen" → idiomatisches Treue-
+    Geben).
+
 ## [1.2.0] — 2026-05-27
 
 ### Hinzugefügt
