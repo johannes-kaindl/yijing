@@ -37,6 +37,8 @@ Schichten, FastAPI-Wrapper). Dieser Anlauf ist absichtlich anders.
   „aufgeräumt". Ist absichtlich roh.
 - **Keine neuen Test-Frameworks** für triviale Funktionen. Wenn Tests
   nötig werden, `node --check` und gezielte ad-hoc-Smoke-Tests bevorzugen.
+  Vorhandener Sanity-Test: `node scripts/test-kingwen.mjs` (King-Wen-
+  Lookups + `data/hexagrams.json`-Konsistenz, keine Dependencies).
 - **`_archiv/yijing_1/.env`** enthält einen Klartext-Google-API-Key. Niemals
   ins git übernehmen, niemals den `_archiv/`-`.gitignore`-Eintrag entfernen.
 
@@ -82,11 +84,16 @@ Das Repo hat zwei Branches:
   (`https://jkaindl.codeberg.page/Yijing/`). **Flaches Layout:** der
   Inhalt von `web/` liegt direkt im Branch-Root, `data/` daneben.
 
-Jede Änderung an `web/`, `sw.js` oder den Daten muss **manuell nach
-`pages` nachgezogen** werden — am einfachsten über einen temporären
-`git worktree`. `index.html`, `style.css`, `manifest.webmanifest` und
-`sw.js` sind in beiden Branches identisch; `app.js` unterscheidet sich
-nur in den Pfaden (`data/`, `sw.js` statt `../data/`, `../sw.js`).
+Jede Änderung an `web/`, `sw.js` oder den Daten muss nach `pages`
+nachgezogen werden — dafür gibt es `./scripts/sync-pages.sh`. Das
+Skript legt automatisch einen Worktree an, spiegelt `web/` in den
+Pages-Root, kopiert `data/` und `sw.js`, patcht die Pfade in `app.js`
+(`../data/` → `data/`, `../sw.js` → `sw.js`), commited und pusht mit
+SSH-Retry. No-op wenn `pages` bereits aktuell ist.
+
+`index.html`, `style.css`, `manifest.webmanifest` und `sw.js` sind in
+beiden Branches identisch; `app.js` unterscheidet sich nur in den
+Pfaden (`data/`, `sw.js` statt `../data/`, `../sw.js`).
 
 ## PWA, Service Worker, Theme
 

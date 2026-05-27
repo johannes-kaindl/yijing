@@ -13,6 +13,21 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
   Bug-Report und Feature-Vorschlag plus `config.yaml` mit Kontaktlinks
   auf SECURITY und README. Greift automatisch beim Anlegen neuer Issues
   über Codeberg.
+- [`scripts/test-kingwen.mjs`](scripts/test-kingwen.mjs): Sanity-Test
+  für die King-Wen-Lookup-Tabellen — prüft `BINARY_TO_KING_WEN` (JS),
+  `KING_WEN_BINARY` (Python) und `data/hexagrams.json` auf Konsistenz
+  und gegenseitige Inversion. Reines Node, keine Test-Framework-
+  Dependency. Aufruf: `node scripts/test-kingwen.mjs`.
+- [`scripts/sync-pages.sh`](scripts/sync-pages.sh): Automatisierter
+  Sync von `main` nach `pages` (Worktree-Anlage, web→Root-Spiegelung,
+  Pfad-Patches `../data/` → `data/` und `../sw.js` → `sw.js`,
+  Commit + Push mit SSH-Retry). Ersetzt die manuelle Worktree-Sed-
+  Choreografie.
+- [`.editorconfig`](.editorconfig): IDE-konsistente Indentation,
+  UTF-8, LF, Trim-Trailing-Whitespace (Markdown ausgenommen).
+- `web/index.html`: Open-Graph + Twitter-Card Meta-Tags für Social-
+  Preview. `og:image` ist absichtlich noch nicht gesetzt — sobald ein
+  Hero-Bild existiert dort als absolute URL ergänzen.
 
 ### Geändert
 

@@ -77,6 +77,9 @@ yijing/
 3. Browser-Tab hard-reload (Cmd+Shift+R)
 4. Im Browser: Wurf machen, Reading durchklicken
 5. Falls LLM-Code geändert: Interpretation mit Ollama und MLX testen
+6. Bei Änderungen an `web/app.js` (King-Wen-Lookup), `scripts/build_data.py`
+   oder `data/hexagrams.json`: `node scripts/test-kingwen.mjs` — prüft
+   die beiden Lookup-Tabellen und das JSON auf gegenseitige Konsistenz.
 
 ### Daten neu bauen
 
@@ -226,7 +229,11 @@ für einen Release (am Beispiel `v1.1.1`):
    `latest`-Alias für direkte Asset-Links. Der README-Status-Badge
    für die Release-Version aktualisiert sich automatisch über
    `shields.io/gitea/v/release`.
-8. **Pages-Sync.** Wenn `web/`, `sw.js` oder `data/` betroffen waren,
-   den Stand nach `pages` ziehen — am einfachsten über einen temporären
-   `git worktree`. Pfad-Anpassungen in `app.js` (`../data/` → `data/`,
-   `../sw.js` → `sw.js`) nicht vergessen.
+8. **Pages-Sync.** Wenn `web/`, `sw.js` oder `data/` betroffen waren:
+   ```bash
+   ./scripts/sync-pages.sh
+   ```
+   Das Skript legt automatisch einen Worktree an, spiegelt `web/` in
+   den Pages-Root, kopiert `data/` und `sw.js`, patcht die Pfade in
+   `app.js` (`../data/` → `data/`, `../sw.js` → `sw.js`), commited
+   und pusht mit SSH-Retry. No-op wenn pages bereits aktuell ist.

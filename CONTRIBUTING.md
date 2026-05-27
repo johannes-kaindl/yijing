@@ -67,6 +67,8 @@ Zum Bauen der macOS-App: Xcode Command Line Tools (siehe
 ## PR-Checkliste
 
 - [ ] `node --check web/*.js` ist sauber
+- [ ] Bei Änderungen an King-Wen-Lookups / Daten-Schema:
+      `node scripts/test-kingwen.mjs` ist grün
 - [ ] Im Browser getestet (hard-reload, Wurf, ggf. KI-Interpretation)
 - [ ] CSS-Änderungen in Desktop + Mobile + Print-Vorschau und in
       beiden Themes (Dark/Light) geprüft
