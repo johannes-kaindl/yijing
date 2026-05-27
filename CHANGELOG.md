@@ -7,6 +7,17 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ### Hinzugefügt
 
+- **Englische UI** — vollständiger i18n-Layer mit Sprach-Toggle DE/EN
+  (`web/i18n.js`). Sprachauswahl im Settings-Modal, persistiert in
+  `localStorage["yijing-language-v1"]`, Default = Browser-Sprache (en → EN,
+  alles andere → DE). Wirkt sofort auf alle UI-Strings, Datumsformate,
+  Markdown-Export-Headers und den LLM-System-Prompt-Default
+  (zwei Varianten in `web/llm.js`). Hexagramm-Texte werden lazy aus
+  `data/hexagrams.en.json` geladen, mit transparentem Fallback auf
+  `data/hexagrams.json` solange die englische Übersetzung noch nicht
+  existiert (Phase B). HTML annotiert mit `data-i18n*`-Attributen,
+  Inline-Boot-Script setzt `<html lang>` vor dem ersten Paint.
+
 - [`SECURITY.md`](SECURITY.md): Sicherheits-Meldewege, Threat-Model,
   Scope, was rein gehört und was nicht.
 - [`.gitea/issue_template/`](.gitea/issue_template/): YAML-Vorlagen für
