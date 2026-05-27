@@ -70,13 +70,17 @@ fi
 
 (
     cd "$WT"
-    if git diff --quiet && git diff --cached --quiet; then
+    # WICHTIG: zuerst `git add -A` damit auch neu hinzugekommene Dateien
+    # (z.B. data/hexagrams.en.json beim allerersten EN-Sync) als geändert
+    # gelten. `git diff` alleine ignoriert untracked Files — das hat beim
+    # EN-Roll-out zu einem falschen „bereits aktuell" geführt.
+    git add -A
+    if git diff --cached --quiet; then
         echo "✓ pages ist bereits aktuell (nichts zu syncen)."
         exit 0
     fi
 
     echo "→ Commit + Push…"
-    git add -A
     git commit -m "Pages: Sync mit main (${TAG})
 
 main: ${MSG_HEAD}"
