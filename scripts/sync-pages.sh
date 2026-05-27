@@ -49,12 +49,11 @@ cp LICENSE "$WT"/LICENSE
 cp LICENSE-DOCS "$WT"/LICENSE-DOCS
 
 echo "→ Pfade in app.js auf flaches Layout patchen…"
-# „../data/" → „data/", „../sw.js" → „sw.js" (für '…' und "…").
+# Sowohl Code-Pfade als auch JSDoc-Erwähnungen — in pages liegt app.js
+# direkt im Root, also stimmt überall der eine-Ebene-höher-Verweis nicht.
 sed -i.bak \
-    -e 's|"\.\./data/|"data/|g' \
-    -e "s|'\.\./data/|'data/|g" \
-    -e 's|"\.\./sw\.js"|"sw.js"|g' \
-    -e "s|'\.\./sw\.js'|'sw.js'|g" \
+    -e 's|\.\./data/|data/|g' \
+    -e 's|\.\./sw\.js|sw.js|g' \
     "$WT"/app.js
 rm -f "$WT"/app.js.bak
 
