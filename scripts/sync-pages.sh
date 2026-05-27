@@ -38,12 +38,15 @@ git worktree add "$WT" pages >/dev/null
 echo "→ web/ → pages-Root spiegeln…"
 rsync -a --delete \
     --exclude='.git' \
+    --exclude='.DS_Store' \
+    --exclude='Thumbs.db' \
+    --exclude='*.swp' \
     --exclude='LICENSE' \
     --exclude='LICENSE-DOCS' \
     web/ "$WT"/
 
 echo "→ data/ + sw.js + Lizenzen kopieren…"
-rsync -a data/ "$WT"/data/
+rsync -a --exclude='.DS_Store' data/ "$WT"/data/
 cp sw.js "$WT"/sw.js
 cp LICENSE "$WT"/LICENSE
 cp LICENSE-DOCS "$WT"/LICENSE-DOCS
