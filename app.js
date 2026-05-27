@@ -6,25 +6,26 @@
  * Verantwortlich für:
  *  - Cast-Mechanik (Drei-Münzen-Methode → Hypergram → Ursprungs-/Zielbild)
  *  - Rendering von Hexagramm-Figuren, Wilhelm-Texten und wandelnden Linien
- *  - Settings-Modal (Endpoint-Verwaltung, Reasoning-Defaults, System-Prompt)
+ *  - Settings-Modal (Endpoint-Verwaltung, Reasoning-Defaults, System-Prompt, Sprache)
  *  - LLM-Interpretation mit Streaming + Thinking-Anzeige
  *  - Verlauf in localStorage + Tiefe Links via URL-Hash (#r=<uuid>)
  *  - Export als Markdown und PDF-Druck
  *
  * Stack: Vanilla ES-Module, keine Build-Tools, keine externen Abhängigkeiten.
- * Daten werden zur Laufzeit aus data/hexagrams.json geladen.
+ * Daten werden zur Laufzeit aus data/hexagrams[.en].json geladen.
  */
 
 import {
   Endpoints,
   SystemPrompt,
-  DEFAULT_SYSTEM_PROMPT,
+  getDefaultSystemPrompt,
   makeClient,
   buildUserPrompt,
   testThinkingMode,
   LLMError,
 } from "./llm.js";
 import { renderMarkdown } from "./markdown.js";
+import { initI18n, applyI18n, setLang, getLang, t, localeTag } from "./i18n.js";
 
 const HISTORY_KEY = "yijing-history-v1";
 
@@ -107,7 +108,7 @@ function hexagramFromLines(lines, useTarget = false) {
 
 function kingWenFromBinary(binary) {
   const n = BINARY_TO_KING_WEN[binary];
-  if (!n) throw new Error("Unbekannte Binärrepräsentation: " + binary);
+  if (!n) throw new Error(t("boot.unknownBinary", { binary }));
   return n;
 }
 
@@ -163,16 +164,37 @@ const els = {
   addEndpointBtn: document.getElementById("addEndpointBtn"),
   systemPromptInput: document.getElementById("systemPromptInput"),
   resetSystemPromptBtn: document.getElementById("resetSystemPrompt"),
+  languageSelect: document.getElementById("languageSelect"),
 };
 
 let HEXAGRAMS = null;
 let CURRENT_READING = null; // { primary, resulting, question, changingIndices }
 let interpretAbortCtrl = null;
 
+/** Lädt Hexagramme passend zur aktuellen Sprache. EN-Fallback → DE. */
 async function loadData() {
-  const res = await fetch("data/hexagrams.json");
-  if (!res.ok) throw new Error("Daten konnten nicht geladen werden");
-  const data = await res.json();
+  const lang = getLang();
+  const sources = lang === "en"
+    ? ["data/hexagrams.en.json", "data/hexagrams.json"]
+    : ["data/hexagrams.json"];
+  let data = null;
+  let usedSrc = null;
+  for (const src of sources) {
+    try {
+      const res = await fetch(src);
+      if (!res.ok) continue;
+      data = await res.json();
+      usedSrc = src;
+      break;
+    } catch {
+      /* nächste Quelle probieren */
+    }
+  }
+  if (!data) throw new Error(t("boot.dataLoadFailed"));
+  if (lang === "en" && usedSrc && !usedSrc.includes(".en.json")) {
+    // EN angefordert, aber nur DE verfügbar — UI bleibt EN, Texte zeigen DE-Wilhelm-Original.
+    console.info("EN translation not available yet, falling back to German Wilhelm texts.");
+  }
   HEXAGRAMS = {};
   for (const h of data) HEXAGRAMS[h.number] = h;
 }
@@ -202,8 +224,13 @@ function renderHexFigure(container, lines, changingMask) {
   });
 }
 
+function hexNameForLang(hexData) {
+  // hexagrams.en.json hat ein paralleles `name_en`-Feld; Fallback: deutscher Name.
+  return getLang() === "en" ? (hexData.name_en || hexData.name_de) : hexData.name_de;
+}
+
 function renderHexCard(card, hexData, lines, changingMask) {
-  card.querySelector(".hex-name").textContent = hexData.name_de;
+  card.querySelector(".hex-name").textContent = hexNameForLang(hexData);
   const chinese = card.querySelector(".hex-chinese");
   chinese.innerHTML = `
     <span class="ch-symbol">${escapeHTML(hexData.unicode)}</span>
@@ -212,12 +239,12 @@ function renderHexCard(card, hexData, lines, changingMask) {
     <span class="ch-latin">· ${escapeHTML(hexData.name_latin)}</span>
   `;
   const tri = card.querySelector(".hex-trigrams");
-  const t = hexData.trigrams || {};
-  if (t.above && t.below) {
+  const tr = hexData.trigrams || {};
+  if (tr.above && tr.below) {
     tri.innerHTML = `
-      <span title="${escapeHTML(t.above.family)} — ${escapeHTML(t.above.nature)}">${escapeHTML(t.above.symbol)} ${escapeHTML(t.above.name)}</span>
-      über
-      <span title="${escapeHTML(t.below.family)} — ${escapeHTML(t.below.nature)}">${escapeHTML(t.below.symbol)} ${escapeHTML(t.below.name)}</span>
+      <span title="${escapeHTML(tr.above.family)} — ${escapeHTML(tr.above.nature)}">${escapeHTML(tr.above.symbol)} ${escapeHTML(tr.above.name)}</span>
+      ${escapeHTML(t("reading.trigramOver"))}
+      <span title="${escapeHTML(tr.below.family)} — ${escapeHTML(tr.below.nature)}">${escapeHTML(tr.below.symbol)} ${escapeHTML(tr.below.name)}</span>
     `;
   } else {
     tri.textContent = "";
@@ -225,10 +252,38 @@ function renderHexCard(card, hexData, lines, changingMask) {
   renderHexFigure(card.querySelector(".hex-figure"), lines, changingMask);
 }
 
+function lineFieldsForLang(ln) {
+  if (getLang() === "en") {
+    return {
+      position: ln.position_en || ln.position,
+      text: ln.text_en || ln.text,
+      interpretation: ln.interpretation_en || ln.interpretation,
+    };
+  }
+  return { position: ln.position, text: ln.text, interpretation: ln.interpretation };
+}
+
+function hexTextFieldsForLang(hex) {
+  if (getLang() === "en") {
+    return {
+      judgment: hex.judgment_en || hex.judgment,
+      image: hex.image_en || hex.image,
+      meaning: hex.meaning_en || hex.meaning,
+      image_association: hex.image_association_en || hex.image_association,
+    };
+  }
+  return {
+    judgment: hex.judgment,
+    image: hex.image,
+    meaning: hex.meaning,
+    image_association: hex.image_association,
+  };
+}
+
 function renderChangingLines(hexData, changingIndices) {
   els.changingLines.innerHTML = "";
   for (const idx of changingIndices) {
-    const ln = hexData.lines[idx];
+    const ln = lineFieldsForLang(hexData.lines[idx]);
     const block = document.createElement("div");
     block.className = "changing-line";
     block.innerHTML = `
@@ -241,8 +296,8 @@ function renderChangingLines(hexData, changingIndices) {
 }
 
 function renderTrigramDetails(hex) {
-  const t = hex.trigrams || {};
-  if (!t.above || !t.below) {
+  const tr = hex.trigrams || {};
+  if (!tr.above || !tr.below) {
     els.trigramText.innerHTML = "—";
     return;
   }
@@ -256,7 +311,8 @@ function renderTrigramDetails(hex) {
       ${tri.associations ? `<div class="trigram-assoc">${escapeHTML(tri.associations)}</div>` : ""}
     </div>
   `;
-  els.trigramText.innerHTML = block("oben", t.above) + block("unten", t.below);
+  els.trigramText.innerHTML =
+    block(t("reading.trigramAbove"), tr.above) + block(t("reading.trigramBelow"), tr.below);
 }
 
 function escapeHTML(s) {
@@ -264,6 +320,12 @@ function escapeHTML(s) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+/** Sprachabhängige typografische Anführungszeichen für die Frage-Echo. */
+function quoteForLang(s) {
+  if (getLang() === "en") return `“${s}”`; // “…”
+  return `„${s}“`; // „…“
 }
 
 // ——— Reading anzeigen ———
@@ -282,13 +344,14 @@ function showReading(question, lines, options = {}) {
 
   renderHexCard(els.primary, primaryHex, lines, changingMask);
 
-  els.judgmentText.textContent = primaryHex.judgment || "—";
-  els.imageText.textContent = primaryHex.image || "—";
-  els.meaningText.textContent = primaryHex.meaning || "—";
+  const primaryTexts = hexTextFieldsForLang(primaryHex);
+  els.judgmentText.textContent = primaryTexts.judgment || "—";
+  els.imageText.textContent = primaryTexts.image || "—";
+  els.meaningText.textContent = primaryTexts.meaning || "—";
 
-  if (primaryHex.image_association) {
+  if (primaryTexts.image_association) {
     els.associationDetails.hidden = false;
-    els.associationText.textContent = primaryHex.image_association;
+    els.associationText.textContent = primaryTexts.image_association;
   } else {
     els.associationDetails.hidden = true;
   }
@@ -309,8 +372,11 @@ function showReading(question, lines, options = {}) {
     renderHexCard(els.resulting, resultingHex, targetLines, targetLines.map(() => false));
     els.resulting.hidden = false;
     els.resultingSection.hidden = false;
-    els.resultingSummary.textContent = `Urteil — ${resultingHex.name_de}`;
-    els.resultingJudgment.textContent = resultingHex.judgment || "—";
+    els.resultingSummary.textContent = t("reading.resultingJudgmentOf", {
+      name: hexNameForLang(resultingHex),
+    });
+    const resultingTexts = hexTextFieldsForLang(resultingHex);
+    els.resultingJudgment.textContent = resultingTexts.judgment || "—";
   } else {
     els.changingSection.hidden = true;
     els.resulting.hidden = true;
@@ -319,7 +385,7 @@ function showReading(question, lines, options = {}) {
 
   if (question.trim()) {
     els.questionEcho.hidden = false;
-    els.questionEcho.textContent = `„${question.trim()}"`;
+    els.questionEcho.textContent = quoteForLang(question.trim());
   } else {
     els.questionEcho.hidden = true;
   }
@@ -349,10 +415,10 @@ function showReading(question, lines, options = {}) {
       id: activeEntryId,
       ts: Date.now(),
       question: question.trim(),
-      primary: { n: primaryNum, name: primaryHex.name_de, unicode: primaryHex.unicode },
+      primary: { n: primaryNum, name: hexNameForLang(primaryHex), unicode: primaryHex.unicode },
       changingLines: changingIndices.map((i) => i + 1),
       resulting: resultingHex
-        ? { n: resultingHex.number, name: resultingHex.name_de, unicode: resultingHex.unicode }
+        ? { n: resultingHex.number, name: hexNameForLang(resultingHex), unicode: resultingHex.unicode }
         : null,
       lines: lines.map((l) => l.value),
     });
@@ -382,7 +448,7 @@ function tossAnimated(question) {
   els.castBtn.disabled = true;
   els.reading.hidden = false;
   els.questionEcho.hidden = !question.trim();
-  els.questionEcho.textContent = question.trim() ? `„${question.trim()}"` : "";
+  els.questionEcho.textContent = question.trim() ? quoteForLang(question.trim()) : "";
 
   const primaryFig = els.primary.querySelector(".hex-figure");
   primaryFig.innerHTML = "";
@@ -465,7 +531,7 @@ function renderHistory(activeId = null) {
     const li = document.createElement("li");
     if (activeId && entry.id === activeId) li.classList.add("active");
     const date = new Date(entry.ts);
-    const dateStr = date.toLocaleString("de-DE", {
+    const dateStr = date.toLocaleString(localeTag(), {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -496,49 +562,64 @@ function renderHistory(activeId = null) {
 function buildMarkdownExport(reading, interpretation) {
   const p = reading.primaryHex;
   const r = reading.resultingHex;
+  const pText = hexTextFieldsForLang(p);
+  const rText = r ? hexTextFieldsForLang(r) : null;
+  const numLabel = getLang() === "en" ? "No." : "Nr.";
   const lines = [];
-  lines.push(`# Yijing Orakel`);
+  lines.push(t("export.title"));
   lines.push("");
-  if (reading.question) lines.push(`**Frage:** ${reading.question}`);
-  lines.push(`**Datum:** ${new Date().toLocaleString("de-DE")}`);
+  if (reading.question) lines.push(t("export.question", { question: reading.question }));
+  lines.push(t("export.date", { date: new Date().toLocaleString(localeTag()) }));
   lines.push("");
-  lines.push(`## Ursprungsbild`);
+  lines.push(t("export.h2.primary"));
   lines.push("");
   lines.push(
-    `**${p.unicode}  Nr. ${p.number} — ${p.name_chinese} ${p.pinyin} · ${p.name_latin} — ${p.name_de}**`
+    `**${p.unicode}  ${numLabel} ${p.number} — ${p.name_chinese} ${p.pinyin} · ${p.name_latin} — ${hexNameForLang(p)}**`
   );
-  const t = p.trigrams || {};
-  if (t.above && t.below) {
+  const tr = p.trigrams || {};
+  if (tr.above && tr.below) {
     lines.push("");
     lines.push(
-      `- Oberes Trigramm: ${t.above.symbol} ${t.above.name} (${t.above.pinyin}) — ${t.above.family}, ${t.above.nature}`
+      t("export.trigramAbove", {
+        symbol: tr.above.symbol,
+        name: tr.above.name,
+        pinyin: tr.above.pinyin,
+        family: tr.above.family,
+        nature: tr.above.nature,
+      })
     );
     lines.push(
-      `- Unteres Trigramm: ${t.below.symbol} ${t.below.name} (${t.below.pinyin}) — ${t.below.family}, ${t.below.nature}`
+      t("export.trigramBelow", {
+        symbol: tr.below.symbol,
+        name: tr.below.name,
+        pinyin: tr.below.pinyin,
+        family: tr.below.family,
+        nature: tr.below.nature,
+      })
     );
   }
-  if (p.image_association) {
+  if (pText.image_association) {
     lines.push("");
-    lines.push(`*Bildmeditation:* ${p.image_association}`);
+    lines.push(t("export.association", { text: pText.image_association }));
   }
   lines.push("");
-  lines.push(`### Das Urteil`);
+  lines.push(t("export.h3.judgment"));
   lines.push("");
-  lines.push(p.judgment || "—");
+  lines.push(pText.judgment || "—");
   lines.push("");
-  lines.push(`### Das Bild`);
+  lines.push(t("export.h3.image"));
   lines.push("");
-  lines.push(p.image || "—");
+  lines.push(pText.image || "—");
   lines.push("");
-  lines.push(`### Bedeutung`);
+  lines.push(t("export.h3.meaning"));
   lines.push("");
-  lines.push(p.meaning || "—");
+  lines.push(pText.meaning || "—");
 
   if (reading.changingIndices && reading.changingIndices.length) {
     lines.push("");
-    lines.push(`## Wandelnde Linien`);
+    lines.push(t("export.h2.changing"));
     for (const idx of reading.changingIndices) {
-      const ln = p.lines[idx];
+      const ln = lineFieldsForLang(p.lines[idx]);
       lines.push("");
       lines.push(`### ${ln.position}`);
       lines.push("");
@@ -552,24 +633,24 @@ function buildMarkdownExport(reading, interpretation) {
 
   if (r) {
     lines.push("");
-    lines.push(`## Zielbild`);
+    lines.push(t("export.h2.resulting"));
     lines.push("");
     lines.push(
-      `**${r.unicode}  Nr. ${r.number} — ${r.name_chinese} ${r.pinyin} · ${r.name_latin} — ${r.name_de}**`
+      `**${r.unicode}  ${numLabel} ${r.number} — ${r.name_chinese} ${r.pinyin} · ${r.name_latin} — ${hexNameForLang(r)}**`
     );
     lines.push("");
-    lines.push(`### Das Urteil`);
+    lines.push(t("export.h3.judgment"));
     lines.push("");
-    lines.push(r.judgment || "—");
+    lines.push(rText.judgment || "—");
     lines.push("");
-    lines.push(`### Das Bild`);
+    lines.push(t("export.h3.image"));
     lines.push("");
-    lines.push(r.image || "—");
+    lines.push(rText.image || "—");
   }
 
   if (interpretation && interpretation.trim()) {
     lines.push("");
-    lines.push(`## KI-Interpretation`);
+    lines.push(t("export.h2.interpretation"));
     lines.push("");
     lines.push(interpretation.trim());
   }
@@ -577,7 +658,7 @@ function buildMarkdownExport(reading, interpretation) {
   lines.push("");
   lines.push("---");
   lines.push("");
-  lines.push("*Text: Richard Wilhelm — I Ging, Das Buch der Wandlungen.*");
+  lines.push(t("export.attribution"));
   return lines.join("\n");
 }
 
@@ -616,7 +697,7 @@ function refreshEndpointSelect() {
   if (!list.length) {
     const o = document.createElement("option");
     o.value = "";
-    o.textContent = "(kein Endpunkt — ⚙ öffnen)";
+    o.textContent = t("llm.option.noEndpoint");
     els.endpointSelect.appendChild(o);
     els.interpretBtn.disabled = true;
     return;
@@ -642,7 +723,7 @@ async function refreshModelSelect() {
   const previouslySelected = els.modelSelect.value;
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "… lade Modelle";
+  placeholder.textContent = t("llm.option.loadingModels");
   els.modelSelect.appendChild(placeholder);
   try {
     const client = makeClient(ep);
@@ -651,7 +732,7 @@ async function refreshModelSelect() {
     if (!models.length) {
       const o = document.createElement("option");
       o.value = "";
-      o.textContent = "(keine Modelle)";
+      o.textContent = t("llm.option.noModels");
       els.modelSelect.appendChild(o);
       return;
     }
@@ -671,7 +752,7 @@ async function refreshModelSelect() {
     els.modelSelect.innerHTML = "";
     const o = document.createElement("option");
     o.value = "";
-    o.textContent = "(nicht erreichbar)";
+    o.textContent = t("llm.option.unreachable");
     els.modelSelect.appendChild(o);
     console.warn("Modell-Liste:", e);
   }
@@ -681,12 +762,12 @@ async function runInterpretation() {
   if (!CURRENT_READING) return;
   const ep = Endpoints.list().find((e) => e.id === els.endpointSelect.value);
   if (!ep) {
-    els.interpStatus.textContent = "Bitte erst Endpunkt einrichten (⚙).";
+    els.interpStatus.textContent = t("llm.status.needEndpoint");
     return;
   }
   const model = els.modelSelect.value;
   if (!model) {
-    els.interpStatus.textContent = "Bitte ein Modell wählen.";
+    els.interpStatus.textContent = t("llm.status.needModel");
     return;
   }
   Endpoints.setSelectedId(ep.id);
@@ -703,7 +784,7 @@ async function runInterpretation() {
   els.interpBody.innerHTML = "";
   els.interpThinking.textContent = "";
   els.interpThinkingDetails.hidden = true;
-  els.interpStatus.textContent = "… denke nach";
+  els.interpStatus.textContent = t("llm.status.thinking");
   els.interpretBtn.hidden = true;
   els.stopInterpretBtn.hidden = false;
 
@@ -728,28 +809,39 @@ async function runInterpretation() {
         { role: "user", content: userPrompt },
       ],
       signal: interpretAbortCtrl.signal,
-      onToken: (t) => {
-        buffer += t;
+      onToken: (tok) => {
+        buffer += tok;
         els.interpBody.innerHTML = renderMarkdown(buffer);
-        if (els.interpStatus.textContent.startsWith("… denke")) {
+        // Status "… thinking" entfernen, sobald sichtbarer Output kommt.
+        const cur = els.interpStatus.textContent;
+        if (cur === t("llm.status.thinking")) {
           els.interpStatus.textContent = "";
         }
       },
-      onThinking: (t) => {
-        thinking += t;
+      onThinking: (tok) => {
+        thinking += tok;
         els.interpThinkingDetails.hidden = false;
         els.interpThinking.textContent = thinking;
       },
     });
     const dt = ((performance.now() - t0) / 1000).toFixed(1);
-    const thMark = choice === "on" ? " · think:on" : choice === "off" ? " · think:off" : "";
-    els.interpStatus.textContent = `${buffer.length} Zeichen · ${dt}s · ${model}${thMark}`;
+    const thMark = choice === "on"
+      ? t("llm.status.thinkOn")
+      : choice === "off"
+        ? t("llm.status.thinkOff")
+        : "";
+    els.interpStatus.textContent = t("llm.status.done", {
+      chars: buffer.length,
+      seconds: dt,
+      model,
+      think: thMark,
+    });
   } catch (e) {
     if (e?.name === "AbortError") {
-      els.interpStatus.textContent = "Abgebrochen.";
+      els.interpStatus.textContent = t("llm.status.aborted");
     } else {
       const msg = e instanceof LLMError ? e.message : String(e?.message || e);
-      els.interpStatus.textContent = `Fehler: ${msg}`;
+      els.interpStatus.textContent = t("llm.status.error", { message: msg });
       console.error(e);
     }
   } finally {
@@ -767,7 +859,7 @@ function renderEndpointList() {
   if (!list.length) {
     const li = document.createElement("li");
     li.className = "empty";
-    li.textContent = "Noch keine Endpunkte. Füge unten einen hinzu.";
+    li.textContent = t("settings.endpoints.empty");
     els.endpointList.appendChild(li);
     return;
   }
@@ -781,24 +873,24 @@ function renderEndpointList() {
       <div class="ep-url"><code>${escapeHTML(ep.baseUrl)}</code></div>
       <div class="ep-config">
         <label>
-          <span>Standard-Modell</span>
+          <span>${escapeHTML(t("settings.endpoints.defaultModel"))}</span>
           <select data-ep-model>
-            <option value="">${ep.defaultModel ? escapeHTML(ep.defaultModel) : "— keins gewählt —"}</option>
+            <option value="">${ep.defaultModel ? escapeHTML(ep.defaultModel) : escapeHTML(t("settings.endpoints.noneSelected"))}</option>
           </select>
         </label>
         <label>
-          <span>Reasoning-Default</span>
+          <span>${escapeHTML(t("settings.thinkingDefault"))}</span>
           <select data-ep-thinking>
-            <option value="default" ${!ep.thinking || ep.thinking === "default" ? "selected" : ""}>Auto</option>
-            <option value="on" ${ep.thinking === "on" ? "selected" : ""}>An</option>
-            <option value="off" ${ep.thinking === "off" ? "selected" : ""}>Aus</option>
+            <option value="default" ${!ep.thinking || ep.thinking === "default" ? "selected" : ""}>${escapeHTML(t("settings.thinkingDefault.short.auto"))}</option>
+            <option value="on" ${ep.thinking === "on" ? "selected" : ""}>${escapeHTML(t("settings.thinkingDefault.short.on"))}</option>
+            <option value="off" ${ep.thinking === "off" ? "selected" : ""}>${escapeHTML(t("settings.thinkingDefault.short.off"))}</option>
           </select>
         </label>
       </div>
       <div class="ep-actions">
-        <button type="button" data-act="test">Verbindung testen</button>
-        <button type="button" data-act="thinkTest">Reasoning testen</button>
-        <button type="button" data-act="remove" class="ghost danger">Entfernen</button>
+        <button type="button" data-act="test">${escapeHTML(t("settings.endpoints.test"))}</button>
+        <button type="button" data-act="thinkTest">${escapeHTML(t("settings.endpoints.testThinking"))}</button>
+        <button type="button" data-act="remove" class="ghost danger">${escapeHTML(t("settings.endpoints.remove"))}</button>
       </div>
       <div class="ep-status" data-status></div>
     `;
@@ -814,7 +906,7 @@ function renderEndpointList() {
         modelEl.innerHTML = "";
         const empty = document.createElement("option");
         empty.value = "";
-        empty.textContent = "— keins gewählt —";
+        empty.textContent = t("settings.endpoints.noneSelected");
         modelEl.appendChild(empty);
         for (const m of models) {
           const o = document.createElement("option");
@@ -824,7 +916,7 @@ function renderEndpointList() {
           modelEl.appendChild(o);
         }
       } catch {
-        modelEl.innerHTML = `<option value="">(nicht erreichbar)</option>`;
+        modelEl.innerHTML = `<option value="">${escapeHTML(t("llm.option.unreachable"))}</option>`;
       }
     })();
 
@@ -836,7 +928,7 @@ function renderEndpointList() {
     });
 
     li.querySelector('[data-act="remove"]').addEventListener("click", () => {
-      if (confirm(`Endpunkt "${ep.name}" entfernen?`)) {
+      if (confirm(t("settings.endpoints.removeConfirm", { name: ep.name }))) {
         Endpoints.remove(ep.id);
         renderEndpointList();
         refreshEndpointSelect();
@@ -844,23 +936,29 @@ function renderEndpointList() {
     });
     li.querySelector('[data-act="test"]').addEventListener("click", async () => {
       const status = li.querySelector("[data-status]");
-      status.textContent = "… teste Verbindung";
+      status.textContent = t("settings.endpoints.testing");
       try {
         const client = makeClient(ep);
         const models = await client.listModels();
-        status.innerHTML = `<span class="ok">OK</span> — ${models.length} Modell(e): ${escapeHTML(models.slice(0, 3).join(", "))}${models.length > 3 ? " …" : ""}`;
+        status.innerHTML = escapeHTML(
+          t("settings.endpoints.testOk", {
+            count: models.length,
+            models: models.slice(0, 3).join(", "),
+            more: models.length > 3 ? " …" : "",
+          })
+        );
       } catch (e) {
-        status.innerHTML = `<span class="err">Fehler</span> — ${escapeHTML(e.message)}`;
+        status.innerHTML = escapeHTML(t("settings.endpoints.testError", { message: e.message || String(e) }));
       }
     });
     li.querySelector('[data-act="thinkTest"]').addEventListener("click", async () => {
       const status = li.querySelector("[data-status]");
-      status.textContent = "… ermittle Modelle";
+      status.textContent = t("settings.endpoints.thinkingProbe.findingModels");
       try {
         const client = makeClient(ep);
         const models = await client.listModels();
         if (!models.length) {
-          status.innerHTML = `<span class="err">Keine Modelle verfügbar</span>`;
+          status.innerHTML = `<span class="err">${escapeHTML(t("settings.endpoints.thinkingProbe.noModels"))}</span>`;
           return;
         }
         // Bevorzugt das vom User gewählte Standard-Modell; sonst erstes
@@ -869,7 +967,7 @@ function renderEndpointList() {
           (ep.defaultModel && models.includes(ep.defaultModel) && ep.defaultModel) ||
           models.find((m) => !/embed/i.test(m)) ||
           models[0];
-        status.innerHTML = `<span class="muted">teste mit <code>${escapeHTML(model)}</code> …</span>`;
+        status.innerHTML = `<span class="muted">${t("settings.endpoints.thinkingProbe.testing", { model: escapeHTML(model) })}</span>`;
 
         const onRes = await testThinkingMode({ endpoint: ep, model, thinking: true });
         const offRes = await testThinkingMode({ endpoint: ep, model, thinking: false });
@@ -879,31 +977,32 @@ function renderEndpointList() {
         const verdict = onRes.didThink && !offRes.didThink ? "ok" : onRes.didThink || offRes.didThink ? "warn" : "err";
         status.innerHTML = `
           <div class="think-test ${verdict}">
-            <div><strong>Modell:</strong> <code>${escapeHTML(model)}</code></div>
+            <div><strong>${escapeHTML(t("settings.endpoints.thinkingProbe.modelLabel"))}</strong> <code>${escapeHTML(model)}</code></div>
             <div>think=on  → reasoning: ${onRes.thinkingChars} · content: ${onRes.contentChars} · ${onRes.durationSec}s  ${onIcon}</div>
             <div>think=off → reasoning: ${offRes.thinkingChars} · content: ${offRes.contentChars} · ${offRes.durationSec}s  ${offIcon}</div>
             <div class="think-test-verdict">${escapeHTML(verdictText(verdict, onRes, offRes))}</div>
           </div>
         `;
       } catch (e) {
-        status.innerHTML = `<span class="err">Fehler</span> — ${escapeHTML(e.message || String(e))}`;
+        status.innerHTML = escapeHTML(t("settings.endpoints.testError", { message: e.message || String(e) }));
       }
     });
     els.endpointList.appendChild(li);
   }
 }
 
-function verdictText(v, on, off) {
-  if (v === "ok") return "Steuerung funktioniert — Reasoning lässt sich an- und ausschalten.";
-  if (v === "warn" && on.didThink) return "Reasoning kommt, aber „Aus“ wurde nicht respektiert. (Server-Args dominieren?)";
-  if (v === "warn") return "„Aus“ funktioniert, aber Reasoning konnte nicht erzwungen werden.";
-  return "Keine Reasoning-Tokens beobachtet — dieses Modell unterstützt es vermutlich nicht.";
+function verdictText(v, on, _off) {
+  if (v === "ok") return t("settings.endpoints.thinkingProbe.verdictOk");
+  if (v === "warn" && on.didThink) return t("settings.endpoints.thinkingProbe.verdictWarnOnSucceededOffFailed");
+  if (v === "warn") return t("settings.endpoints.thinkingProbe.verdictWarnOffOnly");
+  return t("settings.endpoints.thinkingProbe.verdictErr");
 }
 
 function openSettings() {
   renderEndpointList();
   els.systemPromptInput.value = SystemPrompt.get();
   els.defaultThinking.value = localStorage.getItem("yijing-default-thinking") || "default";
+  if (els.languageSelect) els.languageSelect.value = getLang();
   els.newEpName.value = "";
   els.newEpUrl.value = "";
   els.newEpKey.value = "";
@@ -936,6 +1035,34 @@ function suggestUrlForType() {
     els.newEpType.value === "ollama" ? "http://localhost:11434" : "http://localhost:8080/v1";
 }
 
+// ——— Sprach-Wechsel-Handler ———
+
+async function changeLanguage(lang) {
+  if (lang !== "de" && lang !== "en") return;
+  if (lang === getLang()) return;
+  setLang(lang); // dispatcht i18n:changed + macht applyI18n + html lang
+  // Hexagramm-Daten in der neuen Sprache nachladen.
+  try {
+    await loadData();
+  } catch (e) {
+    console.warn("loadData on language change failed", e);
+  }
+  // System-Prompt-Default sprach-passend aktualisieren, wenn kein Custom gespeichert.
+  els.systemPromptInput.value = SystemPrompt.get();
+  // Aktuelle Reading neu rendern — nimmt das History-Entry, damit die Linien-
+  // werte erhalten bleiben und nicht aus binary+changing rekonstruiert werden.
+  const hashMatch = window.location.hash.match(/^#r=([^&]+)$/);
+  if (hashMatch) {
+    const entry = findHistoryEntry(hashMatch[1]);
+    if (entry) showReadingFromEntry(entry);
+  }
+  // Endpoint-Liste neu rendern, damit Labels passen.
+  renderEndpointList();
+  refreshEndpointSelect();
+  // Verlauf-Datumsformat ist sprach-abhängig — neu rendern.
+  renderHistory(hashMatch ? hashMatch[1] : null);
+}
+
 // ——— Events ———
 
 els.castBtn.addEventListener("click", () => {
@@ -959,7 +1086,7 @@ els.exportMdBtn.addEventListener("click", () => {
   if (!CURRENT_READING) return;
   const md = buildMarkdownExport(CURRENT_READING, els.interpBody.textContent || "");
   const dateStr = new Date().toISOString().slice(0, 10);
-  const slug = (CURRENT_READING.primaryHex.name_latin || "yijing")
+  const slug = (CURRENT_READING.primaryHex.name_latin || t("export.filenameSlug"))
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
@@ -980,7 +1107,7 @@ els.exportPdfBtn.addEventListener("click", () => {
 });
 
 els.clearHistoryBtn.addEventListener("click", () => {
-  if (confirm("Verlauf wirklich löschen?")) {
+  if (confirm(t("history.clearConfirm"))) {
     localStorage.removeItem(HISTORY_KEY);
     renderHistory();
   }
@@ -998,7 +1125,7 @@ els.addEndpointBtn.addEventListener("click", () => {
   const name = els.newEpName.value.trim();
   const url = els.newEpUrl.value.trim();
   if (!name || !url) {
-    alert("Name und URL angeben.");
+    alert(t("settings.endpoints.addMissingFields"));
     return;
   }
   Endpoints.add({
@@ -1016,7 +1143,7 @@ els.addEndpointBtn.addEventListener("click", () => {
 });
 
 els.resetSystemPromptBtn.addEventListener("click", () => {
-  els.systemPromptInput.value = DEFAULT_SYSTEM_PROMPT;
+  els.systemPromptInput.value = getDefaultSystemPrompt(getLang());
 });
 
 els.endpointSelect.addEventListener("change", () => {
@@ -1033,12 +1160,21 @@ els.modelSelect.addEventListener("change", () => {
 els.interpretBtn.addEventListener("click", () => void runInterpretation());
 els.stopInterpretBtn.addEventListener("click", () => interpretAbortCtrl?.abort());
 
+if (els.languageSelect) {
+  els.languageSelect.addEventListener("change", () => {
+    void changeLanguage(els.languageSelect.value);
+  });
+}
+
 // ——— Theme (Dark / Light / System) ———
 
 const THEME_KEY = "yijing-theme";
 const THEME_ICONS = { dark: "☾", light: "☀", system: "◐" };
-const THEME_LABELS = { dark: "Dunkel", light: "Hell", system: "System" };
 const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+function themeLabel(mode) {
+  return t(`theme.${mode}`);
+}
 
 /** Wendet den Modus an: setzt data-theme und aktualisiert den Knopf. */
 function applyTheme(mode) {
@@ -1050,7 +1186,7 @@ function applyTheme(mode) {
   const btn = document.getElementById("themeToggle");
   if (btn) {
     btn.textContent = THEME_ICONS[mode];
-    btn.title = `Erscheinungsbild: ${THEME_LABELS[mode]}`;
+    btn.title = t("theme.tooltip", { mode: themeLabel(mode) });
     btn.setAttribute("aria-label", btn.title);
   }
 }
@@ -1072,15 +1208,21 @@ function applyTheme(mode) {
       applyTheme("system");
     }
   });
+  // Bei Sprachwechsel den Tooltip mit-aktualisieren.
+  document.addEventListener("i18n:changed", () => {
+    applyTheme(localStorage.getItem(THEME_KEY) || "system");
+  });
 })();
 
 // ——— Init ———
 
 (async () => {
   try {
+    initI18n();
     await loadData();
     renderHistory();
     refreshEndpointSelect();
+    if (els.languageSelect) els.languageSelect.value = getLang();
     // Hintergrund: lokale LLM-Server suchen und Auswahl aktualisieren
     Endpoints.autoDiscover().then(() => refreshEndpointSelect());
     // Tiefer Link? — falls #r=<id> in der URL steht, Eintrag wiederherstellen
@@ -1094,8 +1236,7 @@ function applyTheme(mode) {
     document.body.insertAdjacentHTML(
       "afterbegin",
       `<div style="background:#d97742;color:#1a1814;padding:1rem;text-align:center;">
-        Fehler beim Laden: ${escapeHTML(e.message)}.
-        Starte mit <code>./serve.sh</code> oder <code>python3 -m http.server</code>.
+        ${t("boot.loadError", { message: escapeHTML(e.message) })}
       </div>`
     );
   }

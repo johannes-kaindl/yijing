@@ -22,6 +22,8 @@
  * Persistenz von Endpunkten und System-Prompt erfolgt in localStorage.
  */
 
+import { t, getLang } from "./i18n.js";
+
 export class LLMError extends Error {
   constructor(msg, cause) {
     super(msg);
@@ -43,10 +45,10 @@ function trimSlash(s) {
  */
 
 export function makeClient(endpoint) {
-  if (!endpoint) throw new LLMError("Kein Endpunkt ausgewählt");
+  if (!endpoint) throw new LLMError("No endpoint selected");
   if (endpoint.type === "ollama") return new OllamaClient(endpoint);
   if (endpoint.type === "openai") return new OpenAIClient(endpoint);
-  throw new LLMError(`Unbekannter Endpunkt-Typ: ${endpoint.type}`);
+  throw new LLMError(`Unknown endpoint type: ${endpoint.type}`);
 }
 
 class OllamaClient {
@@ -88,7 +90,7 @@ class OllamaClient {
       const txt = await res.text().catch(() => "");
       throw new LLMError(`Ollama /api/chat: HTTP ${res.status} ${txt}`);
     }
-    if (!res.body) throw new LLMError("Ollama: kein Stream-Body");
+    if (!res.body) throw new LLMError("Ollama: empty stream body");
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -161,7 +163,7 @@ class OpenAIClient {
       const txt = await res.text().catch(() => "");
       throw new LLMError(`OpenAI /chat/completions: HTTP ${res.status} ${txt}`);
     }
-    if (!res.body) throw new LLMError("OpenAI: kein Stream-Body");
+    if (!res.body) throw new LLMError("OpenAI: empty stream body");
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -206,7 +208,7 @@ const STORE_KEY = "yijing-endpoints-v1";
 const SELECTED_KEY = "yijing-endpoint-selected-v1";
 const PROMPT_KEY = "yijing-system-prompt-v1";
 
-export const DEFAULT_SYSTEM_PROMPT = `Du bist ein weises I-Ging-Orakel.
+export const DEFAULT_SYSTEM_PROMPT_DE = `Du bist ein weises I-Ging-Orakel.
 
 Hintergrund:
 Als weises I-Ging-Orakel verkörperst du eine jahrtausendealte Tradition der Weisheit und Weissagung. Deine tiefgründige Kenntnis der I-Ging-Philosophie und ihrer traditionellen Interpretationen ermöglicht es dir, zeitlose Wahrheiten in die Gegenwart zu übersetzen.
@@ -231,6 +233,41 @@ Strukturiere deine Beratung so:
 
 Wenn keine wandelnden Linien vorliegen, deute nur das Ursprungsbild und überspringe 2 und 3.
 Schließe mit einer kurzen ermutigenden Kernbotschaft.`;
+
+export const DEFAULT_SYSTEM_PROMPT_EN = `You are a wise I Ching oracle.
+
+Background:
+As a wise I Ching oracle you embody a millennia-old tradition of wisdom and divination. Your deep familiarity with I Ching philosophy and its traditional interpretations lets you translate timeless truths into the present.
+
+Stance:
+- Dignity and compassion in dealing with those who seek counsel
+- Bridge traditional wisdom with modern understanding
+- Clear yet profound language
+- Balance philosophical depth with practical applicability
+- Respectful encouragement of self-reflection
+
+When interpreting the hexagrams:
+- Connect the original symbolism to present-day life situations
+- Translate traditional images into modern contexts
+- Consider outer circumstances, inner development, relational dynamics, and future potentials
+
+Structure your counsel like this:
+1. Present situation — interpretation of the primary hexagram, connection to the life situation
+2. Process of change — meaning of the changing lines, dynamics of the transformation
+3. Future tendency — interpretation of the resulting hexagram, opening possibilities
+4. Practical integration — concrete impulses for reflection and action
+
+If there are no changing lines, interpret only the primary hexagram and skip 2 and 3.
+Close with a short, encouraging key message.`;
+
+/** Default system prompt for the active language. */
+export function getDefaultSystemPrompt(lang = getLang()) {
+  return lang === "en" ? DEFAULT_SYSTEM_PROMPT_EN : DEFAULT_SYSTEM_PROMPT_DE;
+}
+
+// Backwards-Compat-Export — Code, der noch DEFAULT_SYSTEM_PROMPT importiert,
+// soll auf die deutsche Variante zeigen (Kompatibilität mit Pre-i18n-Stand).
+export const DEFAULT_SYSTEM_PROMPT = DEFAULT_SYSTEM_PROMPT_DE;
 
 export const Endpoints = {
   list() {
@@ -274,9 +311,9 @@ export const Endpoints = {
    */
   async autoDiscover() {
     const probes = [
-      { type: "ollama", name: "Ollama lokal", baseUrl: "http://localhost:11434" },
-      { type: "openai", name: "MLX lokal", baseUrl: "http://localhost:8080/v1" },
-      { type: "openai", name: "LM Studio lokal", baseUrl: "http://localhost:1234/v1" },
+      { type: "ollama", name: t("discover.ollama"), baseUrl: "http://localhost:11434" },
+      { type: "openai", name: t("discover.mlx"), baseUrl: "http://localhost:8080/v1" },
+      { type: "openai", name: t("discover.lmstudio"), baseUrl: "http://localhost:1234/v1" },
     ];
     const existing = this.list().map((e) => e.baseUrl.replace(/\/+$/, ""));
     for (const p of probes) {
@@ -322,8 +359,11 @@ export async function testThinkingMode({ endpoint, model, thinking, signal }) {
     messages: [
       {
         role: "user",
+        // Sprach-neutraler Probe-Prompt — funktioniert mit jedem
+        // tokenisierten Modell und ist kurz genug, dass „Aus" tatsächlich
+        // ohne Reasoning bleiben sollte.
         content:
-          "Antworte mit genau einem Wort: BEREIT. Kein Reasoning, keine Erklärung.",
+          "Reply with exactly one word: READY. No reasoning, no explanation.",
       },
     ],
     onToken: (t) => {
@@ -348,14 +388,32 @@ export async function testThinkingMode({ endpoint, model, thinking, signal }) {
 
 export const SystemPrompt = {
   get() {
-    return localStorage.getItem(PROMPT_KEY) || DEFAULT_SYSTEM_PROMPT;
+    const stored = localStorage.getItem(PROMPT_KEY);
+    if (stored) return stored;
+    // Kein Custom-Prompt gespeichert → Sprach-passender Default.
+    return getDefaultSystemPrompt();
   },
   set(s) {
-    if (s && s.trim() && s.trim() !== DEFAULT_SYSTEM_PROMPT.trim()) {
-      localStorage.setItem(PROMPT_KEY, s);
-    } else {
+    if (!s || !s.trim()) {
       localStorage.removeItem(PROMPT_KEY);
+      return;
     }
+    const trimmed = s.trim();
+    // Wenn der Inhalt einem der zwei Sprach-Defaults entspricht, NICHT
+    // persistieren — sonst wäre der Prompt nicht mehr automatisch
+    // sprach-mitwandernd.
+    if (
+      trimmed === DEFAULT_SYSTEM_PROMPT_DE.trim() ||
+      trimmed === DEFAULT_SYSTEM_PROMPT_EN.trim()
+    ) {
+      localStorage.removeItem(PROMPT_KEY);
+      return;
+    }
+    localStorage.setItem(PROMPT_KEY, s);
+  },
+  /** Setzt explizit auf den aktuellen Sprach-Default zurück. */
+  reset() {
+    localStorage.removeItem(PROMPT_KEY);
   },
 };
 
@@ -363,31 +421,38 @@ export const SystemPrompt = {
 
 export function buildUserPrompt({ question, primary, changingLines, primaryHex, resultingHex }) {
   const parts = [];
-  parts.push(`Frage: ${question?.trim() || "(keine konkrete Frage gestellt)"}`);
+  parts.push(t("prompt.question", { question: question?.trim() || t("prompt.noQuestion") }));
   parts.push("");
-  parts.push("=== URSPRUNGSBILD ===");
+  parts.push(t("prompt.primary"));
   parts.push(
-    `${primaryHex.unicode}  Nr. ${primaryHex.number} — ${primaryHex.name_chinese} ${primaryHex.pinyin} · ${primaryHex.name_latin} · ${primaryHex.name_de}`
+    `${primaryHex.unicode}  ${getLang() === "en" ? "No." : "Nr."} ${primaryHex.number} — ${primaryHex.name_chinese} ${primaryHex.pinyin} · ${primaryHex.name_latin} · ${primaryHex.name_de}`
   );
-  const t = primaryHex.trigrams || {};
-  if (t.above && t.below) {
+  const tri = primaryHex.trigrams || {};
+  if (tri.above && tri.below) {
     parts.push(
-      `Trigramme: oben ${t.above.symbol} ${t.above.name} (${t.above.nature}) · unten ${t.below.symbol} ${t.below.name} (${t.below.nature})`
+      t("prompt.trigrams", {
+        aboveSym: tri.above.symbol,
+        aboveName: tri.above.name,
+        aboveNature: tri.above.nature,
+        belowSym: tri.below.symbol,
+        belowName: tri.below.name,
+        belowNature: tri.below.nature,
+      })
     );
   }
   parts.push("");
-  parts.push("Das Urteil:");
+  parts.push(t("prompt.judgment"));
   parts.push(primaryHex.judgment || "—");
   parts.push("");
-  parts.push("Das Bild:");
+  parts.push(t("prompt.image"));
   parts.push(primaryHex.image || "—");
   parts.push("");
-  parts.push("Bedeutung:");
+  parts.push(t("prompt.meaning"));
   parts.push(primaryHex.meaning || "—");
 
   if (changingLines && changingLines.length) {
     parts.push("");
-    parts.push("=== WANDELNDE LINIEN ===");
+    parts.push(t("prompt.changing"));
     for (const idx of changingLines) {
       const ln = primaryHex.lines[idx];
       parts.push(`• ${ln.position} ${ln.text}`);
@@ -395,22 +460,22 @@ export function buildUserPrompt({ question, primary, changingLines, primaryHex, 
     }
     if (resultingHex) {
       parts.push("");
-      parts.push("=== ZIELBILD ===");
+      parts.push(t("prompt.resulting"));
       parts.push(
-        `${resultingHex.unicode}  Nr. ${resultingHex.number} — ${resultingHex.name_chinese} ${resultingHex.pinyin} · ${resultingHex.name_latin} · ${resultingHex.name_de}`
+        `${resultingHex.unicode}  ${getLang() === "en" ? "No." : "Nr."} ${resultingHex.number} — ${resultingHex.name_chinese} ${resultingHex.pinyin} · ${resultingHex.name_latin} · ${resultingHex.name_de}`
       );
-      parts.push("Das Urteil:");
+      parts.push(t("prompt.judgment"));
       parts.push(resultingHex.judgment || "—");
-      parts.push("Das Bild:");
+      parts.push(t("prompt.image"));
       parts.push(resultingHex.image || "—");
     }
   } else {
     parts.push("");
-    parts.push("(Keine wandelnden Linien — nur das Ursprungsbild ist zu deuten.)");
+    parts.push(t("prompt.noChanging"));
   }
 
   parts.push("");
-  parts.push("Bitte interpretiere diese Konstellation in Bezug auf die Frage.");
+  parts.push(t("prompt.tail"));
 
   return parts.join("\n");
 }

@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Yijing Orakel</title>
-  <meta name="description" content="I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und optionaler KI-Deutung über lokale LLM-Server (Ollama / MLX / LM Studio). Vanilla JS, offline-fähig, mit nativer macOS-App." />
+  <title data-i18n="doc.title">Yijing Orakel</title>
+  <meta name="description" data-i18n-content="doc.description" content="I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und optionaler KI-Deutung über lokale LLM-Server (Ollama / MLX / LM Studio). Vanilla JS, offline-fähig, mit nativer macOS-App." />
 
   <!-- Open Graph / Social Preview. og:image fehlt absichtlich noch — sobald
        ein Hero-Bild existiert (1200×630, z.B. stilisiertes Hexagramm), hier
        als absolute URL ergänzen. -->
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Yijing Orakel" />
-  <meta property="og:title" content="Yijing Orakel" />
-  <meta property="og:description" content="I-Ging-Orakel als Static-Site — Drei-Münzen-Methode, Wilhelm-Übersetzung, optionale KI-Deutung über lokale LLM-Server. Offline-fähig als PWA." />
+  <meta property="og:site_name" data-i18n-content="doc.title" content="Yijing Orakel" />
+  <meta property="og:title" data-i18n-content="doc.title" content="Yijing Orakel" />
+  <meta property="og:description" data-i18n-content="og.description" content="I-Ging-Orakel als Static-Site — Drei-Münzen-Methode, Wilhelm-Übersetzung, optionale KI-Deutung über lokale LLM-Server. Offline-fähig als PWA." />
   <meta property="og:url" content="https://jkaindl.codeberg.page/Yijing/" />
-  <meta property="og:locale" content="de_DE" />
+  <meta property="og:locale" data-i18n-content="og.locale" content="de_DE" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Yijing Orakel" />
-  <meta name="twitter:description" content="I-Ging-Orakel als Static-Site — Drei-Münzen-Methode, Wilhelm-Übersetzung, optionale KI-Deutung über lokale LLM-Server." />
+  <meta name="twitter:title" data-i18n-content="doc.title" content="Yijing Orakel" />
+  <meta name="twitter:description" data-i18n-content="og.description" content="I-Ging-Orakel als Static-Site — Drei-Münzen-Methode, Wilhelm-Übersetzung, optionale KI-Deutung über lokale LLM-Server." />
 
   <!-- Theme sofort setzen — vermeidet Flackern beim Laden. -->
   <script>
@@ -26,6 +26,12 @@
       var dark = m === "dark" || (m === "system" &&
         window.matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.dataset.theme = dark ? "dark" : "light";
+      // Sprache früh setzen, vermeidet Flicker beim Initial-applyI18n().
+      var lang = localStorage.getItem("yijing-language-v1");
+      if (lang !== "de" && lang !== "en") {
+        lang = (navigator.language || "de").toLowerCase().indexOf("en") === 0 ? "en" : "de";
+      }
+      document.documentElement.lang = lang;
     })();
   </script>
 
@@ -43,27 +49,40 @@
 <body>
   <header>
     <div class="header-row">
-      <button id="openSettings" type="button" class="icon-btn" title="Einstellungen" aria-label="Einstellungen">⚙</button>
-      <h1>易經 <span class="subtle">Yijing Orakel</span></h1>
-      <button id="themeToggle" type="button" class="icon-btn" title="Erscheinungsbild" aria-label="Erscheinungsbild umschalten">◐</button>
+      <button id="openSettings" type="button" class="icon-btn"
+              data-i18n-title="header.openSettings"
+              data-i18n-aria="header.openSettings"
+              title="Einstellungen" aria-label="Einstellungen">⚙</button>
+      <h1>易經 <span class="subtle" data-i18n="doc.title">Yijing Orakel</span></h1>
+      <button id="themeToggle" type="button" class="icon-btn"
+              data-i18n-title="header.themeToggle"
+              data-i18n-aria="header.themeToggle"
+              title="Erscheinungsbild umschalten" aria-label="Erscheinungsbild umschalten">◐</button>
     </div>
-    <p class="tagline">Drei-Münzen-Methode · Wilhelm-Übersetzung · lokale Modelle</p>
+    <p class="tagline" data-i18n="header.tagline">Drei-Münzen-Methode · Wilhelm-Übersetzung · lokale Modelle</p>
   </header>
 
 
   <main>
     <section class="ask" id="ask">
-      <label for="question">Deine Frage</label>
+      <label for="question" data-i18n="ask.label">Deine Frage</label>
       <textarea
         id="question"
         rows="2"
+        data-i18n-placeholder="ask.placeholder"
         placeholder="Worum geht es? (optional – aber Konzentration hilft)"
       ></textarea>
       <div class="controls">
-        <button id="cast" type="button">Münzen werfen</button>
-        <button id="reset" type="button" class="ghost" hidden>Neue Frage</button>
-        <button id="exportMd" type="button" class="ghost" hidden title="Als Markdown exportieren">Markdown</button>
-        <button id="exportPdf" type="button" class="ghost" hidden title="Als PDF drucken / speichern">PDF</button>
+        <button id="cast" type="button" data-i18n="ask.cast">Münzen werfen</button>
+        <button id="reset" type="button" class="ghost" data-i18n="ask.reset" hidden>Neue Frage</button>
+        <button id="exportMd" type="button" class="ghost"
+                data-i18n="ask.exportMd"
+                data-i18n-title="ask.exportMd.title"
+                title="Als Markdown exportieren" hidden>Markdown</button>
+        <button id="exportPdf" type="button" class="ghost"
+                data-i18n="ask.exportPdf"
+                data-i18n-title="ask.exportPdf.title"
+                title="Als PDF drucken / speichern" hidden>PDF</button>
       </div>
     </section>
 
@@ -72,7 +91,7 @@
 
       <div class="hexagrams">
         <article class="hex-card" id="primary">
-          <h2 class="hex-title">Ursprungsbild</h2>
+          <h2 class="hex-title" data-i18n="reading.primary">Ursprungsbild</h2>
           <div class="hex-figure" data-figure="primary"></div>
           <div class="hex-chinese"></div>
           <h3 class="hex-name"></h3>
@@ -80,7 +99,7 @@
         </article>
 
         <article class="hex-card" id="resulting" hidden>
-          <h2 class="hex-title">Zielbild</h2>
+          <h2 class="hex-title" data-i18n="reading.resulting">Zielbild</h2>
           <div class="hex-figure" data-figure="resulting"></div>
           <div class="hex-chinese"></div>
           <h3 class="hex-name"></h3>
@@ -91,21 +110,28 @@
       <!-- KI-Interpretation -->
       <section class="interpretation" id="interpretation" hidden>
         <div class="interp-controls">
-          <h2 class="section-title">KI-Interpretation</h2>
+          <h2 class="section-title" data-i18n="llm.heading">KI-Interpretation</h2>
           <div class="interp-picker">
-            <select id="endpointSelect" aria-label="LLM-Endpunkt"></select>
-            <select id="modelSelect" aria-label="Modell"></select>
-            <select id="thinkingSelect" aria-label="Reasoning-Modus" title="Reasoning / Thinking">
-              <option value="default">Reasoning: Default</option>
-              <option value="on">Reasoning: An</option>
-              <option value="off">Reasoning: Aus</option>
+            <select id="endpointSelect"
+                    data-i18n-aria="llm.endpointSelect"
+                    aria-label="LLM-Endpunkt"></select>
+            <select id="modelSelect"
+                    data-i18n-aria="llm.modelSelect"
+                    aria-label="Modell"></select>
+            <select id="thinkingSelect"
+                    data-i18n-aria="llm.thinkingSelect"
+                    data-i18n-title="llm.thinkingSelect.title"
+                    aria-label="Reasoning-Modus" title="Reasoning / Thinking">
+              <option value="default" data-i18n="llm.thinking.default">Reasoning: Default</option>
+              <option value="on" data-i18n="llm.thinking.on">Reasoning: An</option>
+              <option value="off" data-i18n="llm.thinking.off">Reasoning: Aus</option>
             </select>
-            <button id="interpretBtn" type="button">Interpretieren</button>
-            <button id="stopInterpretBtn" type="button" class="ghost" hidden>Abbrechen</button>
+            <button id="interpretBtn" type="button" data-i18n="llm.interpret">Interpretieren</button>
+            <button id="stopInterpretBtn" type="button" class="ghost" data-i18n="llm.stop" hidden>Abbrechen</button>
           </div>
         </div>
         <details id="interpThinkingDetails" class="thinking-details" hidden>
-          <summary>Denkprozess <span class="thinking-marker">●</span></summary>
+          <summary><span data-i18n="llm.thinkingDetails">Denkprozess</span> <span class="thinking-marker">●</span></summary>
           <div class="thinking-body" id="interpThinking"></div>
         </details>
         <div class="interp-body" id="interpBody"></div>
@@ -115,35 +141,35 @@
       <!-- Wilhelm-Texte -->
       <section class="texts">
         <details open>
-          <summary>Das Urteil</summary>
+          <summary data-i18n="reading.judgment">Das Urteil</summary>
           <div class="text-body" id="judgmentText"></div>
         </details>
         <details>
-          <summary>Das Bild</summary>
+          <summary data-i18n="reading.image">Das Bild</summary>
           <div class="text-body" id="imageText"></div>
         </details>
         <details>
-          <summary>Bedeutung</summary>
+          <summary data-i18n="reading.meaning">Bedeutung</summary>
           <div class="text-body" id="meaningText"></div>
         </details>
         <details id="associationDetails" hidden>
-          <summary>Bildmeditation</summary>
+          <summary data-i18n="reading.association">Bildmeditation</summary>
           <div class="text-body" id="associationText"></div>
         </details>
         <details id="trigramDetails">
-          <summary>Trigramme</summary>
+          <summary data-i18n="reading.trigrams">Trigramme</summary>
           <div class="text-body" id="trigramText"></div>
         </details>
 
         <div id="changingSection" hidden>
-          <h2 class="section-title">Wandelnde Linien</h2>
+          <h2 class="section-title" data-i18n="reading.changingLines">Wandelnde Linien</h2>
           <div id="changingLines"></div>
         </div>
 
         <div id="resultingSection" hidden>
-          <h2 class="section-title">Zielbild</h2>
+          <h2 class="section-title" data-i18n="reading.resulting">Zielbild</h2>
           <details>
-            <summary id="resultingSummary">Urteil des Zielbilds</summary>
+            <summary id="resultingSummary" data-i18n="reading.resultingJudgment">Urteil des Zielbilds</summary>
             <div class="text-body" id="resultingJudgment"></div>
           </details>
         </div>
@@ -151,93 +177,105 @@
     </section>
 
     <section class="history" id="history" hidden>
-      <h2>Verlauf</h2>
+      <h2 data-i18n="history.heading">Verlauf</h2>
       <ul id="historyList"></ul>
-      <button id="clearHistory" type="button" class="ghost">Verlauf löschen</button>
+      <button id="clearHistory" type="button" class="ghost" data-i18n="history.clear">Verlauf löschen</button>
     </section>
   </main>
 
   <!-- Settings-Modal -->
   <dialog id="settingsModal" class="settings-modal">
     <form method="dialog" class="settings-form">
-      <h2>Einstellungen</h2>
+      <h2 data-i18n="settings.heading">Einstellungen</h2>
 
       <fieldset>
-        <legend>LLM-Endpunkte</legend>
-        <p class="hint">
+        <legend data-i18n="settings.endpoints">LLM-Endpunkte</legend>
+        <p class="hint" data-i18n-html="settings.endpoints.hint">
           Lokale Modelle via <strong>Ollama</strong> (Standardport <code>11434</code>) oder
           <strong>OpenAI-kompatibel</strong> (MLX, LM Studio …). CORS auf dem Server muss erlaubt sein —
           für Ollama z.&nbsp;B. <code>OLLAMA_ORIGINS=*</code>.
         </p>
         <ul id="endpointList" class="endpoint-list"></ul>
         <details class="add-endpoint">
-          <summary>+ Endpunkt hinzufügen</summary>
+          <summary data-i18n="settings.endpoints.add">+ Endpunkt hinzufügen</summary>
           <div class="grid">
-            <label>Name <input type="text" id="newEpName" placeholder="z.B. Ollama lokal" /></label>
-            <label>Typ
+            <label><span data-i18n="settings.endpoints.name">Name</span> <input type="text" id="newEpName" data-i18n-placeholder="settings.endpoints.namePlaceholder" placeholder="z.B. Ollama lokal" /></label>
+            <label><span data-i18n="settings.endpoints.type">Typ</span>
               <select id="newEpType">
-                <option value="ollama">Ollama</option>
-                <option value="openai">OpenAI-kompatibel</option>
+                <option value="ollama" data-i18n="settings.endpoints.typeOllama">Ollama</option>
+                <option value="openai" data-i18n="settings.endpoints.typeOpenAI">OpenAI-kompatibel</option>
               </select>
             </label>
-            <label>URL <input type="text" id="newEpUrl" placeholder="http://localhost:11434" /></label>
-            <label>API-Key (optional) <input type="text" id="newEpKey" autocomplete="off" /></label>
+            <label><span data-i18n="settings.endpoints.url">URL</span> <input type="text" id="newEpUrl" placeholder="http://localhost:11434" /></label>
+            <label><span data-i18n="settings.endpoints.apiKey">API-Key (optional)</span> <input type="text" id="newEpKey" autocomplete="off" /></label>
           </div>
-          <button type="button" id="addEndpointBtn">Hinzufügen</button>
+          <button type="button" id="addEndpointBtn" data-i18n="settings.endpoints.addBtn">Hinzufügen</button>
         </details>
       </fieldset>
 
       <fieldset>
-        <legend>Reasoning-Default</legend>
-        <p class="hint">
+        <legend data-i18n="settings.thinkingDefault">Reasoning-Default</legend>
+        <p class="hint" data-i18n-html="settings.thinkingDefault.hint">
           Wird pro Wurf in der UI überschrieben. „Auto" = keine Steuerung,
           Modell entscheidet selbst. „An" / „Aus" setzt für jede Anfrage
           den passenden Parameter (Ollama: <code>think</code>, OpenAI-kompatibel:
           <code>reasoning_effort</code> + <code>chat_template_kwargs</code>).
         </p>
         <label class="row-inline">
-          <span>Default-Modus:</span>
+          <span data-i18n="settings.thinkingDefault.label">Default-Modus:</span>
           <select id="defaultThinking">
-            <option value="default">Auto (Modell entscheidet)</option>
-            <option value="on">An (Reasoning erzwingen)</option>
-            <option value="off">Aus (Reasoning unterdrücken)</option>
+            <option value="default" data-i18n="settings.thinkingDefault.auto">Auto (Modell entscheidet)</option>
+            <option value="on" data-i18n="settings.thinkingDefault.on">An (Reasoning erzwingen)</option>
+            <option value="off" data-i18n="settings.thinkingDefault.off">Aus (Reasoning unterdrücken)</option>
           </select>
         </label>
       </fieldset>
 
       <fieldset>
-        <legend>Beratungs-Prompt</legend>
-        <p class="hint">System-Prompt für die KI-Interpretation. Default folgt der Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige Beratungsstruktur).</p>
+        <legend data-i18n="settings.language">Sprache / Language</legend>
+        <p class="hint" data-i18n="settings.language.hint">Wirkt sofort auf die UI und auf den Beratungs-Prompt-Default. Lädt beim Wechsel die passenden Hexagramm-Texte nach.</p>
+        <label class="row-inline">
+          <span>Sprache:</span>
+          <select id="languageSelect">
+            <option value="de" data-i18n="settings.language.de">Deutsch (Wilhelm)</option>
+            <option value="en" data-i18n="settings.language.en">English (Wilhelm — translated)</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="settings.systemPrompt">Beratungs-Prompt</legend>
+        <p class="hint" data-i18n="settings.systemPrompt.hint">System-Prompt für die KI-Interpretation. Default folgt der Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige Beratungsstruktur).</p>
         <textarea id="systemPromptInput" rows="8"></textarea>
         <div class="row">
-          <button type="button" id="resetSystemPrompt" class="ghost">Default wiederherstellen</button>
+          <button type="button" id="resetSystemPrompt" class="ghost" data-i18n="settings.systemPrompt.reset">Default wiederherstellen</button>
         </div>
       </fieldset>
 
       <div class="settings-footer">
-        <button type="button" id="closeSettings">Schließen</button>
+        <button type="button" id="closeSettings" data-i18n="settings.close">Schließen</button>
       </div>
     </form>
   </dialog>
 
   <footer>
-    <p>
+    <p data-i18n-html="footer.source">
       Text: Richard Wilhelm, <em>I Ging — Das Buch der Wandlungen</em>.<br>
       Drei-Münzen-Methode (Verteilung 1:3:3:1).
     </p>
     <p class="footer-mac" id="macFooterLink" hidden>
-      Auch als
-      <a href="https://codeberg.org/jkaindl/Yijing/releases/download/v1.1.1/Yijing.dmg">macOS-App</a>
-      verfügbar ·
-      <a href="https://codeberg.org/jkaindl/Yijing#-yijing-orakel-für-macos-herunterladen">Installations-Hinweis</a>
+      <span data-i18n="footer.mac.also">Auch als</span>
+      <a href="https://codeberg.org/jkaindl/Yijing/releases/download/v1.1.1/Yijing.dmg" data-i18n="footer.mac.app">macOS-App</a>
+      <span data-i18n="footer.mac.available">verfügbar</span> ·
+      <a href="https://codeberg.org/jkaindl/Yijing#-yijing-orakel-für-macos-herunterladen" data-i18n="footer.mac.install">Installations-Hinweis</a>
     </p>
     <p class="copyright">
       © 2026 Johannes Kaindl ·
       <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a>
-      (code) ·
+      <span data-i18n="footer.copyright.code">(code)</span> ·
       <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a>
-      (docs) ·
-      <a href="https://codeberg.org/jkaindl/Yijing">Source</a>
+      <span data-i18n="footer.copyright.docs">(docs)</span> ·
+      <a href="https://codeberg.org/jkaindl/Yijing" data-i18n="footer.copyright.source">Source</a>
     </p>
   </footer>
 
