@@ -150,18 +150,18 @@ MLX und LM Studio sind standardmäßig offen. Details und Fehlersuche:
 
 ```mermaid
 flowchart TD
-    A[Frage eintippen<br/>+ „Münzen werfen"] --> B[castHypergram<br/>6 Linien × 3 Münzen]
-    B --> C[Ursprungs-Hexagramm<br/>+ ggf. wandelnde Linien]
-    C --> D{Wandelnde Linien?}
-    D -->|nein| E[Wilhelm-Text<br/>rendern]
-    D -->|ja| F[Zielbild ableiten<br/>+ Linientexte]
+    A["Frage eintippen<br/>+ Münzen-Wurf"] --> B["castHypergram<br/>6 Linien × 3 Münzen"]
+    B --> C["Ursprungs-Hexagramm<br/>+ ggf. wandelnde Linien"]
+    C --> D{"Wandelnde Linien?"}
+    D -->|nein| E["Wilhelm-Text<br/>rendern"]
+    D -->|ja| F["Zielbild ableiten<br/>+ Linientexte"]
     F --> E
-    E --> G[Reading in localStorage<br/>+ URL-Hash #r=uuid]
-    G --> H{„Interpretieren"<br/>geklickt?}
-    H -->|nein| Z[Fertig]
-    H -->|ja| I[Prompt aus Hexagramm<br/>+ Linien bauen]
-    I --> J[Streaming-Request<br/>an lokalen LLM-Server]
-    J --> K[Reasoning + Antwort<br/>live ins UI]
+    E --> G["Reading in localStorage<br/>URL-Hash r=uuid"]
+    G --> H{"Interpretieren geklickt?"}
+    H -->|nein| Z["Fertig"]
+    H -->|ja| I["Prompt aus Hexagramm<br/>+ Linien bauen"]
+    I --> J["Streaming-Request<br/>an lokalen LLM-Server"]
+    J --> K["Reasoning + Antwort<br/>live ins UI"]
 ```
 
 Technische Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
