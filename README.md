@@ -12,8 +12,11 @@ Ein schlankes I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und
 optionaler KI-Deutung über lokale LLM-Server (Ollama, MLX, LM Studio,
 vLLM, OpenClaw). Drei-Münzen-Methode, vollständige Wilhelm-Texte
 inklusive aller wandelnden Linien, chinesisches Schrift­zeichen mit
-Pīnyīn, Trigramme mit Stammdaten. Vanilla JavaScript, kein Build-Step,
-kein Backend, offline-fähig als PWA.
+Pīnyīn, Trigramme mit Stammdaten. **Zweisprachig Deutsch / English** —
+UI und Hexagramm-Texte umschaltbar (Englisch ist eine eigene
+Übersetzung des Wilhelm-Originals, im Wilhelm-Stil gehalten, klassische
+I-Ching-Vokabeln). Vanilla JavaScript, kein Build-Step, kein Backend,
+offline-fähig als PWA.
 
 [![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.1.1/Yijing.dmg)
 [![Live-Demo öffnen](https://img.shields.io/badge/Live--Demo_%C3%B6ffnen-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
@@ -43,6 +46,7 @@ Disk-Image öffnen, „Yijing" in den Programme-Ordner ziehen — fertig.
 - [Schnellstart](#schnellstart)
 - [Als macOS-App](#als-macos-app)
 - [Features](#features)
+- [Sprache (Deutsch / English)](#sprache-deutsch--english)
 - [Lokale LLM-Anbindung](#lokale-llm-anbindung)
 - [Wie ein Wurf abläuft](#wie-ein-wurf-abläuft)
 - [Drei-Münzen-Methode](#drei-münzen-methode)
@@ -119,6 +123,23 @@ Voraussetzung zum Bauen: Xcode Command Line Tools
 - **Theme-Umschalter** — Dark, Light oder automatisch nach
   System­einstellung
 - **Tastatur-Bedienung** für Wurf, Reset und Settings
+
+## Sprache (Deutsch / English)
+
+Die App startet in der Sprache deines Browsers (`navigator.language`):
+`en*` → English, alles andere → Deutsch. Umschaltbar im Settings-Modal
+(⚙ → Sprache). Die Auswahl wirkt sofort auf alle UI-Elemente, das
+Datumsformat im Verlauf, die Markdown-Export-Header und den Default-
+System-Prompt für die KI-Interpretation.
+
+Die englischen Hexagramm-Texte sind eine eigene Übersetzung des
+deutschen Wilhelm-Originals (1924, gemeinfrei) im Wilhelm-Stil:
+würdevoll, kontemplativ, mit den klassischen I-Ching-Vokabeln aus der
+englischen Standardliteratur (the superior man, the great man, the
+noble, the abyss, the well, the receptive, the creative …) —
+vergleichbar mit Cary F. Baynes' 1950er-Übersetzung, aber in eigenen
+Worten. Übersetzt mit Claude Opus 4.7, parallel über acht Subagenten.
+Schema und Generierungs-Details: [`docs/DATA.md`](docs/DATA.md#englische-variante-datahexagramsenjson).
 
 ## Lokale LLM-Anbindung
 
