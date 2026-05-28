@@ -115,6 +115,10 @@ footer .copyright {
   font-size: 0.75rem;
 }
 
+footer .footer-lang {
+  margin-bottom: 0.9rem;
+}
+
 /* Ask section */
 .ask {
   background: var(--bg-card);
@@ -511,15 +515,22 @@ button.ghost:hover {
 }
 
 .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: 1px solid var(--line);
   color: var(--ink-soft);
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  font-size: 1.2rem;
   padding: 0;
   cursor: pointer;
+}
+
+.icon-btn .icon {
+  width: 20px;
+  height: 20px;
 }
 
 .icon-btn:hover {

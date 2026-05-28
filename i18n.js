@@ -145,18 +145,18 @@ const STRINGS = {
     "settings.systemPrompt.reset": "Default wiederherstellen",
 
     "settings.language": "Sprache / Language",
+    "settings.language.label": "Sprache:",
     "settings.language.hint":
       "Wirkt sofort auf die UI und auf den Beratungs-Prompt-Default. Lädt beim Wechsel die passenden Hexagramm-Texte nach.",
     "settings.language.de": "Deutsch (Wilhelm)",
     "settings.language.en": "English (Wilhelm — translated)",
 
-    // ——— Theme-Knopf ———
-    "theme.tooltip": "Erscheinungsbild: {mode}",
-    "theme.dark": "Dunkel",
-    "theme.light": "Hell",
-    "theme.system": "System",
+    // ——— Theme-Knopf (Tooltip beschreibt die Klick-Aktion) ———
+    "theme.toLight": "Zu hellem Design wechseln",
+    "theme.toDark": "Zu dunklem Design wechseln",
 
     // ——— Footer ———
+    "footer.langSwitch": "English version",
     "footer.source":
       "Text: Richard Wilhelm, <em>I Ging — Das Buch der Wandlungen</em>.<br>Drei-Münzen-Methode (Verteilung 1:3:3:1).",
     "footer.mac.also": "Auch als",
@@ -335,18 +335,18 @@ const STRINGS = {
     "settings.systemPrompt.reset": "Restore default",
 
     "settings.language": "Sprache / Language",
+    "settings.language.label": "Language:",
     "settings.language.hint":
       "Takes effect immediately on the UI and the counsel-prompt default. Loads the matching hexagram texts on switch.",
     "settings.language.de": "Deutsch (Wilhelm)",
     "settings.language.en": "English (Wilhelm — translated)",
 
-    // ——— Theme button ———
-    "theme.tooltip": "Appearance: {mode}",
-    "theme.dark": "Dark",
-    "theme.light": "Light",
-    "theme.system": "System",
+    // ——— Theme button (tooltip describes the click action) ———
+    "theme.toLight": "Switch to light mode",
+    "theme.toDark": "Switch to dark mode",
 
     // ——— Footer ———
+    "footer.langSwitch": "Deutsche Version",
     "footer.source":
       "Text: Richard Wilhelm, <em>I Ching — The Book of Changes</em>.<br>Three-coin method (distribution 1:3:3:1).",
     "footer.mac.also": "Also available as a",
