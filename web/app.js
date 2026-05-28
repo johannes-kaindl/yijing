@@ -1166,40 +1166,57 @@ if (els.languageSelect) {
   });
 }
 
+// Footer-Link wechselt in die jeweils andere Sprache. Der Link-TEXT wird von
+// applyI18n verwaltet (DE-Dict „English version", EN-Dict „Deutsche Version").
+const langSwitchLink = document.getElementById("langSwitch");
+if (langSwitchLink) {
+  langSwitchLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    void changeLanguage(getLang() === "de" ? "en" : "de");
+  });
+}
+
 // ——— Theme (Dark / Light / System) ———
 
 const THEME_KEY = "yijing-theme";
-const THEME_ICONS = { dark: "☾", light: "☀", system: "◐" };
 const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-function themeLabel(mode) {
-  return t(`theme.${mode}`);
+// Inline-SVG (Lucide, ISC). Das Icon zeigt den AKTUELL sichtbaren Modus —
+// Sonne bei hell, Mond bei dunkel. stroke=currentColor erbt die Button-Farbe.
+const THEME_SVG = {
+  light:
+    '<svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+  dark:
+    '<svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>',
+};
+
+function effectiveTheme(mode) {
+  return mode === "dark" || (mode === "system" && themeQuery.matches) ? "dark" : "light";
 }
 
-/** Wendet den Modus an: setzt data-theme und aktualisiert den Knopf. */
+/** Setzt data-theme + Icon (zeigt aktuellen Zustand) + Tooltip (beschreibt die Klick-Aktion). */
 function applyTheme(mode) {
-  const effective =
-    mode === "dark" || (mode === "system" && themeQuery.matches)
-      ? "dark"
-      : "light";
+  const effective = effectiveTheme(mode);
   document.documentElement.dataset.theme = effective;
   const btn = document.getElementById("themeToggle");
   if (btn) {
-    btn.textContent = THEME_ICONS[mode];
-    btn.title = t("theme.tooltip", { mode: themeLabel(mode) });
+    btn.innerHTML = THEME_SVG[effective];
+    btn.title = effective === "dark" ? t("theme.toLight") : t("theme.toDark");
     btn.setAttribute("aria-label", btn.title);
   }
 }
 
 (function initTheme() {
-  let mode = localStorage.getItem(THEME_KEY) || "system";
-  applyTheme(mode);
+  applyTheme(localStorage.getItem(THEME_KEY) || "system");
   const btn = document.getElementById("themeToggle");
   if (btn) {
     btn.addEventListener("click", () => {
-      mode = mode === "dark" ? "light" : mode === "light" ? "system" : "dark";
-      localStorage.setItem(THEME_KEY, mode);
-      applyTheme(mode);
+      // „System" bleibt nur der Initial-Default; ein Klick legt explizit hell/dunkel
+      // fest — immer das Gegenteil des aktuell sichtbaren Zustands.
+      const current = localStorage.getItem(THEME_KEY) || "system";
+      const next = effectiveTheme(current) === "dark" ? "light" : "dark";
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
     });
   }
   // Bei Modus „System": auf OS-Wechsel reagieren.

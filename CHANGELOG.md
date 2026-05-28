@@ -5,6 +5,28 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- **Sprach-Umschalter im Footer** — adaptiver Link, der in die jeweils
+  andere Sprache wechselt und *in* dieser Sprache beschriftet ist
+  (deutsche UI → „English version", englische UI → „Deutsche Version").
+  Macht den Sprachwechsel auffindbar, ohne erst ins Settings-Modal zu
+  müssen. Nutzt die bestehende `applyI18n`-Mechanik für den Text-Swap.
+
+### Geändert
+
+- **Header-Icons als Inline-SVG** (Lucide, ISC — als Markup eingebettet,
+  kein npm-Dependency): Zahnrad für Einstellungen, Sonne/Mond fürs Theme,
+  `stroke=currentColor` erbt Theme- und Hover-Farbe. Ersetzt die vorigen
+  Unicode-Glyphen (`⚙`/`◐`), die je nach Font/Plattform uneinheitlich
+  rendern.
+- **Theme-Toggle jetzt 2-stufig** (Hell↔Dunkel statt 3-stufigem Zyklus).
+  Das Icon zeigt den aktuell sichtbaren Zustand (Mond = dunkel,
+  Sonne = hell), der Tooltip beschreibt die Klick-Aktion. „System folgen"
+  bleibt der initiale Default beim ersten Besuch, ist danach aber nicht
+  mehr aktiv wählbar.
+- **Settings: Sprach-Sektion an die erste Position** im Modal verschoben.
+
 ## [1.2.1] — 2026-05-27
 
 ### Hinzugefügt
