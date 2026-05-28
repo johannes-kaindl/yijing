@@ -1,207 +1,207 @@
 # AGENTS.md
 
-Konventionen für KI-Agents (Claude Code, Codex, Cursor, …), die an diesem
-Repository arbeiten. Menschen profitieren auch — aber primär gerichtet an
-automatisierte Sessions.
+Conventions for AI agents (Claude Code, Codex, Cursor, …) working on this
+repository. Humans benefit too — but this is primarily aimed at
+automated sessions.
 
-## Charakter des Projekts
+## Project character
 
-Yijing-Orakel ist ein **Hobbyprojekt** mit bewusst flacher Architektur.
-Wir sind hier auf dem siebten Anlauf nach sechs verworfenen Vorgängern
-(siehe `_archiv/yijing_1` bis `Yijing_6`). Alle früheren Anläufe sind in
-strukturellem Over-Engineering versandet (Notebook-Workflows, Pydantic-
-Schichten, FastAPI-Wrapper). Dieser Anlauf ist absichtlich anders.
+Yijing-Orakel is a **hobby project** with a deliberately flat architecture.
+We are on the seventh attempt here, after six discarded predecessors
+(see `_archiv/yijing_1` through `Yijing_6`). All earlier attempts got
+bogged down in structural over-engineering (notebook workflows, Pydantic
+layers, FastAPI wrappers). This attempt is intentionally different.
 
-> **Wichtig:** Bevor du eine Architekturentscheidung treffst, prüfe ob
-> einer der archivierten Anläufe dasselbe schon versucht hat. Wir bauen
-> hier nicht nochmal den gleichen Turm.
+> **Important:** Before you make an architectural decision, check whether
+> one of the archived attempts already tried the same thing. We are not
+> building the same tower again here.
 
-## Architektur-Prinzipien
+## Architecture principles
 
-| Prinzip | Konsequenz |
+| Principle | Consequence |
 |---|---|
-| **Static Site** | Kein Application-Server, kein Backend. Reine HTML/CSS/JS, ausgeliefert per `python3 -m http.server`. |
-| **Zero Dependencies** | Kein npm, kein Webpack, kein TypeScript-Build. Vanilla ES-Module mit nativem `<script type="module">`. |
-| **Daten als Quelle** | Hexagramm-Texte und Trigramm-Stammdaten leben als statisches JSON in `data/`. Build-Skript (`scripts/build_data.py`) liest aus `_archiv/` und produziert die JSONs. |
-| **Lokale LLMs only** | Default-Endpunkte sind Ollama (11434) und MLX/LM-Studio (8080/v1, 1234/v1). Keine Cloud-API-Keys im Code. |
-| **Persistenz im Browser** | Verlauf, Endpunkte, System-Prompt in `localStorage`. Keine Datenbank, keine Server-Side-State. |
+| **Static site** | No application server, no backend. Pure HTML/CSS/JS, served via `python3 -m http.server`. |
+| **Zero Dependencies** | No npm, no Webpack, no TypeScript build. Vanilla ES modules with native `<script type="module">`. |
+| **Data as the source** | Hexagram texts and trigram reference data live as static JSON in `data/`. The build script (`scripts/build_data.py`) reads from `_archiv/` and produces the JSONs. |
+| **Local LLMs only** | The default endpoints are Ollama (11434) and MLX/LM-Studio (8080/v1, 1234/v1). No cloud API keys in the code. |
+| **Persistence in the browser** | History, endpoints, system prompt in `localStorage`. No database, no server-side state. |
 
-## Was du NICHT tun sollst
+## What you should NOT do
 
-- **Kein Framework einführen** (React/Vue/Svelte). Vanilla bleibt vanilla.
-- **Keinen Build-Step einführen** (Webpack/Vite/esbuild). Wenn ES-Module
-  nicht reichen, ist das ein Hinweis zum Vereinfachen, nicht zum Aufrüsten.
-- **Kein TypeScript**. JSDoc reicht für Typ-Hints.
-- **Kein Backend** für LLM-Routing. Browser ruft die lokalen Server direkt.
-- **`_archiv/`** wird **nur gelesen**, nie zurückgeschrieben. Auch nicht
-  „aufgeräumt". Ist absichtlich roh.
-- **Keine neuen Test-Frameworks** für triviale Funktionen. Wenn Tests
-  nötig werden, `node --check` und gezielte ad-hoc-Smoke-Tests bevorzugen.
-  Vorhandener Sanity-Test: `node scripts/test-kingwen.mjs` (King-Wen-
-  Lookups + `data/hexagrams.json`-Konsistenz, keine Dependencies).
-- **`_archiv/yijing_1/.env`** enthält einen Klartext-Google-API-Key. Niemals
-  ins git übernehmen, niemals den `_archiv/`-`.gitignore`-Eintrag entfernen.
+- **Do not introduce a framework** (React/Vue/Svelte). Vanilla stays vanilla.
+- **Do not introduce a build step** (Webpack/Vite/esbuild). If ES modules
+  are not enough, that is a hint to simplify, not to upgrade.
+- **No TypeScript**. JSDoc is enough for type hints.
+- **No backend** for LLM routing. The browser calls the local servers directly.
+- **`_archiv/`** is **read-only**, never written back to. Not even
+  "cleaned up". It is intentionally raw.
+- **No new test frameworks** for trivial functions. If tests become
+  necessary, prefer `node --check` and targeted ad-hoc smoke tests.
+  Existing sanity test: `node scripts/test-kingwen.mjs` (King-Wen
+  lookups + `data/hexagrams.json` consistency, no dependencies).
+- **`_archiv/yijing_1/.env`** contains a plaintext Google API key. Never
+  commit it to git, never remove the `_archiv/` `.gitignore` entry.
 
-## Code-Stilrichtlinien
+## Code style guidelines
 
-- **UI-Sprache: zweisprachig DE + EN** — siehe Abschnitt
-  „[Sprachen (DE / EN)](#sprachen-de--en)". Code-Identifier: Englisch.
-  Kommentare: Englisch oder Deutsch, beides okay — aber konsistent
-  innerhalb einer Datei.
-- **In deutschen String-Literalen niemals gerade `"…"` für innere
-  Anführungszeichen.** Typografisch setzen: `„…"`. Sonst schließt
-  JavaScript den String vorzeitig — siehe Commit `a164aba` ff.
-- **Nach jedem JS-Edit:** `node --check <file>` laufen lassen.
-- **Bei Edits an `app.js`:** Browser-Tab hard-reload (Cmd+Shift+R) testen.
-  Der Dev-Server setzt zwar `Cache-Control: no-store`, manche Browser
-  cachen ES-Modul-Imports trotzdem.
-- **Kommentare** erklären *warum*, nicht *was*. Identifier-Namen erklären
-  das Was.
+- **UI language: bilingual DE + EN** — see the section
+  "[Languages (DE / EN)](#languages-de--en)". Code identifiers: English.
+  Comments: English or German, both fine — but consistent
+  within a file.
+- **In German string literals, never use straight `"…"` for inner
+  quotation marks.** Set them typographically: `„…"`. Otherwise
+  JavaScript closes the string prematurely — see commit `a164aba` ff.
+- **After every JS edit:** run `node --check <file>`.
+- **When editing `app.js`:** test with a browser tab hard-reload (Cmd+Shift+R).
+  The dev server does set `Cache-Control: no-store`, but some browsers
+  still cache ES module imports.
+- **Comments** explain *why*, not *what*. Identifier names explain
+  the what.
 
-## Sprachen (DE / EN)
+## Languages (DE / EN)
 
-Das Repo ist bewusst zweisprachig — aber **gezielt**, nicht überall, um
-Doppelpflege gering zu halten (passt zum schlanken Hobbyprojekt-Charakter).
+The repo is deliberately bilingual — but **selectively**, not everywhere, to
+keep duplicate maintenance low (fits the lean hobby-project character).
 
-| Bereich | Sprachpolitik |
+| Area | Language policy |
 |---|---|
-| **App** — UI-Strings (`web/i18n.js`), Hexagramm-Texte (`data/`) | **Zweisprachig DE + EN.** Jeder neue UI-String braucht beide Dict-Einträge; jedes neue nutzersichtbare Daten-Feld braucht sein `*_en`-Pendant. |
-| **README** | **Zweisprachig:** `README.md` (Englisch, **kanonisch**) + `README.de.md` (Deutsch). Inhaltliche Änderungen in beide Dateien nachziehen; die Sprach-Umschalt-Zeile oben (`🇬🇧 English · 🇩🇪 Deutsch`) erhalten. |
-| **Alles Übrige** — `docs/`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, Release-Notes | **Einsprachig, Englisch als kanonische Zielsprache.** Keine `*.de.md`-Doppelung anlegen. |
+| **App** — UI strings (`web/i18n.js`), hexagram texts (`data/`) | **Bilingual DE + EN.** Every new UI string needs both dict entries; every new user-visible data field needs its `*_en` counterpart. |
+| **README** | **Bilingual:** `README.md` (English, **canonical**) + `README.de.md` (German). Carry content changes into both files; preserve the language-toggle line at the top (`🇬🇧 English · 🇩🇪 Deutsch`). |
+| **Everything else** — `docs/`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, release notes | **Single-language, English as the canonical target language.** Do not create `*.de.md` duplicates. |
 
-Bestehende tiefe Doku (`docs/`, einige Meta-Dateien) ist historisch noch
-auf Deutsch. Die Migration nach Englisch läuft **opportunistisch** — wenn
-eine Datei ohnehin angefasst wird, dann gleich mit übersetzen; **kein
-Big-Bang**. So bleibt der schlanke Charakter erhalten und es entsteht keine
-Übersetzungs-Tretmühle.
+Existing deep documentation (`docs/`, some meta files) is historically
+still in German. The migration to English proceeds **opportunistically** — when
+a file is being touched anyway, translate it at the same time; **no
+big bang**. This keeps the lean character intact and avoids a
+translation treadmill.
 
-## Daten neu bauen
+## Rebuild the data
 
 ```bash
 python3 scripts/build_data.py
 ```
 
-Quellen: `_archiv/Yijing_6/yijing/resources/hexagram_json/` (Wilhelm-Texte
-für 64 Hexagramme, zwei Schema-Varianten — siehe Build-Skript),
-`_archiv/yijing_5/data/processed/` (chinesische Bezeichnungen, Trigramm-
-Stammdaten), `_archiv/yijing_3/` (Bild-Assoziationen aus Dateinamen, nur
-19/64 vorhanden).
+Sources: `_archiv/Yijing_6/yijing/resources/hexagram_json/` (Wilhelm texts
+for the 64 hexagrams, two schema variants — see the build script),
+`_archiv/yijing_5/data/processed/` (Chinese names, trigram
+reference data), `_archiv/yijing_3/` (image associations from file names, only
+19/64 present).
 
-Output: `data/hexagrams.json` (~580 KB, alle 64 Hexagramme normalisiert),
-`data/trigrams.json` (8 Trigramme mit Stammdaten).
+Output: `data/hexagrams.json` (~580 KB, all 64 hexagrams normalized),
+`data/trigrams.json` (8 trigrams with reference data).
 
-Beide Files **gehören zum Commit** (sind keine Build-Artefakte im strengen
-Sinn, sondern primäre Daten-Assets der App).
+Both files **belong to the commit** (they are not build artifacts in the
+strict sense, but primary data assets of the app).
 
-## Branches: `main` und `pages`
+## Branches: `main` and `pages`
 
-Das Repo hat zwei Branches:
+The repo has two branches:
 
-- **`main`** — die Entwicklung. `index.html` liegt im Unterordner
-  `web/`, die Daten in `data/` (von `web/` aus: `../data/`).
-- **`pages`** — das Deployment für Codeberg Pages
-  (`https://jkaindl.codeberg.page/Yijing/`). **Flaches Layout:** der
-  Inhalt von `web/` liegt direkt im Branch-Root, `data/` daneben.
+- **`main`** — the development branch. `index.html` lives in the subfolder
+  `web/`, the data in `data/` (from `web/`: `../data/`).
+- **`pages`** — the deployment for Codeberg Pages
+  (`https://jkaindl.codeberg.page/Yijing/`). **Flat layout:** the
+  contents of `web/` live directly in the branch root, `data/` next to it.
 
-Jede Änderung an `web/`, `sw.js` oder den Daten muss nach `pages`
-nachgezogen werden — dafür gibt es `./scripts/sync-pages.sh`. Das
-Skript legt automatisch einen Worktree an, spiegelt `web/` in den
-Pages-Root, kopiert `data/` und `sw.js`, patcht die Pfade in `app.js`
-(`../data/` → `data/`, `../sw.js` → `sw.js`), commited und pusht mit
-SSH-Retry. No-op wenn `pages` bereits aktuell ist.
+Every change to `web/`, `sw.js` or the data must be carried over to
+`pages` — there is `./scripts/sync-pages.sh` for that. The
+script automatically creates a worktree, mirrors `web/` into the
+pages root, copies `data/` and `sw.js`, patches the paths in `app.js`
+(`../data/` → `data/`, `../sw.js` → `sw.js`), commits and pushes with
+an SSH retry. No-op if `pages` is already up to date.
 
-`index.html`, `style.css`, `manifest.webmanifest` und `sw.js` sind in
-beiden Branches identisch; `app.js` unterscheidet sich nur in den
-Pfaden (`data/`, `sw.js` statt `../data/`, `../sw.js`).
+`index.html`, `style.css`, `manifest.webmanifest` and `sw.js` are
+identical in both branches; `app.js` differs only in the
+paths (`data/`, `sw.js` instead of `../data/`, `../sw.js`).
 
 ## PWA, Service Worker, Theme
 
-- **`sw.js`** (Repo-Root) ist ein Service Worker — network-first-Caching
-  für den Offline-Betrieb. Liegt im Root, damit sein Scope `web/` und
-  `data/` erfasst. Bei Änderungen an `web/` daran denken, dass der SW
-  im Browser cachen kann.
-- **`web/manifest.webmanifest` + `web/icons/`** machen die Seite als
-  PWA installierbar.
-- **Theme:** Dark/Light/System. Farben sind `:root`-CSS-Variablen,
-  Light über `:root[data-theme="light"]`. Auswahl in `localStorage`
-  (`yijing-theme`). Ein Inline-Script im `<head>` setzt das Theme vor
-  dem ersten Paint.
+- **`sw.js`** (repo root) is a service worker — network-first caching
+  for offline operation. It lives in the root so that its scope covers `web/`
+  and `data/`. When changing `web/`, keep in mind that the SW
+  can cache in the browser.
+- **`web/manifest.webmanifest` + `web/icons/`** make the site installable
+  as a PWA.
+- **Theme:** Dark/Light/System. Colors are `:root` CSS variables,
+  Light via `:root[data-theme="light"]`. The selection is in `localStorage`
+  (`yijing-theme`). An inline script in the `<head>` sets the theme before
+  the first paint.
 
-## macOS-App
+## macOS app
 
-`scripts/build-macos-app.sh` bündelt das Orakel als `Yijing.app` — eine
-native Swift-App (`scripts/macos-app/Yijing.swift` +
-`StaticServer.swift`), die einen internen HTTP-Server (Network.framework
-/ `NWListener`) startet und das Orakel in einem WKWebView-Fenster zeigt.
-Kein Python und keine Command-Line-Tools auf der Nutzerseite — die App
-bringt alles selbst mit. Das `CFBundleExecutable` **muss** eine
-kompilierte Binary sein — ein Shell-Skript löst auf Apple Silicon einen
-Rosetta-Prompt aus. Details: `docs/MACOS-APP.md`.
+`scripts/build-macos-app.sh` bundles the oracle as `Yijing.app` — a
+native Swift app (`scripts/macos-app/Yijing.swift` +
+`StaticServer.swift`) that starts an internal HTTP server (Network.framework
+/ `NWListener`) and shows the oracle in a WKWebView window.
+No Python and no command-line tools on the user's side — the app
+brings everything itself. The `CFBundleExecutable` **must** be a
+compiled binary — a shell script triggers a Rosetta prompt on Apple
+Silicon. Details: `docs/MACOS-APP.md`.
 
-## CORS — wichtiger Setup-Hinweis
+## CORS — important setup note
 
-Der Browser ruft die LLM-Server direkt. Beide müssen CORS für die Origin
-des Dev-Servers erlauben:
+The browser calls the LLM servers directly. Both must allow CORS for the origin
+of the dev server:
 
 **Ollama:**
 ```bash
-export OLLAMA_ORIGINS="*"   # oder spezifisch: "http://localhost:8765"
+export OLLAMA_ORIGINS="*"   # or specific: "http://localhost:8765"
 ollama serve
 ```
 
-**MLX/LM Studio:** ist standardmäßig offen. Bei eigenem `mlx_lm.server`
-keinen restriktiven `--allowed-origins`-Flag setzen.
+**MLX/LM Studio:** open by default. With your own `mlx_lm.server`,
+do not set a restrictive `--allowed-origins` flag.
 
-## Reasoning-Modi
+## Reasoning modes
 
-LLM-Adapter (`web/llm.js`) übersetzt `thinking: true|false|null` in:
+The LLM adapter (`web/llm.js`) translates `thinking: true|false|null` into:
 
 | Backend | Parameter |
 |---|---|
-| Ollama `/api/chat` | `think: bool` + `options.num_predict` (32k an, 4k aus) |
-| OpenAI-kompatibel `/v1/chat/completions` | `reasoning_effort: "low"|"none"` + `chat_template_kwargs.enable_thinking: bool` + `max_tokens` |
+| Ollama `/api/chat` | `think: bool` + `options.num_predict` (32k on, 4k off) |
+| OpenAI-compatible `/v1/chat/completions` | `reasoning_effort: "low"|"none"` + `chat_template_kwargs.enable_thinking: bool` + `max_tokens` |
 
-Reasoning-Output kommt je nach Server in unterschiedlichen Feldern an:
-- Ollama-native: `message.thinking`
+Reasoning output arrives in different fields depending on the server:
+- Ollama native: `message.thinking`
 - Ollama-OpenAI: `choices[0].delta.reasoning_content`
 - MLX (`mlx_lm.server`): `choices[0].delta.reasoning`
-- DeepSeek-Stil: `reasoning_content`
+- DeepSeek style: `reasoning_content`
 
-`llm.js` parst alle drei, ruft `onThinking(text)` separat von `onToken(text)`
-auf — UI zeigt Reasoning in einem eigenen, gedimmten `<details>`-Block.
+`llm.js` parses all three, calls `onThinking(text)` separately from `onToken(text)`
+— the UI shows reasoning in its own, dimmed `<details>` block.
 
-## Verlauf, Tiefe Links
+## History, deep links
 
-Würfe werden mit UUID gespeichert (`localStorage["yijing-history-v1"]`).
-URL-Hash `#r=<uuid>` ruft einen Wurf wieder auf. Beim Reset wird der Hash
-geräumt.
+Readings are stored with a UUID (`localStorage["yijing-history-v1"]`).
+The URL hash `#r=<uuid>` recalls a reading. On reset the hash
+is cleared.
 
-Beim Verändern des Schemas: `loadHistory()` muss alte Einträge tolerieren
-oder eine Migration anbieten.
+When changing the schema: `loadHistory()` must tolerate old entries
+or offer a migration.
 
-## Wenn du den Code splittest
+## When you split the code
 
-`app.js` ist mit ~1100 Zeilen am oberen Ende dessen, was in eine Datei
-gehört. Beim weiteren Wachstum erst splitten, wenn ein konkretes Feature
-sich klar isolieren lässt — nicht prophylaktisch. Sinnvolle Schnitte
-wären:
+`app.js` is, at ~1100 lines, at the upper end of what belongs in a single
+file. As it grows further, only split when a concrete feature
+can be cleanly isolated — not prophylactically. Sensible cuts
+would be:
 
 - `history.js` (loadHistory, saveHistory, renderHistory, applyHashIfAny)
 - `settings.js` (renderEndpointList, openSettings, closeSettings)
-- `export.js` (buildMarkdownExport, downloadFile, Print-Handler)
-- `theme.js` (applyTheme, initTheme, Service-Worker-Registrierung)
+- `export.js` (buildMarkdownExport, downloadFile, print handler)
+- `theme.js` (applyTheme, initTheme, service worker registration)
 
-Aber: das geht nur, wenn jeder Schnitt eine klare öffentliche API hat.
-Sonst lieber lassen.
+But: this only works if each cut has a clear public API.
+Otherwise, better leave it.
 
-## Tests / Verifikation
+## Tests / verification
 
-Es gibt keine Unit-Test-Suite. Akzeptiert. Wenn du etwas änderst:
+There is no unit test suite. Accepted. If you change something:
 
-1. `node --check web/<file>.js` für Syntax
-2. Im Browser hard-reload, Wurf machen, „Interpretieren" mit beiden
-   Endpunkten (Ollama + MLX) testen
-3. Für Daten-Änderungen: `python3 scripts/build_data.py` muss durchlaufen
-   ohne Fehler, Zähler im Output stimmig
+1. `node --check web/<file>.js` for syntax
+2. In the browser hard-reload, make a reading, test "Interpret" with both
+   endpoints (Ollama + MLX)
+3. For data changes: `python3 scripts/build_data.py` must run through
+   without errors, the counters in the output consistent
 
-Bei größeren Änderungen ergänze einen kurzen Hinweis im `CHANGELOG.md`.
+For larger changes, add a short note to `CHANGELOG.md`.

@@ -3,85 +3,84 @@ SPDX-FileCopyrightText: 2026 Johannes Kaindl
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-# Sicherheits-Meldungen
+# Reporting Security Issues
 
-Yijing-Orakel ist ein **Hobbyprojekt** ohne Security-Team, ohne SLA und
-ohne Bug-Bounty. Trotzdem freue ich mich über Hinweise auf
-sicherheitsrelevante Probleme und versuche, sie zeitnah zu beheben.
+Yijing Oracle is a **hobby project** with no security team, no SLA and
+no bug bounty. Even so, I welcome pointers to security-relevant problems
+and try to fix them promptly.
 
-## Was hier rein gehört
+## What belongs here
 
-- **Cross-Site Scripting** in der gerenderten Reading oder im
-  Markdown-Output (sowohl Wilhelm-Texten als auch LLM-Antworten).
-- **Pfad-Traversal** im Static-Server (`scripts/serve.py` für Dev oder
-  `scripts/macos-app/StaticServer.swift` für die App).
-- **Daten-Exfiltration** über fehlkonfigurierte CORS-Pfade oder
-  Service-Worker-Verhalten.
-- **Code-Injection** über manipuliertes localStorage, URL-Hash
-  (`#r=<uuid>`) oder Endpunkt-Konfiguration.
-- **macOS-App-Bundle-Themen**: Plist-Quirks, WKWebView-Allowlist,
-  unkontrollierte URL-Schemes, Listener-Bindings nicht auf Loopback.
+- **Cross-Site Scripting** in the rendered reading or in the
+  Markdown output (both Wilhelm texts and LLM responses).
+- **Path traversal** in the static server (`scripts/serve.py` for dev or
+  `scripts/macos-app/StaticServer.swift` for the app).
+- **Data exfiltration** via misconfigured CORS paths or
+  service worker behavior.
+- **Code injection** via manipulated localStorage, URL hash
+  (`#r=<uuid>`) or endpoint configuration.
+- **macOS app bundle topics**: plist quirks, WKWebView allowlist,
+  uncontrolled URL schemes, listener bindings not on loopback.
 
-Wenn du dir nicht sicher bist, ob etwas reinfällt: lieber melden.
+If you are not sure whether something fits: better to report it.
 
-## Was nicht hier rein gehört
+## What does not belong here
 
-- Allgemeine Bug-Reports (kein Sicherheitsbezug) — bitte als
-  öffentliches Issue: <https://codeberg.org/jkaindl/Yijing/issues>.
-- Sicherheitsthemen in **externen LLM-Servern** (Ollama, MLX,
-  LM Studio, vLLM, OpenClaw) — gehören in deren Projekte.
-- Allgemeine Härtungs-Vorschläge ohne konkretes Angriffsszenario —
-  gerne als normales Issue mit `enhancement`-Label.
+- General bug reports (no security relevance) — please file as a
+  public issue: <https://codeberg.org/jkaindl/Yijing/issues>.
+- Security topics in **external LLM servers** (Ollama, MLX,
+  LM Studio, vLLM, OpenClaw) — these belong in their own projects.
+- General hardening suggestions without a concrete attack scenario —
+  feel free to file as a normal issue with the `enhancement` label.
 
-## Wie melden
+## How to report
 
-**Bevorzugt:** privates Codeberg-Issue im Repo, oder PM via Codeberg an
-[@jkaindl](https://codeberg.org/jkaindl). Codeberg unterstützt private
-Issues — beim Anlegen das Privacy-Häkchen setzen.
+**Preferred:** a private Codeberg issue in the repo, or a PM via Codeberg to
+[@jkaindl](https://codeberg.org/jkaindl). Codeberg supports private
+issues — tick the privacy checkbox when creating one.
 
-**Alternativ:** E-Mail an die Adresse, die im
-[Codeberg-Profil](https://codeberg.org/jkaindl) hinterlegt ist. Wenn
-keine sichtbar ist, schreib eine kurze PM mit Bitte um Mail-Adresse —
-dann ohne Details, die schon im ersten Schritt vertraulich bleiben
-sollen.
+**Alternatively:** email to the address listed in the
+[Codeberg profile](https://codeberg.org/jkaindl). If
+none is visible, send a short PM asking for the email address —
+then without details that should stay confidential in the first
+step.
 
-PGP ist nicht aufgesetzt; für sensible Reports kann ich auf Anfrage
-einen Schlüssel veröffentlichen.
+PGP is not set up; for sensitive reports I can publish a key on request.
 
-## Was du erwarten kannst
+## What you can expect
 
-- **Eingangsbestätigung** innerhalb von 7 Tagen.
-- **Erste Einschätzung** (Reproduktion, Schweregrad, geplantes Vorgehen)
-  innerhalb von 14 Tagen.
-- **Fix oder dokumentierter Workaround** so schnell wie für ein
-  Hobbyprojekt realistisch ist — kritisch: Tage, normal: Wochen.
-- **Credit** im `CHANGELOG.md` und Release-Notes, wenn du das möchtest.
-  Standardmäßig anonym, auf Wunsch mit Namen und Link.
+- **Acknowledgment of receipt** within 7 days.
+- **Initial assessment** (reproduction, severity, planned approach)
+  within 14 days.
+- **Fix or documented workaround** as quickly as is realistic for a
+  hobby project — critical: days, normal: weeks.
+- **Credit** in the `CHANGELOG.md` and release notes, if you want it.
+  Anonymous by default, with name and link on request.
 
-## Scope und Threat-Model
+## Scope and Threat Model
 
-Yijing ist **single-tenant, single-user, lokal**:
+Yijing is **single-tenant, single-user, local**:
 
-- Kein Auth, keine Sessions, keine Multi-User-Daten.
-- LLM-Server werden über Loopback (`127.0.0.1`) angesprochen — nicht
-  über öffentliche Netze.
-- Der Dev-Server (`scripts/serve.py`) bindet explizit auf `127.0.0.1`.
-- API-Keys (für nicht-lokale OpenAI-kompatible Endpunkte, sofern
-  jemand sowas einträgt) liegen im localStorage des Geräts.
-- Der Service Worker cached same-origin-Requests network-first.
+- No auth, no sessions, no multi-user data.
+- LLM servers are addressed over loopback (`127.0.0.1`) — not
+  over public networks.
+- The dev server (`scripts/serve.py`) binds explicitly to `127.0.0.1`.
+- API keys (for non-local OpenAI-compatible endpoints, if
+  someone enters such a thing) live in the device's localStorage.
+- The service worker caches same-origin requests network-first.
 
-Reports, die diese Annahmen verletzen (Multi-User, exponierter Port,
-synchronisierte Keys), sind im Scope und besonders willkommen.
+Reports that violate these assumptions (multi-user, exposed port,
+synced keys) are in scope and especially welcome.
 
-## Bekannte Designentscheidungen, die kein Bug sind
+## Known Design Decisions That Are Not Bugs
 
-- **Markdown wird first escaped, dann sanitized.** Links nur mit
-  `http(s):` / `mailto:`. Trotzdem: Reports zu Renderer-Bypass sind
-  willkommen.
-- **`localStorage` ist nicht verschlüsselt.** Das ist Browser-Standard;
-  Geräte-Sicherheit liegt beim Nutzer.
-- **Die macOS-App ist nicht Apple-notarisiert.** Gatekeeper warnt beim
-  ersten Start — das ist erwartet und in der README dokumentiert.
-- **`_archiv/yijing_1/.env`** enthält historisch einen Klartext-Google-
-  API-Key. Der Ordner ist per `.gitignore` ausgeschlossen und niemals
-  committet. Wer das _archiv lokal hat: bitte rotieren.
+- **Markdown is first escaped, then sanitized.** Links only with
+  `http(s):` / `mailto:`. Even so: reports on renderer bypasses are
+  welcome.
+- **`localStorage` is not encrypted.** This is browser-standard;
+  device security is up to the user.
+- **The macOS app is not Apple-notarized.** Gatekeeper warns on the
+  first launch — this is expected and documented in the README.
+- **`_archiv/yijing_1/.env`** historically contains a plaintext Google
+  API key. The folder is excluded via `.gitignore` and never
+  committed. If you have the _archiv locally: please rotate it.

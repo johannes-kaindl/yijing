@@ -1,251 +1,250 @@
 # Changelog
 
-Format orientiert an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
-Versionierung nach [SemVer](https://semver.org/lang/de/).
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
 ## [1.3.0] — 2026-05-28
 
-### Hinzugefügt
+### Added
 
-- **Sprach-Umschalter im Footer** — adaptiver Link, der in die jeweils
-  andere Sprache wechselt und *in* dieser Sprache beschriftet ist
-  (deutsche UI → „English version", englische UI → „Deutsche Version").
-  Macht den Sprachwechsel auffindbar, ohne erst ins Settings-Modal zu
-  müssen. Nutzt die bestehende `applyI18n`-Mechanik für den Text-Swap.
+- **Language switcher in the footer** — adaptive link that switches to the
+  respective other language and is labeled *in* that language
+  (German UI → "English version", English UI → "Deutsche Version").
+  Makes the language switch discoverable without first having to go into
+  the settings modal. Uses the existing `applyI18n` mechanism for the text
+  swap.
 
-### Geändert
+### Changed
 
-- **Header-Icons als Inline-SVG** (Lucide, ISC — als Markup eingebettet,
-  kein npm-Dependency): Zahnrad für Einstellungen, Sonne/Mond fürs Theme,
-  `stroke=currentColor` erbt Theme- und Hover-Farbe. Ersetzt die vorigen
-  Unicode-Glyphen (`⚙`/`◐`), die je nach Font/Plattform uneinheitlich
-  rendern.
-- **Theme-Toggle jetzt 2-stufig** (Hell↔Dunkel statt 3-stufigem Zyklus).
-  Das Icon zeigt den aktuell sichtbaren Zustand (Mond = dunkel,
-  Sonne = hell), der Tooltip beschreibt die Klick-Aktion. „System folgen"
-  bleibt der initiale Default beim ersten Besuch, ist danach aber nicht
-  mehr aktiv wählbar.
-- **Settings: Sprach-Sektion an die erste Position** im Modal verschoben.
-- **README zweisprachig gesplittet** — `README.md` ist jetzt die
-  kanonische englische Fassung (OSS-Konvention; Codeberg rendert
-  `README.md` per Default), die deutsche Fassung liegt in `README.de.md`.
-  Sprach-Umschalt-Zeile oben in beiden Dateien.
+- **Header icons as inline SVG** (Lucide, ISC — embedded as markup,
+  no npm dependency): gear for settings, sun/moon for the theme,
+  `stroke=currentColor` inherits theme and hover color. Replaces the
+  previous Unicode glyphs (`⚙`/`◐`), which render inconsistently depending
+  on font/platform.
+- **Theme toggle is now 2-stage** (Light↔Dark instead of a 3-stage cycle).
+  The icon shows the currently visible state (moon = dark,
+  sun = light), the tooltip describes the click action. "Follow system"
+  remains the initial default on the first visit, but is no longer actively
+  selectable afterwards.
+- **Settings: language section moved to the first position** in the modal.
+- **README split bilingually** — `README.md` is now the
+  canonical English version (OSS convention; Codeberg renders
+  `README.md` by default), the German version lives in `README.de.md`.
+  Language-switch line at the top of both files.
 
-### Behoben
+### Fixed
 
-- **App-Bundle-Version** (`scripts/macos-app/Info.plist`):
-  `CFBundleVersion` + `CFBundleShortVersionString` standen seit v1.0 auf
-  `1.0` und wurden bei den Releases nie nachgezogen. Jetzt auf `1.3.0`
-  gesetzt — die DMG-App meldet endlich ihre echte Version.
+- **App bundle version** (`scripts/macos-app/Info.plist`):
+  `CFBundleVersion` + `CFBundleShortVersionString` had been at `1.0` since
+  v1.0 and were never updated for the releases. Now set to `1.3.0` —
+  the DMG app finally reports its real version.
 
 ## [1.2.1] — 2026-05-27
 
-### Hinzugefügt
+### Added
 
-- **Hero-Bild für Social-Preview** (`web/assets/og-image.png`, 1200×630):
-  stilisiertes Hexagramm 1 + 易經 auf dunklem Hintergrund mit App-Theme-
-  Akzentfarbe. `og:image` + `twitter:image` als absolute URLs verlinkt,
-  Twitter-Card auf `summary_large_image`. SVG-Quelle in
-  `web/assets/og-image.svg` versioniert. Auch als README-Hero
-  zentriert eingebunden.
+- **Hero image for social preview** (`web/assets/og-image.png`, 1200×630):
+  stylized hexagram 1 + 易經 on a dark background with the app theme
+  accent color. `og:image` + `twitter:image` linked as absolute URLs,
+  Twitter card set to `summary_large_image`. SVG source versioned in
+  `web/assets/og-image.svg`. Also embedded centered as the README hero.
 
-### Geändert
+### Changed
 
-- `scripts/macos-app/StaticServer.swift`: **Connection-Limit (max 32
-  parallel)** plus zentraler `finishConnection()` für Cleanup —
-  schließt theoretischen lokalen-Prozess-Flood-Vektor (low real-world
-  risk; loopback-only + single-user, aber sauberer Hygiene-Stand).
-  Kommentar an `receiveRequest` erläutert, warum die Callback-basierte
-  „Rekursion" kein echtes Stack-Wachstum ist.
-- `scripts/serve.py`: **Tot-Code entfernt** — `_watch_parent()` plus
-  `threading`/`time`-Imports raus. Die Funktion war für die alte
-  Python-Backend-Variante der macOS-App (vor v1.1). Seit v1.1 ist die
-  App vollständig Swift-intern (`StaticServer.swift`), kein Python-
-  Subprocess mehr → `YIJING_PARENT_PID` wird nirgends mehr gesetzt.
-  SPDX-Header und präzisere Modul-Docstring ergänzt.
+- `scripts/macos-app/StaticServer.swift`: **connection limit (max 32
+  parallel)** plus a central `finishConnection()` for cleanup —
+  closes a theoretical local-process flood vector (low real-world
+  risk; loopback-only + single-user, but a cleaner hygiene state).
+  A comment on `receiveRequest` explains why the callback-based
+  "recursion" is not real stack growth.
+- `scripts/serve.py`: **dead code removed** — `_watch_parent()` plus
+  the `threading`/`time` imports gone. The function was for the old
+  Python-backend variant of the macOS app (before v1.1). Since v1.1 the
+  app is fully Swift-internal (`StaticServer.swift`), no more Python
+  subprocess → `YIJING_PARENT_PID` is no longer set anywhere.
+  SPDX header and a more precise module docstring added.
 
-### Behoben
+### Fixed
 
-- **EN-Übersetzung — Stichproben-QA-Patches** in `data/hexagrams.en.json`:
-  - **Vokabel-Konsistenz für 君子 (der Edle):** 41 Vorkommen
-    „superior man" → „noble one". Subagent-Batches 25–32, 33–40 und
-    49–56 hatten uneinheitlich übersetzt; Datei wirkte zusammen-
-    gestückelt. Jetzt überall einheitlich „noble one".
-  - **Hex 11 image_en — Bedeutungsverfehlung:** „Himmelsrichtungen"
-    war zu „regions of heaven" (kosmologische Sphären) statt
-    „cardinal directions" (Kompass-Richtungen) übersetzt.
-  - **Hex 11 image_en — Redundanz/Tonalität:** „Heaven and earth
-    stand in intercourse" zu „come together and unite their effects"
-    (das Wort intercourse ist heute fast nur sexuell konnotiert; direkt
-    nach „Heaven and earth unite" wirkte es unfreiwillig komisch).
-  - **Hex 11 judgment_en:** „hold the rule in hand" → „hold the reins
-    of power" (englisches Idiom).
-  - **Hex 49 judgment_en:** „On your own day, then you are believed"
-    → „On your own day you are believed" (unmotiviertes „then" raus).
-  - **Hex 49 line 3 text_en:** „talk of revolution has gone round
-    three times" → „talk of the revolution has been heard three times"
-    (umgangssprachlich-modern → würdig-archaisch).
-  - **Hex 49 line 5 interp_en — Germanismus:** „the people fall to
-    him quite of their own accord" → „give him their allegiance of
-    their own accord" (wörtliches „fallen" → idiomatisches Treue-
-    Geben).
+- **EN translation — spot-check QA patches** in `data/hexagrams.en.json`:
+  - **Vocabulary consistency for 君子 (the noble one):** 41 occurrences
+    "superior man" → "noble one". Subagent batches 25–32, 33–40 and
+    49–56 had translated inconsistently; the file looked patched
+    together. Now uniformly "noble one" everywhere.
+  - **Hex 11 image_en — meaning miss:** "Himmelsrichtungen"
+    had been translated to "regions of heaven" (cosmological spheres)
+    instead of "cardinal directions" (compass directions).
+  - **Hex 11 image_en — redundancy/tone:** "Heaven and earth
+    stand in intercourse" to "come together and unite their effects"
+    (the word intercourse today is almost only sexually connotated; right
+    after "Heaven and earth unite" it came across as unintentionally comic).
+  - **Hex 11 judgment_en:** "hold the rule in hand" → "hold the reins
+    of power" (English idiom).
+  - **Hex 49 judgment_en:** "On your own day, then you are believed"
+    → "On your own day you are believed" (unmotivated "then" removed).
+  - **Hex 49 line 3 text_en:** "talk of revolution has gone round
+    three times" → "talk of the revolution has been heard three times"
+    (colloquial-modern → dignified-archaic).
+  - **Hex 49 line 5 interp_en — Germanism:** "the people fall to
+    him quite of their own accord" → "give him their allegiance of
+    their own accord" (literal "fall" → idiomatic giving of allegiance).
 
 ## [1.2.0] — 2026-05-27
 
-### Hinzugefügt
+### Added
 
-- **Englische Hexagramm-Texte** — `data/hexagrams.en.json` mit parallelen
-  `*_en`-Feldern (`name_en`, `meaning_en`, `judgment_en`, `image_en`,
-  `image_association_en`, pro Linie `position_en`/`text_en`/
-  `interpretation_en`). Vollständig: 64/64 Hexagramme, 384/384 Linien.
-  Übersetzt mit Claude Opus 4.7 aus dem deutschen Wilhelm-Original
-  parallel über acht Subagenten — Wilhelm-Stil bewahrt, klassische
-  I-Ching-Vokabeln in englischer Standardform (the superior man, the
-  great man, the noble, the abyss, etc.), Absatzstruktur 1:1. Source
-  ist gemeinfrei (Wilhelm 1924), Übersetzung unter AGPL-3.0-or-later.
-- `scripts/test-kingwen.mjs` um EN-JSON-Strukturchecks erweitert —
-  prüft `number`/`binary`-Konsistenz mit DE-Source und Field-Symmetrie
-  (für jedes nicht-leere DE-Feld muss `*_en` existieren).
-- `docs/DATA.md` Sektion „Englische Variante" mit Schema-Beschreibung
-  und Generierungs-Hinweis.
+- **English hexagram texts** — `data/hexagrams.en.json` with parallel
+  `*_en` fields (`name_en`, `meaning_en`, `judgment_en`, `image_en`,
+  `image_association_en`, per line `position_en`/`text_en`/
+  `interpretation_en`). Complete: 64/64 hexagrams, 384/384 lines.
+  Translated with Claude Opus 4.7 from the German Wilhelm original
+  in parallel across eight subagents — Wilhelm style preserved, classical
+  I Ching vocabulary in standard English form (the superior man, the
+  great man, the noble, the abyss, etc.), paragraph structure 1:1. Source
+  is public domain (Wilhelm 1924), translation under AGPL-3.0-or-later.
+- `scripts/test-kingwen.mjs` extended with EN JSON structure checks —
+  verifies `number`/`binary` consistency with the DE source and field
+  symmetry (for every non-empty DE field, `*_en` must exist).
+- `docs/DATA.md` section "English variant" with schema description
+  and a generation note.
 
-- **Englische UI** — vollständiger i18n-Layer mit Sprach-Toggle DE/EN
-  (`web/i18n.js`). Sprachauswahl im Settings-Modal, persistiert in
-  `localStorage["yijing-language-v1"]`, Default = Browser-Sprache (en → EN,
-  alles andere → DE). Wirkt sofort auf alle UI-Strings, Datumsformate,
-  Markdown-Export-Headers und den LLM-System-Prompt-Default
-  (zwei Varianten in `web/llm.js`). Hexagramm-Texte werden lazy aus
-  `data/hexagrams.en.json` geladen, mit transparentem Fallback auf
-  `data/hexagrams.json` solange die englische Übersetzung noch nicht
-  existiert (Phase B). HTML annotiert mit `data-i18n*`-Attributen,
-  Inline-Boot-Script setzt `<html lang>` vor dem ersten Paint.
+- **English UI** — full i18n layer with a DE/EN language toggle
+  (`web/i18n.js`). Language selection in the settings modal, persisted in
+  `localStorage["yijing-language-v1"]`, default = browser language (en → EN,
+  everything else → DE). Takes effect immediately on all UI strings, date
+  formats, Markdown export headers and the LLM system prompt default
+  (two variants in `web/llm.js`). Hexagram texts are lazily loaded from
+  `data/hexagrams.en.json`, with a transparent fallback to
+  `data/hexagrams.json` as long as the English translation does not yet
+  exist (Phase B). HTML annotated with `data-i18n*` attributes,
+  an inline boot script sets `<html lang>` before the first paint.
 
-- [`SECURITY.md`](SECURITY.md): Sicherheits-Meldewege, Threat-Model,
-  Scope, was rein gehört und was nicht.
-- [`.gitea/issue_template/`](.gitea/issue_template/): YAML-Vorlagen für
-  Bug-Report und Feature-Vorschlag plus `config.yaml` mit Kontaktlinks
-  auf SECURITY und README. Greift automatisch beim Anlegen neuer Issues
-  über Codeberg.
-- [`scripts/test-kingwen.mjs`](scripts/test-kingwen.mjs): Sanity-Test
-  für die King-Wen-Lookup-Tabellen — prüft `BINARY_TO_KING_WEN` (JS),
-  `KING_WEN_BINARY` (Python) und `data/hexagrams.json` auf Konsistenz
-  und gegenseitige Inversion. Reines Node, keine Test-Framework-
-  Dependency. Aufruf: `node scripts/test-kingwen.mjs`.
-- [`scripts/sync-pages.sh`](scripts/sync-pages.sh): Automatisierter
-  Sync von `main` nach `pages` (Worktree-Anlage, web→Root-Spiegelung,
-  Pfad-Patches `../data/` → `data/` und `../sw.js` → `sw.js`,
-  Commit + Push mit SSH-Retry). Ersetzt die manuelle Worktree-Sed-
-  Choreografie.
-- [`.editorconfig`](.editorconfig): IDE-konsistente Indentation,
-  UTF-8, LF, Trim-Trailing-Whitespace (Markdown ausgenommen).
-- `web/index.html`: Open-Graph + Twitter-Card Meta-Tags für Social-
-  Preview. `og:image` ist absichtlich noch nicht gesetzt — sobald ein
-  Hero-Bild existiert dort als absolute URL ergänzen.
+- [`SECURITY.md`](SECURITY.md): security reporting channels, threat model,
+  scope, what belongs in it and what does not.
+- [`.gitea/issue_template/`](.gitea/issue_template/): YAML templates for
+  bug report and feature proposal plus `config.yaml` with contact links
+  to SECURITY and README. Takes effect automatically when creating new
+  issues via Codeberg.
+- [`scripts/test-kingwen.mjs`](scripts/test-kingwen.mjs): sanity test
+  for the King Wen lookup tables — verifies `BINARY_TO_KING_WEN` (JS),
+  `KING_WEN_BINARY` (Python) and `data/hexagrams.json` for consistency
+  and mutual inversion. Pure Node, no test-framework
+  dependency. Invocation: `node scripts/test-kingwen.mjs`.
+- [`scripts/sync-pages.sh`](scripts/sync-pages.sh): automated
+  sync from `main` to `pages` (worktree creation, web→root mirroring,
+  path patches `../data/` → `data/` and `../sw.js` → `sw.js`,
+  commit + push with SSH retry). Replaces the manual worktree sed
+  choreography.
+- [`.editorconfig`](.editorconfig): IDE-consistent indentation,
+  UTF-8, LF, trim trailing whitespace (Markdown excepted).
+- `web/index.html`: Open Graph + Twitter card meta tags for social
+  preview. `og:image` is intentionally not yet set — as soon as a
+  hero image exists, add it there as an absolute URL.
 
-### Geändert
+### Changed
 
-- README komplett überarbeitet — erweiterte Badge-Reihe (Platform,
-  PWA, Build), Inhaltsverzeichnis, Mermaid-Wurf-Ablauf, Release-
-  Historie-Tabelle mit Tag-Links, eigene „Sicherheit melden"- und
-  „Warum keine Build-Pipeline?"-Sektionen, Repo-Footer.
-- `CONTRIBUTING.md` erweitert um lokales Setup, Issue-Template-Hinweis,
-  Lizenz-Klausel für Beiträge, Verweis auf `SECURITY.md`, erweiterte
-  PR-Checkliste (macOS-App-Build, Pages-Sync-Vermerk).
-- Codeberg-Repo-Metadaten via API: Description präzisiert, Website auf
-  Pages-URL, Topics (20 Stück: yijing, iching, i-ging, oracle,
+- README completely reworked — extended badge row (Platform,
+  PWA, Build), table of contents, Mermaid reading flow, release
+  history table with tag links, dedicated "Report security" and
+  "Why no build pipeline?" sections, repo footer.
+- `CONTRIBUTING.md` extended with local setup, issue-template note,
+  license clause for contributions, reference to `SECURITY.md`, extended
+  PR checklist (macOS app build, Pages sync note).
+- Codeberg repo metadata via API: description made more precise, website set
+  to the Pages URL, topics (20 of them: yijing, iching, i-ging, oracle,
   divination, hexagram, wilhelm, static-site, pwa, offline-first,
   vanilla-js, zero-dependency, ollama, mlx, local-llm, macos-app,
   swift, service-worker, german, agpl).
 
 ## [1.1.1] — 2026-05-25
 
-### Behoben
+### Fixed
 
-- `web/llm.js`: Stream-Reader wird jetzt in einem `finally`-Block
-  freigegeben. Beim schnellen „Abbrechen"-und-sofort-Wiederstarten der
-  Interpretation konnte sonst `ReadableStream is locked` auftreten
-  (Ollama- und OpenAI-kompatibler Pfad).
-- `scripts/macos-app/StaticServer.swift`: wartet beim Start explizit
-  auf den `NWListener`-State `.ready`. Vorher konnte der WebView in
-  seltenen Fällen gegen einen noch nicht aufgeschlagenen Port laden.
-- `scripts/build_data.py`: deterministische Auswahl unter gleich langen
-  Bild-Assoziations-Prompts (vorher abhängig von der Set-Iteration).
+- `web/llm.js`: the stream reader is now released in a `finally` block.
+  When quickly "canceling" and immediately restarting the
+  interpretation, `ReadableStream is locked` could otherwise occur
+  (Ollama- and OpenAI-compatible path).
+- `scripts/macos-app/StaticServer.swift`: explicitly waits at startup
+  for the `NWListener` state `.ready`. Previously the WebView could in
+  rare cases load against a port that had not yet come up.
+- `scripts/build_data.py`: deterministic selection among equally long
+  image-association prompts (previously dependent on set iteration).
 
-### Geändert
+### Changed
 
-- Diverse Härtungen ohne sichtbare Verhaltensänderung: vollständiges
-  HTML-Escape an allen `innerHTML`-Stellen in `app.js`, Quota-Schutz
-  für `localStorage`-Schreibvorgänge, Focus-Management im `<dialog>`-
-  Fallback-Pfad, WKWebView-Scheme-Allowlist, klarerer Pfad-Traversal-
-  Guard im Swift-Server, atomarer Schreibvorgang und bessere Fehler-
-  meldungen in `build_data.py`.
-- `scripts/serve.py` bindet jetzt explizit auf `127.0.0.1` statt auf
-  allen Interfaces, und nutzt `directory=` statt `os.chdir()`.
-- SPDX-Header (AGPL-3.0-or-later) auf `web/app.js` und `web/llm.js`
-  ergänzt; `LICENSE-DOCS`-Geltungsbereich explizit um `CHANGELOG.md`,
-  `CONTRIBUTING.md` und `AGENTS.md` erweitert.
+- Various hardenings without visible behavior change: full
+  HTML escaping at all `innerHTML` sites in `app.js`, quota protection
+  for `localStorage` writes, focus management in the `<dialog>`
+  fallback path, WKWebView scheme allowlist, clearer path-traversal
+  guard in the Swift server, atomic write and better error
+  messages in `build_data.py`.
+- `scripts/serve.py` now binds explicitly to `127.0.0.1` instead of on
+  all interfaces, and uses `directory=` instead of `os.chdir()`.
+- SPDX header (AGPL-3.0-or-later) added to `web/app.js` and `web/llm.js`;
+  `LICENSE-DOCS` scope explicitly extended with `CHANGELOG.md`,
+  `CONTRIBUTING.md` and `AGENTS.md`.
 
 ## [1.1] — 2026-05-24
 
-### Geändert
+### Changed
 
-- macOS-App: Python-Backend (`serve.py`) durch einen Swift-internen
-  Static-Server (Network.framework / `NWListener`) ersetzt. Die App
-  braucht jetzt **kein System-Python und keine Command-Line-Tools**
-  mehr — Nutzer:innen ohne Python können sie installieren und starten,
-  ohne Apples 700 MB–3 GB CLT-Download zu triggern. Bundle-Layout
-  vereinfacht: `Resources/web/`, `Resources/data/`, `Resources/sw.js`
-  direkt statt Subordner `Resources/yijing/…`. DMG kleiner geworden
-  (3,0 MB statt 3,7 MB).
-- Web-UI: macOS-App-Hinweis aus dem prominenten Header-Block in eine
-  dezente Footer-Zeile verlegt; die ausführliche Gatekeeper-Anleitung
-  steht weiter in der README und `INSTALL.txt` im DMG.
-- README: shields.io-Badges (`for-the-badge`) für Download und
-  Live-Demo statt einfachem Markdown-Link.
+- macOS app: Python backend (`serve.py`) replaced by a Swift-internal
+  static server (Network.framework / `NWListener`). The app
+  now needs **no system Python and no Command Line Tools**
+  anymore — users without Python can install and start it,
+  without triggering Apple's 700 MB–3 GB CLT download. Bundle layout
+  simplified: `Resources/web/`, `Resources/data/`, `Resources/sw.js`
+  directly instead of the subfolder `Resources/yijing/…`. DMG has become
+  smaller (3.0 MB instead of 3.7 MB).
+- Web UI: macOS app note moved out of the prominent header block into a
+  subtle footer line; the detailed Gatekeeper instructions
+  remain in the README and `INSTALL.txt` in the DMG.
+- README: shields.io badges (`for-the-badge`) for download and
+  live demo instead of a simple Markdown link.
 
 ## [1.0] — 2026-05-22
 
-### Hinzugefügt
+### Added
 
-- Initialer Static-Site-Build mit Drei-Münzen-Methode
-- Wilhelm-Übersetzung aller 64 Hexagramme inkl. Urteil, Bild, Bedeutung,
-  wandelnden Linien (übernommen aus `_archiv/Yijing_6`)
-- Chinesische Schriftzeichen + Pīnyīn pro Hexagramm
-  (aus `_archiv/yijing_5`)
-- Trigramme als Stammdaten mit Familie, Natur, Jahreszeit, Himmelsrichtung
-  (aus `_archiv/yijing_5`)
-- Bild-Assoziationen für 19 Hexagramme (aus `_archiv/yijing_3`)
-- LLM-Adapter für Ollama (native API) und OpenAI-kompatibel (MLX, LM
+- Initial static-site build with the three-coin method
+- Wilhelm translation of all 64 hexagrams incl. the Judgment, the Image,
+  meaning, changing lines (taken from `_archiv/Yijing_6`)
+- Chinese characters + Pīnyīn per hexagram
+  (from `_archiv/yijing_5`)
+- Trigrams as master data with family, nature, season, cardinal direction
+  (from `_archiv/yijing_5`)
+- Image associations for 19 hexagrams (from `_archiv/yijing_3`)
+- LLM adapter for Ollama (native API) and OpenAI-compatible (MLX, LM
   Studio, vLLM, OpenClaw)
-- Streaming-Antwort mit getrennter Reasoning-/Thinking-Anzeige
-- Auto-Discovery typischer lokaler LLM-Endpunkte beim ersten Start
-- Reasoning-Toggle (an/aus/auto) pro Endpunkt + Override pro Wurf
-- „Reasoning testen"-Knopf im Settings-Modal
-- Markdown-Rendering der LLM-Antwort (eigener kleiner Parser)
-- Verlauf in localStorage, einzelne Würfe via URL-Hash verlinkbar
-- Markdown-Export der Reading
-- Druckfreundliches PDF-Layout via `@media print`
-- Dev-Server mit `Cache-Control: no-store`
-- Dokumentation: `docs/ARCHITECTURE.md`, `docs/DATA.md`, `docs/LLM.md`,
+- Streaming response with separate reasoning/thinking display
+- Auto-discovery of typical local LLM endpoints on first start
+- Reasoning toggle (on/off/auto) per endpoint + override per reading
+- "Test reasoning" button in the settings modal
+- Markdown rendering of the LLM response (own small parser)
+- History in localStorage, individual readings linkable via URL hash
+- Markdown export of the reading
+- Print-friendly PDF layout via `@media print`
+- Dev server with `Cache-Control: no-store`
+- Documentation: `docs/ARCHITECTURE.md`, `docs/DATA.md`, `docs/LLM.md`,
   `docs/DEVELOPMENT.md`, `AGENTS.md`, `CONTRIBUTING.md`,
   `LICENSE` (AGPL-3.0-or-later), `LICENSE-DOCS` (CC BY-SA 4.0)
-- PWA-Unterstützung: Web-App-Manifest, Icon-Set (favicon, Apple-Touch-
-  Icon, maskable Icons), Theme-Color — die Seite ist installierbar und
-  bekommt ein Homescreen-/Dock-Icon
-- Offline-Betrieb über Service Worker (network-first) — die App lädt
-  und läuft nach dem ersten Besuch ohne Internet
-- Theme-Umschalter (Dark / Light / System) im Header, Auswahl bleibt
-  in localStorage erhalten
-- macOS-App (`scripts/build-macos-app.sh`): bündelt das Orakel als
-  doppelklickbare `Yijing.app` — native Swift-App mit eigenem Fenster
-  (WKWebView), öffnet sich eigenständig statt als Browser-Tab
+- PWA support: web app manifest, icon set (favicon, Apple touch
+  icon, maskable icons), theme color — the site is installable and
+  gets a home-screen/dock icon
+- Offline operation via service worker (network-first) — the app loads
+  and runs after the first visit without internet
+- Theme switcher (Dark / Light / System) in the header, the selection is
+  kept in localStorage
+- macOS app (`scripts/build-macos-app.sh`): bundles the oracle as a
+  double-clickable `Yijing.app` — native Swift app with its own window
+  (WKWebView), opens independently instead of as a browser tab
 
-### Bekannte Fragen
+### Known issues
 
-- Auto-Discovery probiert nur drei feste URLs. Eigene lokale Endpunkte
-  (z.B. abweichende Ports) müssen manuell angelegt werden.
-- Bild-Assoziationen sind nur für 19/64 Hexagramme vorhanden.
-- Verlauf-Einträge vor Version mit UUID lassen sich nicht via Link
-  abrufen (alte Einträge im Verlauf ohne `id`).
+- Auto-discovery only tries three fixed URLs. Custom local endpoints
+  (e.g. differing ports) must be created manually.
+- Image associations are only available for 19/64 hexagrams.
+- History entries from before the version with UUID cannot be retrieved
+  via link (old entries in the history without `id`).

@@ -1,8 +1,8 @@
-# Architektur
+# Architecture
 
-Eine Übersicht über Aufbau und Datenfluss des Yijing-Orakels.
+An overview of the structure and data flow of the Yijing oracle.
 
-## Übersicht
+## Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -10,13 +10,13 @@ Eine Übersicht über Aufbau und Datenfluss des Yijing-Orakels.
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐    │
 │  │   app.js     │   │   llm.js     │   │ markdown.js  │    │
 │  │  (UI, Cast,  │◀──│   (Ollama,   │   │  (Markdown→  │    │
-│  │   Verlauf)   │   │   OpenAI)    │   │    HTML)     │    │
+│  │   History)   │   │   OpenAI)    │   │    HTML)     │    │
 │  └──────┬───────┘   └──────┬───────┘   └──────────────┘    │
 │         │                  │                                │
 │         ▼                  ▼                                │
 │  ┌──────────────┐   ┌──────────────┐                       │
 │  │ localStorage │   │  fetch() →   │                       │
-│  │  (Verlauf,   │   │  Streaming   │                       │
+│  │  (History,   │   │  Streaming   │                       │
 │  │  Endpoints)  │   └──────┬───────┘                       │
 │  └──────────────┘          │                                │
 └────────────────────────────┼────────────────────────────────┘
@@ -33,134 +33,135 @@ Eine Übersicht über Aufbau und Datenfluss des Yijing-Orakels.
                   │   Static Server                  │
                   │   • Dev: python3 (scripts/       │
                   │     serve.py)                    │
-                  │   • macOS-App: Swift NWListener  │
+                  │   • macOS app: Swift NWListener  │
                   │     (StaticServer.swift)         │
                   │   serves: web/, data/, sw.js     │
                   │   Cache-Control: no-store        │
                   └──────────────────────────────────┘
 ```
 
-## Module
+## Modules
 
-### `web/app.js` (~1000 Zeilen)
+### `web/app.js` (~1000 lines)
 
-Frontend-Hauptmodul. Enthält:
+Main frontend module. Contains:
 
-- **Cast-Mechanik:** `tossLine()` (Drei-Münzen-Wurf), `castHypergram()`,
+- **Cast mechanics:** `tossLine()` (three-coin cast), `castHypergram()`,
   `lineState()`, `hexagramFromLines()`, `kingWenFromBinary()`
-- **King-Wen-Lookup:** `BINARY_TO_KING_WEN` (bottom-to-top Binärstring →
-  King-Wen-Nummer 1–64)
+- **King Wen lookup:** `BINARY_TO_KING_WEN` (bottom-to-top binary string →
+  King Wen number 1–64)
 - **Rendering:** `showReading()`, `renderHexCard()`, `renderHexFigure()`,
   `renderChangingLines()`, `renderTrigramDetails()`
-- **Verlauf:** `loadHistory()`, `saveHistory()`, `renderHistory()`,
-  `applyHashIfAny()` (URL-Hash-Routing)
+- **History:** `loadHistory()`, `saveHistory()`, `renderHistory()`,
+  `applyHashIfAny()` (URL hash routing)
 - **Settings:** `renderEndpointList()`, `openSettings()`, `closeSettings()`
-- **LLM-Interpretation:** `runInterpretation()` mit Streaming + Reasoning-
-  Anzeige
-- **Export:** `buildMarkdownExport()`, `downloadFile()`, Print-Handler
-- **Theme:** `applyTheme()` / `initTheme()` — Dark/Light/System-Umschaltung
-  über `data-theme`; außerdem die Service-Worker-Registrierung
+- **LLM interpretation:** `runInterpretation()` with streaming + reasoning
+  display
+- **Export:** `buildMarkdownExport()`, `downloadFile()`, print handler
+- **Theme:** `applyTheme()` / `initTheme()` — dark/light/system switching
+  via `data-theme`; also the service-worker registration
 
 ### `web/llm.js`
 
-LLM-Adapter mit zwei Backend-Klassen:
+LLM adapter with two backend classes:
 
-- `OllamaClient` — nutzt Ollamas native API. Streaming via ND-JSON
-  (eine JSON-Zeile pro Token).
-- `OpenAIClient` — OpenAI-kompatibles `/v1/chat/completions`-Schema.
+- `OllamaClient` — uses Ollama's native API. Streaming via ND-JSON
+  (one JSON line per token).
+- `OpenAIClient` — OpenAI-compatible `/v1/chat/completions` schema.
   Streaming via Server-Sent Events (SSE).
 
-Beide implementieren dieselbe `chatStream({ model, messages, thinking,
-onToken, onThinking, signal })`-Schnittstelle. Thinking-/Reasoning-Tokens
-werden separat an `onThinking()` geroutet, sodass das UI sie in einem
-eigenen Block anzeigen kann.
+Both implement the same `chatStream({ model, messages, thinking,
+onToken, onThinking, signal })` interface. Thinking/reasoning tokens
+are routed separately to `onThinking()`, so the UI can show them in a
+dedicated block.
 
-Außerdem im Modul:
+Also in the module:
 
-- `Endpoints` — Verwaltung der Endpoint-Liste in `localStorage`
-- `SystemPrompt` — System-Prompt für die Interpretation (Default mit
-  Wilhelm-Tradition)
-- `testThinkingMode()` — sendet zwei Mini-Anfragen (on/off) und prüft,
-  ob das Modell tatsächlich Reasoning-Tokens emittiert
-- `buildUserPrompt()` — komponiert den Nutzer-Prompt aus Frage,
-  Hexagramm-Daten und wandelnden Linien
+- `Endpoints` — manages the endpoint list in `localStorage`
+- `SystemPrompt` — system prompt for the interpretation (default rooted in
+  the Wilhelm tradition)
+- `testThinkingMode()` — sends two mini-requests (on/off) and checks
+  whether the model actually emits reasoning tokens
+- `buildUserPrompt()` — composes the user prompt from the question,
+  hexagram data, and changing lines
 
 ### `web/markdown.js`
 
-Minimaler streaming-tauglicher Markdown→HTML-Renderer. Unterstützt
-ATX-Headings (`#…######`), `**bold**`, `*italic*`, ``inline code``, fenced
-code blocks, Listen, Blockquotes, Absätze, horizontale Linien, einfache
-Links.
+Minimal streaming-capable Markdown→HTML renderer. Supports
+ATX headings (`#…######`), `**bold**`, `*italic*`, ``inline code``, fenced
+code blocks, lists, blockquotes, paragraphs, horizontal rules, simple
+links.
 
-Sicherheit: HTML wird zuerst escaped, dann markdown-formatiert. Links nur
-mit `http(s):` und `mailto:` zugelassen.
+Security: HTML is escaped first, then Markdown-formatted. Links allowed
+only with `http(s):` and `mailto:`.
 
 ### `web/style.css`
 
-Farben sind durchgängig CSS-Variablen (`:root`). Dark ist der Default;
-`:root[data-theme="light"]` überschreibt das Variablen-Set für den
-Light-Modus. Drei Layout-Modi:
+Colors are CSS variables throughout (`:root`). Dark is the default;
+`:root[data-theme="light"]` overrides the variable set for the
+light mode. Three layout modes:
 
-- **Bildschirm** (Default) — serifenbetonte Typografie, Dark oder Light
-  je nach Theme-Auswahl
-- **Mobile** (≤ 540 px) — Hexagramme stapeln vertikal
-- **Print** (`@media print`) — heller Hintergrund, keine Rahmen, alle
-  `<details>` aufgeklappt (JS-seitig zusätzlich erzwungen)
+- **Screen** (default) — serif-forward typography, dark or light
+  depending on the theme selection
+- **Mobile** (≤ 540 px) — hexagrams stack vertically
+- **Print** (`@media print`) — light background, no borders, all
+  `<details>` expanded (additionally enforced on the JS side)
 
 ### `sw.js`
 
-Service Worker im Repo-Root. Cacht same-origin-GET-Requests
-network-first: online wird stets frisch geladen, der Cache dient als
-Offline-Reserve — die App lädt und läuft nach dem ersten Besuch ohne
-Internet. Liegt im Root, damit sein Scope `web/` und `data/` umfasst.
+Service worker at the repo root. Caches same-origin GET requests
+network-first: online it always loads fresh, the cache serving as an
+offline fallback — the app loads and runs without internet after the
+first visit. It lives at the root so that its scope covers `web/` and
+`data/`.
 
 ### `web/manifest.webmanifest` + `web/icons/`
 
-Web-App-Manifest und Icon-Set — machen die Seite als PWA installierbar
-(Homescreen-/Dock-Icon, Standalone-Anzeige, Theme-Color).
+Web app manifest and icon set — make the site installable as a PWA
+(home-screen/dock icon, standalone display, theme color).
 
 ### `scripts/build_data.py`
 
-Konsolidiert die Hexagramm-Daten aus drei `_archiv/`-Quellen in zwei
-JSONs. Normalisiert zwei Schema-Varianten der Wilhelm-JSONs (Hexagramm 16
-hat ein abweichendes Schema), mergt chinesische Schriftzeichen und Pīnyīn,
-extrahiert Bild-Assoziationen aus Dateinamen.
+Consolidates the hexagram data from three `_archiv/` sources into two
+JSONs. Normalizes two schema variants of the Wilhelm JSONs (hexagram 16
+has a deviating schema), merges Chinese characters and Pīnyīn,
+extracts image associations from filenames.
 
-Siehe [`docs/DATA.md`](DATA.md) für Detail.
+See [`docs/DATA.md`](DATA.md) for detail.
 
 ### `scripts/serve.py`
 
-Python-basierter Dev-HTTP-Server. Sendet `Cache-Control: no-store` —
-verhindert das Caching alter JS-Modul-Versionen während der Entwicklung.
-**Nur fürs Dev-Setup (`./serve.sh`); die macOS-App bringt einen eigenen
-Swift-Server mit (siehe `scripts/macos-app/StaticServer.swift`).**
+Python-based dev HTTP server. Sends `Cache-Control: no-store` —
+prevents caching of stale JS module versions during development.
+**For the dev setup only (`./serve.sh`); the macOS app ships its own
+Swift server (see `scripts/macos-app/StaticServer.swift`).**
 
 ### `scripts/macos-app/StaticServer.swift`
 
-Minimaler HTTP/1.1-Server in Swift (Network.framework / `NWListener`).
-GET/HEAD only, MIME-Map, Pfad-Traversal-Schutz, `Cache-Control: no-store`
-analog zu `serve.py`. Wird von der gebündelten `Yijing.app` benutzt, um
-die Bundle-Resources (`web/`, `data/`, `sw.js`) lokal an die WKWebView
-auszuliefern — keine Python-Abhängigkeit auf der Nutzerseite.
+Minimal HTTP/1.1 server in Swift (Network.framework / `NWListener`).
+GET/HEAD only, MIME map, path-traversal protection, `Cache-Control: no-store`
+analogous to `serve.py`. Used by the bundled `Yijing.app` to
+serve the bundle resources (`web/`, `data/`, `sw.js`) locally to the
+WKWebView — no Python dependency on the user side.
 
-## Datenfluss eines Wurfs
+## Data Flow of a Reading
 
 ```
-  Klick "Münzen werfen"
+  Click "Cast Coins"
          │
          ▼
-  castHypergram()           → 6 Linien mit Werten 6/7/8/9
+  castHypergram()           → 6 lines with values 6/7/8/9
          │
          ▼
-  tossAnimated()            → animiert die 6 Linien nacheinander ins DOM
+  tossAnimated()            → animates the 6 lines one after another into the DOM
          │
          ▼
   showReading()
     │
-    ├── hexagramFromLines(lines, false) → "111010" (Binär, bottom-up)
-    ├── hexagramFromLines(lines, true)  → "111000" (Zielbild)
-    ├── kingWenFromBinary("111010")     → 5  (Hex Sü/Warten)
-    ├── kingWenFromBinary("111000")     → 11 (Hex Tai/Friede)
+    ├── hexagramFromLines(lines, false) → "111010" (binary, bottom-up)
+    ├── hexagramFromLines(lines, true)  → "111000" (resulting hexagram)
+    ├── kingWenFromBinary("111010")     → 5  (Hex Hsü/Waiting)
+    ├── kingWenFromBinary("111000")     → 11 (Hex Tai/Peace)
     │
     ├── HEXAGRAMS[5]  → primaryHex
     ├── HEXAGRAMS[11] → resultingHex
@@ -176,7 +177,7 @@ auszuliefern — keine Python-Abhängigkeit auf der Nutzerseite.
     └── CURRENT_READING = { primaryHex, resultingHex, changingIndices, question }
          │
          ▼
-  User klickt "Interpretieren"
+  User clicks "Interpret"
          │
          ▼
   runInterpretation()
@@ -186,56 +187,56 @@ auszuliefern — keine Python-Abhängigkeit auf der Nutzerseite.
     ├── client = makeClient(endpoint)
     └── client.chatStream({ model, messages, thinking, onToken, onThinking })
          │
-         ├── onThinking(text) → fügt zu Reasoning-<details> hinzu
+         ├── onThinking(text) → appends to reasoning <details>
          └── onToken(text) → renderMarkdown(buffer) → innerHTML
 ```
 
-## Persistenz
+## Persistence
 
-Alle Daten leben im `localStorage` unter den Keys:
+All data lives in `localStorage` under the keys:
 
-| Key | Inhalt |
+| Key | Content |
 |---|---|
-| `yijing-history-v1` | Array der letzten 20 Würfe (mit UUID, Frage, Hexagrammen, Linien-Werten) |
-| `yijing-endpoints-v1` | Array konfigurierter LLM-Endpunkte |
-| `yijing-endpoint-selected-v1` | Aktuell gewählter Endpunkt (UUID) |
-| `yijing-system-prompt-v1` | Anpasster System-Prompt (nur wenn vom Default abweichend) |
-| `yijing-default-thinking` | Globaler Reasoning-Default (`"default" | "on" | "off"`) |
-| `yijing-theme` | Theme-Auswahl (`"dark" | "light" | "system"`) |
+| `yijing-history-v1` | Array of the last 20 readings (with UUID, question, hexagrams, line values) |
+| `yijing-endpoints-v1` | Array of configured LLM endpoints |
+| `yijing-endpoint-selected-v1` | Currently selected endpoint (UUID) |
+| `yijing-system-prompt-v1` | Customized system prompt (only when it differs from the default) |
+| `yijing-default-thinking` | Global reasoning default (`"default" | "on" | "off"`) |
+| `yijing-theme` | Theme selection (`"dark" | "light" | "system"`) |
 
-Keine Migration vorhanden — Schemaänderungen brauchen eine neue Version
-im Key-Namen (`v2`, `v3`, …) und Fallback-Logik.
+No migration in place — schema changes need a new version in the key
+name (`v2`, `v3`, …) and fallback logic.
 
-## URL-Schema
+## URL Scheme
 
-Es gibt nur einen URL-Hash:
+There is only one URL hash:
 
 ```
 #r=<uuid>
 ```
 
-Beim Laden: passender Eintrag aus `localStorage` wird wiederhergestellt
-(`applyHashIfAny()`). Beim Wurf wird der Hash neu gesetzt
-(`history.replaceState`, kein Scroll-Sprung). Beim Reset wird der Hash
-entfernt.
+On load: the matching entry from `localStorage` is restored
+(`applyHashIfAny()`). On a reading the hash is set anew
+(`history.replaceState`, no scroll jump). On reset the hash is
+removed.
 
-`hashchange`-Event triggert `applyHashIfAny()` für Browser-Back-Button.
+The `hashchange` event triggers `applyHashIfAny()` for the browser back button.
 
-## Sicherheitsannahmen
+## Security Assumptions
 
-- Die App ist **single-tenant, single-user** — kein Auth, keine Sessions,
-  keine Cross-User-Daten.
-- LLM-Server laufen **lokal** auf vertrauenswürdigen Ports — der Code
-  vertraut den Server-Antworten.
-- Der Dev-Server (`scripts/serve.py`) und der Swift-Static-Server der
-  macOS-App binden explizit auf `127.0.0.1` / Loopback.
-- Markdown wird **escaped + sanitized** vor dem Rendern. Links nur mit
-  erlaubtem Schema (`http(s):`, `mailto:`).
-- WKWebView in der macOS-App hat eine Scheme-Allowlist (`http`,
-  `https`, `about`) — externe Links öffnen im Standard-Browser, nicht
-  im App-Fenster.
-- API-Keys (für nicht-lokale OpenAI-kompatible Endpunkte) liegen im
-  `localStorage` — also auf dem Gerät. Nicht synchronisiert.
+- The app is **single-tenant, single-user** — no auth, no sessions,
+  no cross-user data.
+- LLM servers run **locally** on trusted ports — the code
+  trusts the server responses.
+- The dev server (`scripts/serve.py`) and the Swift static server of the
+  macOS app explicitly bind to `127.0.0.1` / loopback.
+- Markdown is **escaped + sanitized** before rendering. Links only with
+  an allowed scheme (`http(s):`, `mailto:`).
+- The WKWebView in the macOS app has a scheme allowlist (`http`,
+  `https`, `about`) — external links open in the default browser, not
+  in the app window.
+- API keys (for non-local OpenAI-compatible endpoints) live in
+  `localStorage` — i.e. on the device. Not synced.
 
-Sicherheitsrelevante Probleme bitte nicht öffentlich melden — siehe
+Please do not report security-relevant issues publicly — see
 [`../SECURITY.md`](../SECURITY.md).

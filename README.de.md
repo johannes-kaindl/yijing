@@ -147,7 +147,7 @@ englischen Standardliteratur (the superior man, the great man, the
 noble, the abyss, the well, the receptive, the creative …) —
 vergleichbar mit Cary F. Baynes' 1950er-Übersetzung, aber in eigenen
 Worten. Übersetzt mit Claude Opus 4.7, parallel über acht Subagenten.
-Schema und Generierungs-Details: [`docs/DATA.md`](docs/DATA.md#englische-variante-datahexagramsenjson).
+Schema und Generierungs-Details: [`docs/DATA.md`](docs/DATA.md#english-variant-datahexagramsenjson).
 
 ## Lokale LLM-Anbindung
 
@@ -173,7 +173,7 @@ launchctl setenv OLLAMA_ORIGINS "*"
 ```
 
 MLX und LM Studio sind standardmäßig offen. Details und Fehlersuche:
-[`docs/LLM.md`](docs/LLM.md#cors-fehlersuche).
+[`docs/LLM.md`](docs/LLM.md#cors-troubleshooting).
 
 ## Wie ein Wurf abläuft
 

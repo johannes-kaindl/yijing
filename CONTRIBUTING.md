@@ -3,120 +3,120 @@ SPDX-FileCopyrightText: 2026 Johannes Kaindl
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-# Beitragen
+# Contributing
 
-Schön, dass du mitmachen möchtest. Yijing-Orakel ist ein Hobbyprojekt mit
-klaren Architekturentscheidungen — die wichtigsten stehen in
-[`AGENTS.md`](AGENTS.md) und [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
-Bitte vor größeren Änderungen lesen.
+Glad you want to join in. Yijing Oracle is a hobby project with
+clear architectural decisions — the most important ones are in
+[`AGENTS.md`](AGENTS.md) and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Please read them before making larger changes.
 
-## Was gut ankommt
+## What goes over well
 
-- **Bugfixes** mit kleinem, klar abgegrenztem Diff
-- **Daten-Verbesserungen** (saubere Wilhelm-Quellen, bessere Pīnyīn-
-  Transliterationen, Trigramm-Stammdaten)
-- **Übersetzungen der UI** (aktuell nur Deutsch)
-- **Sauberere Print-Styles** für PDF-Export
-- **Mehr LLM-Backend-Adapter** (vLLM, llama.cpp HTTP-Server, etc.)
-- **A11y-Verbesserungen** (ARIA-Labels, Keyboard-Navigation, Screenreader)
-- **Doku-Patches** — Tippfehler, präzisere Erklärungen, neue Diagramme
+- **Bugfixes** with a small, clearly scoped diff
+- **Data improvements** (clean Wilhelm sources, better Pīnyīn
+  transliterations, trigram master data)
+- **UI translations** (currently German only)
+- **Cleaner print styles** for PDF export
+- **More LLM backend adapters** (vLLM, llama.cpp HTTP server, etc.)
+- **A11y improvements** (ARIA labels, keyboard navigation, screen reader)
+- **Doc patches** — typos, more precise explanations, new diagrams
 
-## Was nicht gut passt
+## What does not fit well
 
-- **Frameworks** (React/Vue/Svelte/…) — wir bleiben bewusst Vanilla
-- **Build-Steps** (Webpack/Vite/…) — kein npm im Repo
-- **TypeScript** — JSDoc reicht
-- **Backend-Services** — die App ist Static-Site
-- **Cloud-LLM-Anbindungen ohne klaren Opt-in** — Default sind lokale Modelle
+- **Frameworks** (React/Vue/Svelte/…) — we deliberately stay Vanilla
+- **Build steps** (Webpack/Vite/…) — no npm in the repo
+- **TypeScript** — JSDoc is enough
+- **Backend services** — the app is a static site
+- **Cloud LLM connections without a clear opt-in** — the default is local models
 
 ## Branches
 
-Das Repo hat zwei Branches:
+The repo has two branches:
 
-- **`main`** — die Entwicklung. PRs gehen immer hier rein.
-- **`pages`** — das Deployment für [Codeberg Pages](https://jkaindl.codeberg.page/Yijing/).
-  Hat ein flaches Layout (Inhalt von `web/` direkt im Root) und wird vom
-  Maintainer manuell aus `main` nachgezogen. **Als Contributor musst du
-  `pages` nicht selbst anfassen** — fokussiere dich auf `main`.
+- **`main`** — development. PRs always go in here.
+- **`pages`** — the deployment for [Codeberg Pages](https://jkaindl.codeberg.page/Yijing/).
+  Has a flat layout (contents of `web/` directly in the root) and is pulled
+  in manually from `main` by the maintainer. **As a contributor you do not
+  need to touch `pages` yourself** — focus on `main`.
 
-Details zur Sync-Konvention stehen in [`AGENTS.md`](AGENTS.md).
+Details on the sync convention are in [`AGENTS.md`](AGENTS.md).
 
-## Issue oder PR?
+## Issue or PR?
 
-- **Issue zuerst** bei größeren Änderungen, neuen Features, Architektur-
-  fragen — verwende die Vorlagen unter
-  [Neue Issue → Vorlage wählen](https://codeberg.org/jkaindl/Yijing/issues/new/choose).
-- **Direkt PR** bei Tippfehlern, kleinen Daten-Korrekturen, offensichtlichen
-  Bugfixes.
-- **Sicherheitsthemen** → niemals öffentliches Issue, sondern siehe
+- **Issue first** for larger changes, new features, architecture
+  questions — use the templates under
+  [New issue → choose template](https://codeberg.org/jkaindl/Yijing/issues/new/choose).
+- **PR directly** for typos, small data corrections, obvious
+  bugfixes.
+- **Security topics** → never a public issue, but see
   [`SECURITY.md`](SECURITY.md).
 
-## Lokales Setup
+## Local setup
 
 ```bash
 git clone https://codeberg.org/jkaindl/Yijing.git yijing
 cd yijing
-./serve.sh                   # öffnet http://localhost:8765/web/index.html
+./serve.sh                   # opens http://localhost:8765/web/index.html
 ```
 
-Voraussetzung: Python 3.9+. Für die KI-Deutung zusätzlich Ollama oder
-ein OpenAI-kompatibler lokaler Server (siehe [`docs/LLM.md`](docs/LLM.md)).
-Zum Bauen der macOS-App: Xcode Command Line Tools (siehe
+Requirement: Python 3.9+. For the AI interpretation you additionally need Ollama or
+an OpenAI-compatible local server (see [`docs/LLM.md`](docs/LLM.md)).
+To build the macOS app: Xcode Command Line Tools (see
 [`docs/MACOS-APP.md`](docs/MACOS-APP.md)).
 
-## PR-Checkliste
+## PR checklist
 
-- [ ] `node --check web/*.js` ist sauber
-- [ ] Bei Änderungen an King-Wen-Lookups / Daten-Schema:
-      `node scripts/test-kingwen.mjs` ist grün
-- [ ] Im Browser getestet (hard-reload, Wurf, ggf. KI-Interpretation)
-- [ ] CSS-Änderungen in Desktop + Mobile + Print-Vorschau und in
-      beiden Themes (Dark/Light) geprüft
-- [ ] Bei Daten-Änderungen: `python3 scripts/build_data.py` läuft ohne
-      Fehler, Zähler im Output stimmig (64/64 Hexagramme, 64/64
-      Schriftzeichen)
-- [ ] Bei macOS-App-Änderungen: `./scripts/build-macos-app.sh` baut
-      durch, App startet, zeigt Inhalt, beendet sauber
-- [ ] `CHANGELOG.md` ergänzt (Sektion `[Unreleased]`)
-- [ ] Bei Änderungen an `web/`, `sw.js` oder `data/`: im PR-Kommentar
-      kurz vermerken, damit der `pages`-Sync nach Merge nicht
-      vergessen wird (macht der Maintainer)
-- [ ] Commit-Messages aussagekräftig (warum, nicht was)
+- [ ] `node --check web/*.js` is clean
+- [ ] For changes to King Wen lookups / data schema:
+      `node scripts/test-kingwen.mjs` is green
+- [ ] Tested in the browser (hard reload, cast, AI interpretation if applicable)
+- [ ] CSS changes checked in desktop + mobile + print preview and in
+      both themes (dark/light)
+- [ ] For data changes: `python3 scripts/build_data.py` runs without
+      errors, counters in the output consistent (64/64 hexagrams, 64/64
+      characters)
+- [ ] For macOS app changes: `./scripts/build-macos-app.sh` builds
+      through, app starts, shows content, exits cleanly
+- [ ] `CHANGELOG.md` updated (`[Unreleased]` section)
+- [ ] For changes to `web/`, `sw.js` or `data/`: note briefly in the PR
+      comment so that the `pages` sync is not forgotten after the merge
+      (the maintainer does it)
+- [ ] Commit messages meaningful (why, not what)
 
-## Commit-Stil
+## Commit style
 
-- Erste Zeile: Imperativ, ~70 Zeichen
-- Leerzeile
-- Body: warum, Kontext, ggf. Caveats
-- Co-Autoren-Trailer erlaubt (z.B. für KI-Assistenz)
+- First line: imperative, ~70 characters
+- Blank line
+- Body: why, context, caveats if applicable
+- Co-author trailers allowed (e.g. for AI assistance)
 
-Beispiel:
+Example:
 
 ```
-Fix CORS-Setup-Hinweis für Ollama auf macOS
+Fix CORS setup note for Ollama on macOS
 
-OLLAMA_ORIGINS muss vor `ollama serve` exportiert sein — die README hatte
-das in der falschen Reihenfolge dokumentiert.
+OLLAMA_ORIGINS must be exported before `ollama serve` — the README had
+documented this in the wrong order.
 ```
 
-## Lizenz von Beiträgen
+## License of contributions
 
-Mit dem Öffnen eines PRs erklärst du dich einverstanden, dass dein
-Beitrag unter denselben Lizenzen veröffentlicht wird wie das
-Gesamtprojekt:
+By opening a PR you agree that your
+contribution will be published under the same licenses as the
+overall project:
 
-- **Code-Änderungen** unter [AGPL-3.0-or-later](LICENSE)
-- **Doku-Änderungen** unter [CC BY-SA 4.0](LICENSE-DOCS)
+- **Code changes** under [AGPL-3.0-or-later](LICENSE)
+- **Doc changes** under [CC BY-SA 4.0](LICENSE-DOCS)
 
-Neue Code-Dateien bitte mit SPDX-Header anlegen:
+Please create new code files with an SPDX header:
 
 ```js
-// SPDX-FileCopyrightText: 2026 <Dein Name>
+// SPDX-FileCopyrightText: 2026 <Your Name>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 ```
 
 ## Code of Conduct
 
-Sei nett, sei präzise, sei verbindlich. Bei Konflikten: erst das Problem
-verstehen, dann reagieren. Wir sind hier in einem Hobby-Kontext — ein
-guter Ton ist wichtiger als jedes Feature.
+Be kind, be precise, be reliable. In case of conflict: first understand
+the problem, then react. We are in a hobby context here — a
+good tone matters more than any feature.

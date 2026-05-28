@@ -145,7 +145,7 @@ standard literature (the superior man, the great man, the noble, the
 abyss, the well, the receptive, the creative …) — comparable to Cary F.
 Baynes’ 1950s translation, but in its own words. Translated with Claude
 Opus 4.7, in parallel across eight subagents. Schema and generation
-details: [`docs/DATA.md`](docs/DATA.md#englische-variante-datahexagramsenjson).
+details: [`docs/DATA.md`](docs/DATA.md#english-variant-datahexagramsenjson).
 
 ## Local LLM connection
 
@@ -171,7 +171,7 @@ launchctl setenv OLLAMA_ORIGINS "*"
 ```
 
 MLX and LM Studio are open by default. Details and troubleshooting:
-[`docs/LLM.md`](docs/LLM.md#cors-fehlersuche).
+[`docs/LLM.md`](docs/LLM.md#cors-troubleshooting).
 
 ## How a reading works
 

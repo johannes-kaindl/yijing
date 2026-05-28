@@ -1,89 +1,89 @@
-# Entwicklungs-Setup
+# Development Setup
 
-## Voraussetzungen
+## Prerequisites
 
-- Python 3.9+ (für den Dev-Server)
-- Optional: Node.js (nur für `node --check` als Syntax-Linter)
-- Optional: Ollama oder MLX für die KI-Interpretation
-- Optional: Xcode Command Line Tools — nur zum Bauen der macOS-App
-  (`scripts/build-macos-app.sh`), siehe [`MACOS-APP.md`](MACOS-APP.md)
+- Python 3.9+ (for the dev server)
+- Optional: Node.js (only for `node --check` as a syntax linter)
+- Optional: Ollama or MLX for the AI interpretation
+- Optional: Xcode Command Line Tools — only for building the macOS app
+  (`scripts/build-macos-app.sh`), see [`MACOS-APP.md`](MACOS-APP.md)
 
-Keine npm-Dependencies, keine Build-Tools.
+No npm dependencies, no build tools.
 
-## Starten
+## Starting
 
 ```bash
 ./serve.sh
 ```
 
-öffnet `http://localhost:8765/web/index.html` automatisch. Der Server
-sendet `Cache-Control: no-store` — Browser laden Module bei jedem Reload
-neu.
+opens `http://localhost:8765/web/index.html` automatically. The server
+sends `Cache-Control: no-store` — browsers reload modules fresh on every
+reload.
 
-Alternativ ohne Auto-Open:
+Alternatively without auto-open:
 
 ```bash
 python3 scripts/serve.py
-# oder simpler:
+# or simpler:
 python3 -m http.server 8765
 ```
 
-`python3 -m http.server` setzt **keine no-cache-Header** — Browser cachen
-JS-Module dann aggressiv. Beim Entwickeln lieber `scripts/serve.py` nutzen.
+`python3 -m http.server` sets **no no-cache headers** — browsers then
+cache JS modules aggressively. When developing, prefer `scripts/serve.py`.
 
-## Verzeichnisstruktur
+## Directory Structure
 
 ```
 yijing/
-├── AGENTS.md              # Konventionen für KI-Sessions
-├── CHANGELOG.md           # Versionshistorie
-├── CONTRIBUTING.md        # Beitragshinweise
-├── LICENSE                # AGPL-3.0-or-later (Code)
-├── LICENSE-DOCS           # CC BY-SA 4.0 (Doku)
-├── README.md              # Einstieg
-├── sw.js                  # Service Worker (Offline-Caching)
-├── docs/                  # Diese Dokumentation
+├── AGENTS.md              # Conventions for AI sessions
+├── CHANGELOG.md           # Version history
+├── CONTRIBUTING.md        # Contribution notes
+├── LICENSE                # AGPL-3.0-or-later (code)
+├── LICENSE-DOCS           # CC BY-SA 4.0 (docs)
+├── README.md              # Getting started
+├── sw.js                  # Service worker (offline caching)
+├── docs/                  # This documentation
 │   ├── ARCHITECTURE.md
 │   ├── DATA.md
 │   ├── DEVELOPMENT.md
 │   ├── LLM.md
 │   └── MACOS-APP.md
 ├── data/
-│   ├── hexagrams.json     # 64 Hexagramme normalisiert
-│   └── trigrams.json      # 8 Trigramme als Stammdaten
+│   ├── hexagrams.json     # 64 hexagrams normalized
+│   └── trigrams.json      # 8 trigrams as master data
 ├── scripts/
-│   ├── build_data.py      # Daten aus _archiv/ konsolidieren
-│   ├── build-macos-app.sh # baut die macOS-App nach dist/
-│   ├── macos-app/         # Bausteine für den App-Build
-│   └── serve.py           # Dev-Server mit no-cache
-├── serve.sh               # Wrapper für serve.py + auto-open
+│   ├── build_data.py      # Consolidate data from _archiv/
+│   ├── build-macos-app.sh # builds the macOS app into dist/
+│   ├── macos-app/         # Building blocks for the app build
+│   └── serve.py           # Dev server with no-cache
+├── serve.sh               # Wrapper for serve.py + auto-open
 ├── web/
-│   ├── app.js             # UI, Cast, Verlauf, Settings, Theme
-│   ├── llm.js             # Ollama/OpenAI-Adapter
-│   ├── markdown.js        # Streaming-MD→HTML
-│   ├── index.html         # Single-Page-App
-│   ├── style.css          # Theme (Dark/Light) + Print-Layout
-│   ├── manifest.webmanifest  # PWA-Manifest
-│   └── icons/             # PWA-Icons
-└── _archiv/               # alte Anläufe (per .gitignore ausgeschlossen)
+│   ├── app.js             # UI, cast, history, settings, theme
+│   ├── llm.js             # Ollama/OpenAI adapter
+│   ├── markdown.js        # Streaming MD→HTML
+│   ├── index.html         # Single-page app
+│   ├── style.css          # Theme (dark/light) + print layout
+│   ├── manifest.webmanifest  # PWA manifest
+│   └── icons/             # PWA icons
+└── _archiv/               # old attempts (excluded via .gitignore)
 ```
 
-## Arbeitsablauf
+## Workflow
 
-### Code ändern
+### Changing Code
 
 1. Edit in `web/*.js`
-2. `node --check web/<file>.js` für schnelle Syntaxprüfung
-3. Browser-Tab hard-reload (Cmd+Shift+R)
-4. Im Browser: Wurf machen, Reading durchklicken
-5. Falls LLM-Code geändert: Interpretation mit Ollama und MLX testen
-6. Bei Änderungen an `web/app.js` (King-Wen-Lookup), `scripts/build_data.py`
-   oder `data/hexagrams.json`: `node scripts/test-kingwen.mjs` — prüft
-   die beiden Lookup-Tabellen und das JSON auf gegenseitige Konsistenz.
+2. `node --check web/<file>.js` for a quick syntax check
+3. Hard-reload the browser tab (Cmd+Shift+R)
+4. In the browser: make a reading, click through the reading
+5. If LLM code changed: test the interpretation with Ollama and MLX
+6. On changes to `web/app.js` (King Wen lookup), `scripts/build_data.py`
+   or `data/hexagrams.json`: `node scripts/test-kingwen.mjs` — checks
+   the two lookup tables and the JSON for mutual consistency.
 
-### Daten neu bauen
+### Rebuilding the Data
 
-Wenn sich Wilhelm-Texte oder Trigramm-Stammdaten ändern:
+When Wilhelm texts or trigram master data change:
 
 ```bash
 python3 scripts/build_data.py
@@ -97,45 +97,45 @@ OK: 8 Trigramme → data/trigrams.json
    Schriftzeichen: 64/64, Bild-Assoziationen: 19/64
 ```
 
-`Schriftzeichen: 64/64` und `Hexagramme: 64` müssen exakt stimmen. Bei
-Abweichungen das Build-Skript debuggen, nicht das JSON von Hand patchen.
+`Schriftzeichen: 64/64` and `Hexagramme: 64` must be exactly right. On
+discrepancies, debug the build script, do not patch the JSON by hand.
 
 ### CSS
 
-Layout-Modi prüfen:
+Check layout modes:
 
-- **Desktop**: Browser-Fenster ≥ 760 px breit
-- **Mobile**: Browser-Tools → Geräte-Emulation, Breite ≤ 540 px
-- **Print**: Cmd+P → „Als PDF sichern" — Vorschau prüfen
+- **Desktop**: browser window ≥ 760 px wide
+- **Mobile**: browser tools → device emulation, width ≤ 540 px
+- **Print**: Cmd+P → "Save as PDF" — check the preview
 
-Außerdem das Theme: Umschalter im Header (◐) durch Dark / Light /
-System klicken. Farben kommen aus den `:root`-Variablen, Light aus
+Also the theme: click the toggle in the header (◐) through dark / light /
+system. Colors come from the `:root` variables, light from
 `:root[data-theme="light"]`.
 
-### LLM-Anbindung testen
+### Testing the LLM Connection
 
-Im Settings-Modal:
+In the settings modal:
 
-- „Verbindung" — listet Modelle, schneller Sanity-Check
-- „Reasoning" — sendet `thinking=on`/`thinking=off`-Mini-Anfragen,
-  prüft ob Steuerung greift
+- "Connection" — lists models, quick sanity check
+- "Reasoning" — sends `thinking=on`/`thinking=off` mini requests,
+  checks whether the control takes effect
 
 ## Debugging
 
-### Browser-Konsole
+### Browser Console
 
-Cmd+Opt+I → Console. Fehler beim Init blocken die Event-Listener — wenn
-Buttons keine Aktion zeigen, ist meist hier eine Exception.
+Cmd+Opt+I → Console. Errors during init block the event listeners — when
+buttons show no action, there is usually an exception here.
 
-### Server-Logs
+### Server Logs
 
 ```bash
 tail -f /tmp/yijing-server.log
 ```
 
-(Wenn der Server mit `serve.sh` im Hintergrund läuft.)
+(When the server runs in the background via `serve.sh`.)
 
-### LLM-Stream im Klartext
+### LLM Stream in Plain Text
 
 ```bash
 # Ollama
@@ -154,86 +154,86 @@ curl -s http://localhost:8080/v1/chat/completions -d '{
 }' | head -10
 ```
 
-Bei MLX kommen `: keepalive`-Comment-Zeilen vor den eigentlichen
-SSE-`data:`-Zeilen — das ist normal.
+With MLX, `: keepalive` comment lines come before the actual
+SSE `data:` lines — that is normal.
 
-### Caching-Probleme
+### Caching Problems
 
-Symptom: Änderungen erscheinen erst nach mehreren Reloads. Browser cached
-ES-Module trotz `Cache-Control: no-store`.
+Symptom: changes appear only after several reloads. The browser caches
+ES modules despite `Cache-Control: no-store`.
 
-Fix: in DevTools → Network → „Disable cache" anhaken solange DevTools
-offen sind. Oder `?t=$(date +%s)` an die URL hängen.
+Fix: in DevTools → Network → check "Disable cache" as long as DevTools
+are open. Or append `?t=$(date +%s)` to the URL.
 
-Greift der Service Worker (`sw.js`), kann er zusätzlich alte Stände
-ausliefern. Beim Entwickeln: DevTools → Application → Service Workers →
-„Update on reload" aktivieren oder den Worker dort abmelden.
+If the service worker (`sw.js`) takes effect, it can additionally serve
+old states. When developing: DevTools → Application → Service Workers →
+enable "Update on reload" or unregister the worker there.
 
-## Code-Stil
+## Code Style
 
-- **Indentation:** 2 Leerzeichen für JS, 4 für Python
-- **Strings:** doppelte Anführungszeichen in JS, einfache in Python wo
-  praktisch
-- **Deutsche String-Literale** mit inneren Anführungszeichen: typografisch
-  setzen (`„…"`), nicht gerade (`"…"`). Sonst Syntax-Fehler.
-- **Kommentare:** nur wo das *warum* nicht aus dem Code lesbar ist
-- **JSDoc** für öffentliche Funktionen — Parameter, Rückgabewert, Hinweise
+- **Indentation:** 2 spaces for JS, 4 for Python
+- **Strings:** double quotes in JS, single in Python where
+  practical
+- **German string literals** with inner quotes: use typographic
+  ones (`„…"`), not straight (`"…"`). Otherwise syntax errors.
+- **Comments:** only where the *why* is not readable from the code
+- **JSDoc** for public functions — parameters, return value, notes
 
-## Release-Prozess
+## Release Process
 
-Versionierung folgt [SemVer](https://semver.org/lang/de/), Changelog
-folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/). Schritte
-für einen Release (am Beispiel `v1.1.1`):
+Versioning follows [SemVer](https://semver.org/), the changelog
+follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Steps
+for a release (using `v1.1.1` as an example):
 
-1. **CHANGELOG ziehen.** Sektion `[Unreleased]` umbenennen in
-   `[1.1.1] — YYYY-MM-DD`. Eine frische `[Unreleased]`-Sektion
-   darüber neu anlegen.
-2. **Version-Strings anpassen.** Footer in `web/index.html`
-   (z.B. „Yijing v1.1.1"). Sonst kommen Nutzer in die Verlegenheit,
-   sich zu fragen welche Version sie haben.
-3. **Commit + Tag.**
+1. **Pull the CHANGELOG.** Rename the `[Unreleased]` section to
+   `[1.1.1] — YYYY-MM-DD`. Create a fresh `[Unreleased]` section
+   above it.
+2. **Adjust the version strings.** Footer in `web/index.html`
+   (e.g. "Yijing v1.1.1"). Otherwise users are left wondering
+   which version they have.
+3. **Commit + tag.**
    ```bash
    git commit -am "Release v1.1.1: <Headline>"
-   git tag -a v1.1.1 -m "v1.1.1 — <kurze Headline>"
+   git tag -a v1.1.1 -m "v1.1.1 — <short headline>"
    git push origin main
    git push origin v1.1.1
    ```
-4. **DMG bauen.**
+4. **Build the DMG.**
    ```bash
    ./scripts/build-macos-app.sh
    # → dist/Yijing.dmg
    ```
-   Das Skript zieht den committeten Stand (`git archive HEAD`), nicht
-   das Arbeitsverzeichnis — Tag also vorher pushen, sonst landet ein
-   nicht-getaggter Stand in der App.
-5. **Codeberg-Release anlegen** (UI oder API):
+   The script pulls the committed state (`git archive HEAD`), not
+   the working directory — so push the tag first, otherwise an
+   untagged state ends up in the app.
+5. **Create a Codeberg release** (UI or API):
    ```bash
    TOKEN=…
    curl -X POST "https://codeberg.org/api/v1/repos/jkaindl/Yijing/releases" \
      -H "Authorization: token $TOKEN" \
      -H "Content-Type: application/json" \
      -d '{"tag_name":"v1.1.1","name":"v1.1.1 — <Headline>",
-          "body":"<Markdown-Notes aus CHANGELOG>"}'
+          "body":"<Markdown notes from CHANGELOG>"}'
    ```
-   Quirk: in seltenen Fällen meldet die API direkt nach Tag-Push
-   „HTTP 409 Release has no Tag" — Sekunden später durchprobieren,
-   dann mit `GET /releases` verifizieren statt blind auf den ersten
-   POST zu vertrauen.
-6. **DMG als Asset hochladen** (UI oder API mit
-   `POST .../releases/<id>/assets`). Download-URL kurz mit `curl -I`
-   verifizieren (HTTP 200).
-7. **Download-Links auf den neuen Tag aktualisieren.** Der Button im
-   `README.md` und der `href` des `#macDownload`-Buttons in
-   `web/index.html` zeigen auf eine versionierte URL
-   (`releases/download/<tag>/Yijing.dmg`) — Codeberg kennt keinen
-   `latest`-Alias für direkte Asset-Links. Der README-Status-Badge
-   für die Release-Version aktualisiert sich automatisch über
+   Quirk: in rare cases the API reports right after a tag push
+   "HTTP 409 Release has no Tag" — retry seconds later,
+   then verify with `GET /releases` instead of blindly trusting
+   the first POST.
+6. **Upload the DMG as an asset** (UI or API with
+   `POST .../releases/<id>/assets`). Briefly verify the download URL
+   with `curl -I` (HTTP 200).
+7. **Update the download links to the new tag.** The button in
+   `README.md` and the `href` of the `#macDownload` button in
+   `web/index.html` point to a versioned URL
+   (`releases/download/<tag>/Yijing.dmg`) — Codeberg has no
+   `latest` alias for direct asset links. The README status badge
+   for the release version updates automatically via
    `shields.io/gitea/v/release`.
-8. **Pages-Sync.** Wenn `web/`, `sw.js` oder `data/` betroffen waren:
+8. **Pages sync.** When `web/`, `sw.js` or `data/` were affected:
    ```bash
    ./scripts/sync-pages.sh
    ```
-   Das Skript legt automatisch einen Worktree an, spiegelt `web/` in
-   den Pages-Root, kopiert `data/` und `sw.js`, patcht die Pfade in
-   `app.js` (`../data/` → `data/`, `../sw.js` → `sw.js`), commited
-   und pusht mit SSH-Retry. No-op wenn pages bereits aktuell ist.
+   The script automatically creates a worktree, mirrors `web/` into
+   the pages root, copies `data/` and `sw.js`, patches the paths in
+   `app.js` (`../data/` → `data/`, `../sw.js` → `sw.js`), commits
+   and pushes with SSH retry. No-op when pages is already up to date.

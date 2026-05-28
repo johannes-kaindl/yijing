@@ -1,19 +1,19 @@
-# LLM-Integration
+# LLM Integration
 
-Wie das Yijing-Orakel mit lokalen LLM-Servern spricht.
+How the Yijing oracle talks to local LLM servers.
 
 ## Backends
 
-| Backend | Empfohlen für | Endpoint-Typ in der App |
+| Backend | Recommended for | Endpoint type in the app |
 |---|---|---|
-| **Ollama** | Hauptarbeitspferd; einfach zu installieren | `ollama` |
-| **MLX** (`mlx_lm.server`) | Apple Silicon — schnellere lokale Modelle | `openai` |
-| **LM Studio** | GUI-orientiert, einfacher Einstieg | `openai` |
-| **OpenClaw**, **vLLM**, … | Eigene OpenAI-kompatible Server | `openai` |
-| Hosted (Together, Anthropic, OpenAI direkt) | nicht unterstützt | — |
+| **Ollama** | Main workhorse; easy to install | `ollama` |
+| **MLX** (`mlx_lm.server`) | Apple Silicon — faster local models | `openai` |
+| **LM Studio** | GUI-oriented, easy entry point | `openai` |
+| **OpenClaw**, **vLLM**, … | Your own OpenAI-compatible servers | `openai` |
+| Hosted (Together, Anthropic, OpenAI directly) | not supported | — |
 
-Die App ruft alle Server **direkt aus dem Browser** auf — kein Proxy, kein
-Backend. Daher ist CORS entscheidend (siehe unten).
+The app calls all servers **directly from the browser** — no proxy, no
+backend. That's why CORS is crucial (see below).
 
 ## Setup
 
@@ -21,12 +21,12 @@ Backend. Daher ist CORS entscheidend (siehe unten).
 
 ```bash
 brew install ollama
-ollama pull llama3.2:latest     # oder ein anderes Modell
+ollama pull llama3.2:latest     # or another model
 OLLAMA_ORIGINS="*" ollama serve
 ```
 
-`OLLAMA_ORIGINS` muss gesetzt sein, sonst blockt der Browser die Requests
-mit CORS-Fehler. Permanent auf macOS:
+`OLLAMA_ORIGINS` must be set, otherwise the browser blocks the requests
+with a CORS error. Permanently on macOS:
 
 ```bash
 launchctl setenv OLLAMA_ORIGINS "*"
@@ -42,145 +42,144 @@ mlx_lm.server \
   --host 127.0.0.1
 ```
 
-MLX hat CORS standardmäßig auf `*` — kein zusätzliches Setup nötig.
+MLX has CORS set to `*` by default — no additional setup needed.
 
-> **Loopback statt `0.0.0.0`.** Bindet man den MLX-Server auf
-> `0.0.0.0`, ist er für alle Geräte im LAN erreichbar — bei einem
-> offenen Modell ohne Auth keine gute Idee. Yijing braucht nur
-> Loopback. Wenn du den Server bewusst LAN-weit anbieten willst:
-> Firewall vorschalten und/oder einen Reverse-Proxy mit Auth.
+> **Loopback instead of `0.0.0.0`.** If you bind the MLX server to
+> `0.0.0.0`, it is reachable by all devices on the LAN — with an
+> open model without auth, not a good idea. Yijing only needs
+> loopback. If you deliberately want to offer the server LAN-wide:
+> put a firewall in front and/or a reverse proxy with auth.
 
 ### LM Studio
 
-In den Settings → Developer → Local Server starten. Default-Port `1234`.
+Start it in the settings under → Developer → Local Server. Default port `1234`.
 
-## Endpunkte in der App konfigurieren
+## Configuring endpoints in the app
 
-1. ⚙ oben links öffnen
-2. „+ Endpunkt hinzufügen"
-3. Felder ausfüllen:
-   - **Name:** frei wählbar
-   - **Typ:** `Ollama` oder `OpenAI-kompatibel`
-   - **URL:** `http://localhost:11434` (Ollama) oder `http://localhost:8080/v1` (MLX)
-   - **API-Key:** leer für lokale Server
-4. „Hinzufügen"
-5. Optional: „Verbindung" und „Reasoning" zum Testen
-6. Standard-Modell auswählen
+1. Open ⚙ at the top left
+2. "+ Add endpoint"
+3. Fill in the fields:
+   - **Name:** freely choosable
+   - **Type:** `Ollama` or `OpenAI-compatible`
+   - **URL:** `http://localhost:11434` (Ollama) or `http://localhost:8080/v1` (MLX)
+   - **API key:** empty for local servers
+4. "Add"
+5. Optional: "Connection" and "Reasoning" for testing
+6. Select the default model
 
-Beim ersten Aufruf der App probiert die Auto-Discovery die typischen
-lokalen Endpunkte (11434, 8080/v1, 1234/v1) selbstständig — wenn was
-antwortet, wird der Endpoint automatisch angelegt.
+When the app is first opened, auto-discovery probes the typical
+local endpoints (11434, 8080/v1, 1234/v1) on its own — if something
+responds, the endpoint is created automatically.
 
-## Reasoning-/Thinking-Modus
+## Reasoning/thinking mode
 
-Viele moderne Modelle (Qwen3, Qwen3.5, Qwen3.6, Gemma4, DeepSeek, …)
-können in einem Reasoning-Modus laufen — sie emittieren interne
-Gedanken-Tokens vor der eigentlichen Antwort. Das Orakel zeigt diese in
-einem eigenen, gedimmten Aufklapper an, separat vom Antwort-Text.
+Many modern models (Qwen3, Qwen3.5, Qwen3.6, Gemma4, DeepSeek, …)
+can run in a reasoning mode — they emit internal thinking tokens
+before the actual response. The oracle shows these in a separate,
+dimmed expander, apart from the response text.
 
-### Steuerung pro Wurf
+### Control per cast
 
-Direkt neben dem Modell-Dropdown: **Reasoning: Default / An / Aus**.
+Right next to the model dropdown: **Reasoning: Default / On / Off**.
 
-| Modus | Verhalten |
+| Mode | Behavior |
 |---|---|
-| Default | Modell entscheidet (oder Endpoint-Default greift) |
-| An | Reasoning erzwingen (langsamer, oft präziser) |
-| Aus | Reasoning unterdrücken (schneller, knapper) |
+| Default | Model decides (or the endpoint default applies) |
+| On | Force reasoning (slower, often more precise) |
+| Off | Suppress reasoning (faster, more concise) |
 
-### Endpoint-Default
+### Endpoint default
 
-Im Settings-Modal pro Endpunkt einstellbar — wird genutzt wenn das
-Cast-UI-Dropdown auf „Default" steht.
+Configurable per endpoint in the settings modal — used when the
+cast UI dropdown is set to "Default".
 
-### Globaler Default
+### Global default
 
-Im Settings-Modal unter „Reasoning-Default" — Fallback, wenn weder pro
-Wurf noch pro Endpunkt etwas Konkretes ausgewählt ist.
+In the settings modal under "Reasoning default" — fallback when
+nothing concrete is selected either per cast or per endpoint.
 
-### Technische Umsetzung
+### Technical implementation
 
-| Backend | Wenn `thinking=true` | Wenn `thinking=false` |
+| Backend | When `thinking=true` | When `thinking=false` |
 |---|---|---|
 | Ollama `/api/chat` | `think: true`, `options.num_predict: 32768` | `think: false`, `options.num_predict: 4096` |
 | OpenAI `/v1/chat/completions` | `reasoning_effort: "low"`, `chat_template_kwargs.enable_thinking: true`, `max_tokens: 32768` | `reasoning_effort: "none"`, `chat_template_kwargs.enable_thinking: false`, `max_tokens: 4096` |
-| `thinking=null` | keine Parameter — Server-Default | dito |
+| `thinking=null` | no parameters — server default | same |
 
-### Reasoning-Output-Felder
+### Reasoning output fields
 
-Verschiedene Server emittieren Reasoning in unterschiedlichen Feldern.
-Der Adapter erkennt alle gängigen:
+Different servers emit reasoning in different fields.
+The adapter recognizes all common ones:
 
-| Backend | Streaming-Feld |
+| Backend | Streaming field |
 |---|---|
 | Ollama `/api/chat` | `message.thinking` |
 | Ollama `/v1/chat/completions` | `choices[0].delta.reasoning_content` |
 | MLX `mlx_lm.server` | `choices[0].delta.reasoning` |
-| DeepSeek-Stil | `choices[0].delta.reasoning_content` |
+| DeepSeek style | `choices[0].delta.reasoning_content` |
 
-## Reasoning-Test
+## Reasoning test
 
-Im Settings-Modal pro Endpoint der Knopf **„Reasoning"** prüft praktisch:
+In the settings modal, the **"Reasoning"** button per endpoint checks in practice:
 
-1. Erstes nicht-embedding Modell des Endpoints holen
-2. Mini-Anfrage `thinking=true` senden — Token-Counts zählen
-3. Mini-Anfrage `thinking=false` senden — dasselbe
-4. Verdikt:
-   - **OK** (grün): Reasoning lässt sich an- und ausschalten
-   - **WARN** (gelb): einer der Modi greift nicht — Server-Args
-     dominieren oder Modell ignoriert
-   - **ERR** (rot): keine Reasoning-Tokens beobachtet
+1. Fetch the first non-embedding model of the endpoint
+2. Send a mini request with `thinking=true` — count token counts
+3. Send a mini request with `thinking=false` — the same
+4. Verdict:
+   - **OK** (green): reasoning can be turned on and off
+   - **WARN** (yellow): one of the modes does not take effect — server args
+     dominate or the model ignores it
+   - **ERR** (red): no reasoning tokens observed
 
-Praktisch: ein MLX-Server, der mit
-`--chat-template-args '{"enable_thinking": false}'` gestartet wurde,
-respektiert dennoch Request-Level-Override via `chat_template_kwargs`.
-Verifiziert mit `mlx_lm.server 0.31.x`.
+In practice: an MLX server started with
+`--chat-template-args '{"enable_thinking": false}'`
+still respects a request-level override via `chat_template_kwargs`.
+Verified with `mlx_lm.server 0.31.x`.
 
-## System-Prompt
+## System prompt
 
-Default-Prompt im Settings-Modal editierbar. Der Default folgt der
-Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige Beratungsstruktur:
-Gegenwart → Wandlungsprozess → Zukunftstendenz → Integration → Kernbotschaft).
+The default prompt is editable in the settings modal. The default follows the
+Wilhelm tradition (dignity, compassion, five-part consultation structure:
+present → process of change → future tendency → integration → core message).
 
-Wenn du den Default wiederherstellen willst: „Default wiederherstellen"-
-Knopf.
+If you want to restore the default: the "Restore default" button.
 
-## Prompt-Komposition (User-Message)
+## Prompt composition (user message)
 
-`buildUserPrompt()` in `web/llm.js` baut die User-Message aus:
+`buildUserPrompt()` in `web/llm.js` builds the user message from:
 
-- Frage
-- Ursprungsbild (Unicode, Schriftzeichen, Pīnyīn, lateinischer/deutscher
-  Name, Trigramme, Urteil, Bild, Bedeutung)
-- Wandelnde Linien (Position + Spruch + Wilhelm-Interpretation)
-- Zielbild (analog Ursprungsbild, falls wandelnde Linien)
-- Aufforderung zur Deutung
+- Question
+- Source hexagram (Unicode, characters, Pīnyīn, Latin/German
+  name, trigrams, judgment, image, meaning)
+- Changing lines (position + text + Wilhelm interpretation)
+- Target hexagram (analogous to source hexagram, if there are changing lines)
+- Request for interpretation
 
-Wenn du den Output-Stil ändern willst (z.B. kürzer, andere Sprache, etc.),
-ist das der richtige Hebel.
+If you want to change the output style (e.g. shorter, a different language, etc.),
+that's the right lever.
 
-## CORS-Fehlersuche
+## CORS troubleshooting
 
-Symptom: „Failed to fetch" oder „CORS policy" in der Browser-Konsole.
+Symptom: "Failed to fetch" or "CORS policy" in the browser console.
 
 Check:
 
 ```bash
 # Ollama
 curl -i -H "Origin: http://localhost:8765" http://localhost:11434/api/tags
-# → muss "Access-Control-Allow-Origin: *" enthalten
+# → must contain "Access-Control-Allow-Origin: *"
 
 # MLX
 curl -i -H "Origin: http://localhost:8765" http://localhost:8080/v1/models
-# → ebenso
+# → likewise
 ```
 
 Fix Ollama:
 
 ```bash
 launchctl setenv OLLAMA_ORIGINS "*"
-# Ollama neu starten
+# restart Ollama
 ```
 
-Fix MLX: meist nicht nötig — bei eigenen Startparametern keine
-restriktiven `--allowed-origins`-Flags setzen.
+Fix MLX: usually not necessary — with your own startup parameters, do not set
+restrictive `--allowed-origins` flags.

@@ -1,123 +1,123 @@
-# macOS-App
+# macOS app
 
-Das Yijing-Orakel lässt sich als eigenständige `Yijing.app` für macOS
-bündeln — eine doppelklickbare App für Nutzer ohne Terminal-Erfahrung.
-Die App bedient die Orakel-Seite über einen **Swift-internen
-Static-Server** (Network.framework / `NWListener`) und zeigt sie in
-einem eigenen Fenster mit eingebettetem WebKit. Kein Browser-Tab, kein
-Python, keine Command-Line-Tools auf der Nutzerseite — die App bringt
-alles selbst mit.
+The Yijing oracle can be bundled as a standalone `Yijing.app` for macOS
+— a double-clickable app for users without terminal experience.
+The app serves the oracle page via a **Swift-internal
+static server** (Network.framework / `NWListener`) and displays it in
+a dedicated window with embedded WebKit. No browser tab, no
+Python, no command-line tools on the user's side — the app brings
+everything along itself.
 
-## Bauen
+## Building
 
 ```bash
 ./scripts/build-macos-app.sh
 ```
 
-Voraussetzung: **Xcode Command Line Tools** (`xcode-select --install`)
-— liefert `swiftc`, `sips`, `iconutil`, `hdiutil`. Das Skript erzeugt:
+Prerequisite: **Xcode Command Line Tools** (`xcode-select --install`)
+— provides `swiftc`, `sips`, `iconutil`, `hdiutil`. The script produces:
 
-- `dist/Yijing.app` — das App-Bundle
-- `dist/Yijing.dmg` — verteilbares Disk-Image (App + Programme-Alias +
+- `dist/Yijing.app` — the app bundle
+- `dist/Yijing.dmg` — distributable disk image (app + Applications alias +
   INSTALL.txt)
-- `dist/INSTALL.txt` — Installationsanleitung für Endnutzer
+- `dist/INSTALL.txt` — installation instructions for end users
 
-`dist/` ist nicht versioniert — Build-Artefakte gehören nicht ins Git.
+`dist/` is not versioned — build artifacts do not belong in Git.
 
-Der Build bettet den **committeten** Repo-Stand ein (`git archive HEAD`),
-nicht das Arbeitsverzeichnis. Lokale, uncommittete Änderungen landen
-also bewusst nicht in der App.
+The build embeds the **committed** repo state (`git archive HEAD`),
+not the working directory. Local, uncommitted changes therefore
+deliberately do not end up in the app.
 
-## Bundle-Aufbau
+## Bundle layout
 
 ```
 Yijing.app/Contents/
-├── Info.plist                 Bundle-Metadaten
+├── Info.plist                 bundle metadata
 ├── MacOS/
-│   └── Yijing                 native App (kompilierte Swift-Binary)
+│   └── Yijing                 native app (compiled Swift binary)
 └── Resources/
-    ├── AppIcon.icns           App-Icon
+    ├── AppIcon.icns           app icon
     ├── LICENSE                AGPL-3.0-or-later
     ├── sw.js                  Service Worker
-    ├── web/                   Static-Site-Quellen (HTML, JS, CSS, Icons)
-    └── data/                  Hexagramm-/Trigramm-JSONs
+    ├── web/                   static-site sources (HTML, JS, CSS, icons)
+    └── data/                  hexagram/trigram JSONs
 ```
 
-Die Build-Bausteine liegen versioniert unter `scripts/macos-app/`:
+The build components live versioned under `scripts/macos-app/`:
 `Yijing.swift`, `StaticServer.swift`, `Info.plist`, `INSTALL.txt`,
 `icon-1024.png`.
 
-## Aufbau der App
+## App structure
 
-`Contents/MacOS/Yijing` ist eine native, mit `swiftc` kompilierte
-Swift-App (universal arm64 + x86_64) — kein Shell-Skript. Das ist aus
-zwei Gründen nötig:
+`Contents/MacOS/Yijing` is a native Swift app compiled with `swiftc`
+(universal arm64 + x86_64) — not a shell script. This is necessary for
+two reasons:
 
-1. **Eigenes Fenster.** Die App zeigt das Orakel in einem `WKWebView`
-   (Apples System-WebKit) in einem eigenen Fenster — kein Browser-Tab.
-2. **Architektur-Erkennung.** macOS bestimmt die Architektur einer App
-   aus der Mach-O-Binary ihres `CFBundleExecutable`. Ein Shell-Skript
-   hat keine — auf Apple Silicon führte das zu einer Rosetta-
-   Aufforderung. Eine kompilierte Binary löst das.
+1. **Dedicated window.** The app shows the oracle in a `WKWebView`
+   (Apple's system WebKit) in a dedicated window — no browser tab.
+2. **Architecture detection.** macOS determines an app's architecture
+   from the Mach-O binary of its `CFBundleExecutable`. A shell script
+   has none — on Apple Silicon this led to a Rosetta
+   prompt. A compiled binary solves this.
 
-Die Binary wird aus zwei Swift-Sources kompiliert:
-`scripts/macos-app/Yijing.swift` (AppDelegate, Fenster, Menü) und
-`scripts/macos-app/StaticServer.swift` (interner HTTP-Server). Keine
-externen Dependencies, kein Swift-Package-Manager nötig — direkt mit
-`swiftc` gebaut.
+The binary is compiled from two Swift sources:
+`scripts/macos-app/Yijing.swift` (AppDelegate, window, menu) and
+`scripts/macos-app/StaticServer.swift` (internal HTTP server). No
+external dependencies, no Swift Package Manager needed — built directly
+with `swiftc`.
 
-## Startverhalten
+## Startup behavior
 
-Beim Start (`Yijing.swift`):
+On startup (`Yijing.swift`):
 
-1. Initialisiert den `StaticServer` mit `Bundle.main.resourceURL!` als
-   Document-Root (die `web/`-, `data/`- und `sw.js`-Files im Bundle).
-2. Sucht einen freien Port im Bereich 8765–8775 und startet einen
-   `NWListener` darauf (Network.framework, loopback-only).
-3. Öffnet ein Fenster mit `WKWebView` auf
+1. Initializes the `StaticServer` with `Bundle.main.resourceURL!` as the
+   document root (the `web/`, `data/` and `sw.js` files in the bundle).
+2. Finds a free port in the range 8765–8775 and starts an
+   `NWListener` on it (Network.framework, loopback-only).
+3. Opens a window with `WKWebView` on
    `http://localhost:<port>/web/index.html`.
-4. Bei jedem GET/HEAD-Request liest der Server die Datei aus den
-   Bundle-Resources, ermittelt den MIME-Type und antwortet mit
-   `Cache-Control: no-store` (analog zum ehemaligen `serve.py`).
-5. Beim Beenden der App wird der Listener gestoppt — alle offenen
-   Connections schließen sich, da loopback-only.
+4. On every GET/HEAD request the server reads the file from the
+   bundle resources, determines the MIME type and responds with
+   `Cache-Control: no-store` (analogous to the former `serve.py`).
+5. When the app quits, the listener is stopped — all open
+   connections close, since they are loopback-only.
 
-Externe Links (Footer: Codeberg, Lizenzen) öffnen im Standard-Browser,
-nicht im App-Fenster.
+External links (footer: Codeberg, licenses) open in the default browser,
+not in the app window.
 
-## Weitergabe und Installation
+## Distribution and installation
 
-`Yijing.dmg` verschicken — es enthält die App, einen Programme-Alias
-zum Hineinziehen und die `INSTALL.txt`. Die App ist **nicht
-Apple-notarisiert** (kein Developer-Account) — beim ersten Start ist
-daher einmalig der Gatekeeper-Weg nötig: Systemeinstellungen →
-Datenschutz & Sicherheit → „Trotzdem öffnen". `INSTALL.txt` führt
-Schritt für Schritt durch den Vorgang.
+Send `Yijing.dmg` — it contains the app, an Applications alias
+to drag into and the `INSTALL.txt`. The app is **not
+Apple-notarized** (no Developer account) — so on first launch the
+Gatekeeper path is needed once: System Settings →
+Privacy & Security → "Open Anyway". `INSTALL.txt` guides you
+step by step through the procedure.
 
-**Fallback ohne UI-Weg** (falls auf neueren macOS-Versionen der
-„Trotzdem öffnen"-Knopf nicht erscheint oder direkt im Terminal
-geholfen werden soll):
+**Fallback without the UI path** (in case on newer macOS versions the
+"Open Anyway" button does not appear or you want to help directly in
+the terminal):
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/Yijing.app
 ```
 
-Entfernt nur das Quarantine-Flag, das macOS beim Download/Mount
-dranhängt. Danach startet die App ohne weitere Gatekeeper-Dialoge.
+Removes only the quarantine flag that macOS attaches on download/mount.
+After that the app starts without further Gatekeeper dialogs.
 
-## Aktualisieren
+## Updating
 
-Neue App-Version:
+New app version:
 
-1. Änderungen committen.
-2. `./scripts/build-macos-app.sh` erneut ausführen.
-3. Auf Codeberg ein neues Release mit neuem Tag anlegen und die frische
-   `dist/Yijing.dmg` als Anhang hochladen.
-4. Die **direkten Download-Links** auf den neuen Tag aktualisieren:
-   der Link im `README.md` und der `href` des `#macDownload`-Buttons in
-   `web/index.html` (danach `pages`-Sync). Sie zeigen auf eine
-   versionierte URL (`releases/download/<tag>/Yijing.dmg`) — Codeberg
-   kennt keinen `latest`-Alias für direkte Asset-Links.
+1. Commit changes.
+2. Run `./scripts/build-macos-app.sh` again.
+3. Create a new release with a new tag on Codeberg and upload the fresh
+   `dist/Yijing.dmg` as an attachment.
+4. Update the **direct download links** to the new tag:
+   the link in `README.md` and the `href` of the `#macDownload` button in
+   `web/index.html` (then `pages` sync). They point to a
+   versioned URL (`releases/download/<tag>/Yijing.dmg`) — Codeberg
+   knows no `latest` alias for direct asset links.
 
-Der `no-store`-Header des Servers verhindert, dass Nutzer nach einem
-Update veraltete Stände sehen.
+The server's `no-store` header prevents users from seeing stale
+states after an update.
