@@ -44,8 +44,10 @@ Schichten, FastAPI-Wrapper). Dieser Anlauf ist absichtlich anders.
 
 ## Code-Stilrichtlinien
 
-- **Sprache der UI: Deutsch.** Code-Identifier: Englisch. Kommentare: Englisch
-  oder Deutsch, beides okay — aber konsistent innerhalb einer Datei.
+- **UI-Sprache: zweisprachig DE + EN** — siehe Abschnitt
+  „[Sprachen (DE / EN)](#sprachen-de--en)". Code-Identifier: Englisch.
+  Kommentare: Englisch oder Deutsch, beides okay — aber konsistent
+  innerhalb einer Datei.
 - **In deutschen String-Literalen niemals gerade `"…"` für innere
   Anführungszeichen.** Typografisch setzen: `„…"`. Sonst schließt
   JavaScript den String vorzeitig — siehe Commit `a164aba` ff.
@@ -55,6 +57,23 @@ Schichten, FastAPI-Wrapper). Dieser Anlauf ist absichtlich anders.
   cachen ES-Modul-Imports trotzdem.
 - **Kommentare** erklären *warum*, nicht *was*. Identifier-Namen erklären
   das Was.
+
+## Sprachen (DE / EN)
+
+Das Repo ist bewusst zweisprachig — aber **gezielt**, nicht überall, um
+Doppelpflege gering zu halten (passt zum schlanken Hobbyprojekt-Charakter).
+
+| Bereich | Sprachpolitik |
+|---|---|
+| **App** — UI-Strings (`web/i18n.js`), Hexagramm-Texte (`data/`) | **Zweisprachig DE + EN.** Jeder neue UI-String braucht beide Dict-Einträge; jedes neue nutzersichtbare Daten-Feld braucht sein `*_en`-Pendant. |
+| **README** | **Zweisprachig:** `README.md` (Englisch, **kanonisch**) + `README.de.md` (Deutsch). Inhaltliche Änderungen in beide Dateien nachziehen; die Sprach-Umschalt-Zeile oben (`🇬🇧 English · 🇩🇪 Deutsch`) erhalten. |
+| **Alles Übrige** — `docs/`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, Release-Notes | **Einsprachig, Englisch als kanonische Zielsprache.** Keine `*.de.md`-Doppelung anlegen. |
+
+Bestehende tiefe Doku (`docs/`, einige Meta-Dateien) ist historisch noch
+auf Deutsch. Die Migration nach Englisch läuft **opportunistisch** — wenn
+eine Datei ohnehin angefasst wird, dann gleich mit übersetzen; **kein
+Big-Bang**. So bleibt der schlanke Charakter erhalten und es entsteht keine
+Übersetzungs-Tretmühle.
 
 ## Daten neu bauen
 
