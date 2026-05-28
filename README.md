@@ -1,85 +1,85 @@
-# Yijing Orakel
+**🇬🇧 English** · [🇩🇪 Deutsch](README.de.md)
+
+# Yijing Oracle
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue?style=flat-square)](LICENSE)
 [![Docs: CC BY-SA 4.0](https://img.shields.io/badge/Docs-CC_BY--SA_4.0-lightgrey?style=flat-square)](LICENSE-DOCS)
-[![Codeberg-Release](https://img.shields.io/gitea/v/release/jkaindl/Yijing?gitea_url=https%3A%2F%2Fcodeberg.org&label=codeberg&color=green&style=flat-square)](https://codeberg.org/jkaindl/Yijing/releases)
-[![Status: aktiv](https://img.shields.io/badge/status-aktiv-success?style=flat-square)](https://codeberg.org/jkaindl/Yijing/commits/branch/main)
+[![Codeberg release](https://img.shields.io/gitea/v/release/jkaindl/Yijing?gitea_url=https%3A%2F%2Fcodeberg.org&label=codeberg&color=green&style=flat-square)](https://codeberg.org/jkaindl/Yijing/releases)
+[![Status: active](https://img.shields.io/badge/status-active-success?style=flat-square)](https://codeberg.org/jkaindl/Yijing/commits/branch/main)
 [![Platform: macOS](https://img.shields.io/badge/macOS-11%2B%20·%20Universal-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/MACOS-APP.md)
-[![PWA](https://img.shields.io/badge/PWA-installierbar-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://jkaindl.codeberg.page/Yijing/)
-[![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#warum-keine-build-pipeline)
+[![PWA](https://img.shields.io/badge/PWA-installable-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://jkaindl.codeberg.page/Yijing/)
+[![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#why-no-build-pipeline)
 
-Ein schlankes I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und
-optionaler KI-Deutung über lokale LLM-Server (Ollama, MLX, LM Studio,
-vLLM, OpenClaw). Drei-Münzen-Methode, vollständige Wilhelm-Texte
-inklusive aller wandelnden Linien, chinesisches Schrift­zeichen mit
-Pīnyīn, Trigramme mit Stammdaten. **Zweisprachig Deutsch / English** —
-UI und Hexagramm-Texte umschaltbar (Englisch ist eine eigene
-Übersetzung des Wilhelm-Originals, im Wilhelm-Stil gehalten, klassische
-I-Ching-Vokabeln). Vanilla JavaScript, kein Build-Step, kein Backend,
-offline-fähig als PWA.
+A lean I Ching oracle as a static site with the Wilhelm translation and
+optional AI interpretation via local LLM servers (Ollama, MLX, LM Studio,
+vLLM, OpenClaw). Three-coin method, complete Wilhelm texts including all
+changing lines, Chinese character with Pīnyīn, trigrams with reference
+data. **Bilingual German / English** — UI and hexagram texts switchable
+(the English is an independent translation of the Wilhelm original, kept
+in Wilhelm's style, with classic I Ching vocabulary). Vanilla JavaScript,
+no build step, no backend, offline-capable as a PWA.
 
 <p align="center">
   <a href="https://jkaindl.codeberg.page/Yijing/">
-    <img src="web/assets/og-image.png" alt="Yijing Orakel — stilisiertes Hexagramm 1 (Das Schöpferische) mit dem chinesischen Schriftzeichen 易經" width="720" />
+    <img src="web/assets/og-image.png" alt="Yijing Oracle — stylized hexagram 1 (The Creative) with the Chinese characters 易經" width="720" />
   </a>
 </p>
 
-[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.2.1/Yijing.dmg)
-[![Live-Demo öffnen](https://img.shields.io/badge/Live--Demo_%C3%B6ffnen-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
+[![Download for macOS](https://img.shields.io/badge/Download_for_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.3.0/Yijing.dmg)
+[![Open live demo](https://img.shields.io/badge/Open_live_demo-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
 
-Disk-Image öffnen, „Yijing" in den Programme-Ordner ziehen — fertig.
+Open the disk image, drag “Yijing” into your Applications folder — done.
 
-> **Beim ersten Start meldet macOS „Apple konnte die App nicht prüfen".**
-> Das ist normal (Hobbyprojekt ohne Apple-Notarisierung) und in zwei
-> Minuten gelöst:
+> **On first launch macOS will report “Apple could not verify the app.”**
+> That is expected (a hobby project without Apple notarization) and
+> resolved in two minutes:
 >
-> 1. Auf die Warnung **„Fertig"** klicken (nicht „In den Papierkorb"!).
-> 2. **Apple-Menü → Systemeinstellungen → Datenschutz & Sicherheit**.
-> 3. Ganz nach unten scrollen → **„Trotzdem öffnen"** neben dem
->    Yijing-Hinweis → mit Passwort/Touch ID bestätigen.
-> 4. Letzter Dialog: nochmal **„Trotzdem öffnen"**.
+> 1. Click **“Done”** on the warning (not “Move to Trash”!).
+> 2. **Apple menu → System Settings → Privacy & Security**.
+> 3. Scroll all the way down → **“Open Anyway”** next to the Yijing
+>    notice → confirm with your password / Touch ID.
+> 4. Final dialog: **“Open Anyway”** once more.
 >
-> Beim zweiten Start ist nichts mehr nötig. Falls der „Trotzdem öffnen"-
-> Knopf fehlt (neuere macOS-Versionen), im Terminal:
-> `xattr -dr com.apple.quarantine /Applications/Yijing.app`. Details und
-> Hintergrund: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
+> Nothing further is needed on the second launch. If the “Open Anyway”
+> button is missing (newer macOS versions), in the Terminal:
+> `xattr -dr com.apple.quarantine /Applications/Yijing.app`. Details and
+> background: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 
 ---
 
-## Inhalt
+## Contents
 
-- [Live-Demo](#live-demo)
-- [Schnellstart](#schnellstart)
-- [Als macOS-App](#als-macos-app)
+- [Live demo](#live-demo)
+- [Quick start](#quick-start)
+- [As a macOS app](#as-a-macos-app)
 - [Features](#features)
-- [Sprache (Deutsch / English)](#sprache-deutsch--english)
-- [Lokale LLM-Anbindung](#lokale-llm-anbindung)
-- [Wie ein Wurf abläuft](#wie-ein-wurf-abläuft)
-- [Drei-Münzen-Methode](#drei-münzen-methode)
-- [Verzeichnisstruktur](#verzeichnisstruktur)
-- [Dokumentation](#dokumentation)
-- [Release-Historie](#release-historie)
-- [Mitmachen](#mitmachen)
-- [Sicherheit melden](#sicherheit-melden)
-- [Lizenz](#lizenz)
-- [Quellen](#quellen)
+- [Language (German / English)](#language-german--english)
+- [Local LLM connection](#local-llm-connection)
+- [How a reading works](#how-a-reading-works)
+- [Three-coin method](#three-coin-method)
+- [Directory structure](#directory-structure)
+- [Documentation](#documentation)
+- [Release history](#release-history)
+- [Contributing](#contributing)
+- [Reporting security issues](#reporting-security-issues)
+- [License](#license)
+- [Sources](#sources)
 - [Status](#status)
 
 ---
 
-## Live-Demo
+## Live demo
 
-<https://jkaindl.codeberg.page/Yijing/> — funktioniert ohne lokales
-Setup für Hexagramm-Wurf und Wilhelm-Text. Die KI-Deutung erfordert
-einen lokal laufenden LLM-Server (Ollama oder MLX), siehe
-[Schnellstart](#schnellstart).
+<https://jkaindl.codeberg.page/Yijing/> — works without any local setup
+for casting a hexagram and reading the Wilhelm text. The AI interpretation
+requires a locally running LLM server (Ollama or MLX), see
+[Quick start](#quick-start).
 
-Beim ersten Besuch installiert sich der Service Worker im Hintergrund
-— danach läuft die Seite vollständig offline. Über den
-„App-installieren"-Knopf des Browsers landet sie als PWA im Dock oder
-auf dem Homescreen.
+On the first visit a service worker installs itself in the background —
+after that the site runs fully offline. Via the browser’s “Install app”
+button it lands as a PWA in the Dock or on the home screen.
 
-## Schnellstart
+## Quick start
 
 ```bash
 git clone https://codeberg.org/jkaindl/Yijing.git yijing
@@ -87,245 +87,246 @@ cd yijing
 ./serve.sh
 ```
 
-Öffnet `http://localhost:8765/web/index.html` automatisch.
+Opens `http://localhost:8765/web/index.html` automatically.
 
-> Voraussetzung: Python 3.9+. Keine npm-Dependencies, kein Build-Step,
-> kein Backend.
+> Requirement: Python 3.9+. No npm dependencies, no build step, no
+> backend.
 
-## Als macOS-App
+## As a macOS app
 
-Für die Weitergabe an Nutzer ohne Terminal-Erfahrung lässt sich das
-Orakel als doppelklickbare macOS-App bündeln:
+For handing it to users without terminal experience, the oracle can be
+bundled as a double-clickable macOS app:
 
 ```bash
 ./scripts/build-macos-app.sh
 ```
 
-Das erzeugt `dist/Yijing.dmg` — ein Disk-Image, in dem die `Yijing.app`
-per Drag & Drop in den Programme-Ordner gezogen wird. Die App zeigt das
-Orakel in einem eigenen Fenster, ganz ohne Terminal und ohne Browser.
-Voraussetzung zum Bauen: Xcode Command Line Tools
-(`xcode-select --install`). Details: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
+This produces `dist/Yijing.dmg` — a disk image in which `Yijing.app` is
+dragged into the Applications folder. The app shows the oracle in its own
+window, with no terminal and no browser. Build requirement: Xcode Command
+Line Tools (`xcode-select --install`). Details:
+[`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 
 ## Features
 
-- **Drei-Münzen-Methode** mit korrekter Verteilung (1/8 : 3/8 : 3/8 : 1/8)
-- **Ursprungs- und Zielbild** bei wandelnden Linien, mit visueller
-  Markierung
-- **Wilhelm-Übersetzung** (1924, gemeinfrei): Urteil, Bild, Bedeutung,
-  alle sechs Linientexte mit Konfuzius-Kommentar
-- **Chinesisches Schriftzeichen + Pīnyīn** pro Hexagramm
-- **Trigramme** mit Familie, Natur, Jahreszeit, Himmelsrichtung,
-  Assoziationen
-- **Bildmeditation** (atmosphärische Stichworte) für 19 Hexagramme
-- **KI-Interpretation** via lokalem LLM-Server (Ollama, MLX, LM Studio,
-  vLLM, OpenClaw) mit Streaming, Reasoning-Steuerung und Markdown-
-  Rendering
-- **Verlauf** der letzten 20 Würfe in localStorage, einzelne Würfe via
-  URL-Hash teilbar und wiederherstellbar
-- **Export** als Markdown oder druckfreundliches PDF
-- **Offline-fähig** — Service Worker; nach dem ersten Besuch lädt und
-  läuft die App ohne Internet. Als PWA installierbar.
-- **Theme-Umschalter** — Dark, Light oder automatisch nach
-  System­einstellung
-- **Tastatur-Bedienung** für Wurf, Reset und Settings
+- **Three-coin method** with the correct distribution (1/8 : 3/8 : 3/8 : 1/8)
+- **Primary and resulting hexagram** for changing lines, with visual
+  marking
+- **Wilhelm translation** (1924, public domain): judgment, image, meaning,
+  all six line texts with Confucius commentary
+- **Chinese character + Pīnyīn** per hexagram
+- **Trigrams** with family, nature, season, cardinal direction,
+  associations
+- **Image meditation** (atmospheric keywords) for 19 hexagrams
+- **AI interpretation** via a local LLM server (Ollama, MLX, LM Studio,
+  vLLM, OpenClaw) with streaming, reasoning control and Markdown
+  rendering
+- **History** of the last 20 readings in localStorage, individual
+  readings shareable and restorable via URL hash
+- **Export** as Markdown or print-friendly PDF
+- **Offline-capable** — service worker; after the first visit the app
+  loads and runs without internet. Installable as a PWA.
+- **Theme switcher** — dark, light or automatic following the system
+  setting
+- **Keyboard operation** for casting, reset and settings
 
-## Sprache (Deutsch / English)
+## Language (German / English)
 
-Die App startet in der Sprache deines Browsers (`navigator.language`):
-`en*` → English, alles andere → Deutsch. Umschaltbar im Settings-Modal
-(⚙ → Sprache). Die Auswahl wirkt sofort auf alle UI-Elemente, das
-Datumsformat im Verlauf, die Markdown-Export-Header und den Default-
-System-Prompt für die KI-Interpretation.
+The app starts in your browser’s language (`navigator.language`):
+`en*` → English, everything else → German. Switchable in the settings
+modal (⚙ → Language). The choice takes effect immediately on all UI
+elements, the date format in the history, the Markdown export headers and
+the default system prompt for the AI interpretation.
 
-Die englischen Hexagramm-Texte sind eine eigene Übersetzung des
-deutschen Wilhelm-Originals (1924, gemeinfrei) im Wilhelm-Stil:
-würdevoll, kontemplativ, mit den klassischen I-Ching-Vokabeln aus der
-englischen Standardliteratur (the superior man, the great man, the
-noble, the abyss, the well, the receptive, the creative …) —
-vergleichbar mit Cary F. Baynes' 1950er-Übersetzung, aber in eigenen
-Worten. Übersetzt mit Claude Opus 4.7, parallel über acht Subagenten.
-Schema und Generierungs-Details: [`docs/DATA.md`](docs/DATA.md#englische-variante-datahexagramsenjson).
+The English hexagram texts are an independent translation of the German
+Wilhelm original (1924, public domain) in Wilhelm’s style: dignified,
+contemplative, with the classic I Ching vocabulary from the English
+standard literature (the superior man, the great man, the noble, the
+abyss, the well, the receptive, the creative …) — comparable to Cary F.
+Baynes’ 1950s translation, but in its own words. Translated with Claude
+Opus 4.7, in parallel across eight subagents. Schema and generation
+details: [`docs/DATA.md`](docs/DATA.md#englische-variante-datahexagramsenjson).
 
-## Lokale LLM-Anbindung
+## Local LLM connection
 
-Klick auf das ⚙-Symbol oben links öffnet das Settings-Modal. Beim ersten
-Start probiert die App automatisch die typischen lokalen Endpunkte:
+Clicking the ⚙ icon in the top left opens the settings modal. On first
+launch the app automatically probes the typical local endpoints:
 
-| Server | URL-Beispiel |
+| Server | Example URL |
 |---|---|
 | Ollama | `http://localhost:11434` |
 | MLX (`mlx_lm.server`) | `http://localhost:8080/v1` |
 | LM Studio | `http://localhost:1234/v1` |
 
-Weitere Endpunkte lassen sich manuell hinzufügen.
+Additional endpoints can be added manually.
 
 ### CORS
 
-Die Web-App ruft die LLM-Server direkt aus dem Browser auf — beide Seiten
-müssen CORS erlauben. Für Ollama auf macOS:
+The web app calls the LLM servers directly from the browser — both sides
+must allow CORS. For Ollama on macOS:
 
 ```bash
 launchctl setenv OLLAMA_ORIGINS "*"
-# Ollama neu starten
+# restart Ollama
 ```
 
-MLX und LM Studio sind standardmäßig offen. Details und Fehlersuche:
+MLX and LM Studio are open by default. Details and troubleshooting:
 [`docs/LLM.md`](docs/LLM.md#cors-fehlersuche).
 
-## Wie ein Wurf abläuft
+## How a reading works
 
 ```mermaid
 flowchart TD
-    A["Frage eintippen<br/>+ Münzen-Wurf"] --> B["castHypergram<br/>6 Linien × 3 Münzen"]
-    B --> C["Ursprungs-Hexagramm<br/>+ ggf. wandelnde Linien"]
-    C --> D{"Wandelnde Linien?"}
-    D -->|nein| E["Wilhelm-Text<br/>rendern"]
-    D -->|ja| F["Zielbild ableiten<br/>+ Linientexte"]
+    A["Type question<br/>+ cast coins"] --> B["castHexagram<br/>6 lines × 3 coins"]
+    B --> C["Primary hexagram<br/>+ any changing lines"]
+    C --> D{"Changing lines?"}
+    D -->|no| E["Render<br/>Wilhelm text"]
+    D -->|yes| F["Derive resulting hexagram<br/>+ line texts"]
     F --> E
-    E --> G["Reading in localStorage<br/>URL-Hash r=uuid"]
-    G --> H{"Interpretieren geklickt?"}
-    H -->|nein| Z["Fertig"]
-    H -->|ja| I["Prompt aus Hexagramm<br/>+ Linien bauen"]
-    I --> J["Streaming-Request<br/>an lokalen LLM-Server"]
-    J --> K["Reasoning + Antwort<br/>live ins UI"]
+    E --> G["Reading in localStorage<br/>URL hash r=uuid"]
+    G --> H{"Interpret clicked?"}
+    H -->|no| Z["Done"]
+    H -->|yes| I["Build prompt from hexagram<br/>+ lines"]
+    I --> J["Streaming request<br/>to local LLM server"]
+    J --> K["Reasoning + answer<br/>live into the UI"]
 ```
 
-Technische Details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Technical details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-## Drei-Münzen-Methode
+## Three-coin method
 
-Pro Linie drei Münzen (Yin = 0, Yang = 1), Summe + 6 ergibt den
-Linienwert:
+Three coins per line (yin = 0, yang = 1); the sum + 6 yields the line
+value:
 
-| Wert | Bedeutung | Wahrscheinlichkeit |
+| Value | Meaning | Probability |
 |---|---|---|
-| 6 | wandelndes Yin (○) | 1/8 (12,5 %) |
-| 7 | festes Yang | 3/8 (37,5 %) |
-| 8 | festes Yin | 3/8 (37,5 %) |
-| 9 | wandelndes Yang (○) | 1/8 (12,5 %) |
+| 6 | changing yin (○) | 1/8 (12.5 %) |
+| 7 | stable yang | 3/8 (37.5 %) |
+| 8 | stable yin | 3/8 (37.5 %) |
+| 9 | changing yang (○) | 1/8 (12.5 %) |
 
-Die Auflösung wandelnder Linien zu einem Zielbild und die King-Wen-
-Zuordnung erfolgt im Browser über eine vollständige Lookup-Tabelle.
+Resolving the changing lines into a resulting hexagram and the King Wen
+mapping happens in the browser via a complete lookup table.
 
-## Verzeichnisstruktur
+## Directory structure
 
 ```
 yijing/
-├── web/                       # Frontend (HTML/CSS/JS, vanilla)
-├── data/                      # 64 Hexagramme + 8 Trigramme als JSON
-├── scripts/                   # Build- und Dev-Server-Skripte
-├── docs/                      # Architektur, Daten, LLM, Entwicklung, macOS-App
-├── .gitea/                    # Issue-Vorlagen für Codeberg
-├── _archiv/                   # alte Anläufe — per .gitignore ausgeschlossen
-├── sw.js                      # Service Worker (Offline-Caching)
-├── AGENTS.md                  # Konventionen für KI-Coding-Sessions
-├── CONTRIBUTING.md            # Beitragshinweise
-├── CHANGELOG.md               # Versionshistorie
-├── SECURITY.md                # Sicherheits-Meldungen
-├── LICENSE                    # AGPL-3.0-or-later (Code)
-├── LICENSE-DOCS               # CC BY-SA 4.0 (Doku)
-└── README.md                  # diese Datei
+├── web/                       # frontend (HTML/CSS/JS, vanilla)
+├── data/                      # 64 hexagrams + 8 trigrams as JSON
+├── scripts/                   # build and dev-server scripts
+├── docs/                      # architecture, data, LLM, development, macOS app
+├── .gitea/                    # issue templates for Codeberg
+├── _archiv/                   # earlier attempts — excluded via .gitignore
+├── sw.js                      # service worker (offline caching)
+├── AGENTS.md                  # conventions for AI coding sessions
+├── CONTRIBUTING.md            # contribution notes
+├── CHANGELOG.md               # version history
+├── SECURITY.md                # security reports
+├── LICENSE                    # AGPL-3.0-or-later (code)
+├── LICENSE-DOCS               # CC BY-SA 4.0 (docs)
+├── README.md                  # this file (English, canonical)
+└── README.de.md               # German README
 ```
 
-## Dokumentation
+## Documentation
 
-| Datei | Inhalt |
+| File | Contents |
 |---|---|
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Modulaufbau, Datenfluss, Persistenz |
-| [`docs/DATA.md`](docs/DATA.md) | Schema von `hexagrams.json` und `trigrams.json` |
-| [`docs/LLM.md`](docs/LLM.md) | LLM-Backends, Reasoning-Modi, CORS-Fehlersuche |
-| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Entwicklungs-Setup, Tests, Debugging, Release-Prozess |
-| [`docs/MACOS-APP.md`](docs/MACOS-APP.md) | macOS-App bauen, Bundle-Aufbau, Weitergabe |
-| [`AGENTS.md`](AGENTS.md) | Konventionen für KI-getriebene Sessions |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Beitragshinweise, PR-Checkliste, Commit-Stil |
-| [`SECURITY.md`](SECURITY.md) | Sicherheits-Meldungen, Threat-Model, Scope |
-| [`CHANGELOG.md`](CHANGELOG.md) | Versionshistorie (Keep a Changelog, SemVer) |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Module layout, data flow, persistence |
+| [`docs/DATA.md`](docs/DATA.md) | Schema of `hexagrams.json` and `trigrams.json` |
+| [`docs/LLM.md`](docs/LLM.md) | LLM backends, reasoning modes, CORS troubleshooting |
+| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Development setup, tests, debugging, release process |
+| [`docs/MACOS-APP.md`](docs/MACOS-APP.md) | Building the macOS app, bundle layout, distribution |
+| [`AGENTS.md`](AGENTS.md) | Conventions for AI-driven sessions |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution notes, PR checklist, commit style |
+| [`SECURITY.md`](SECURITY.md) | Security reports, threat model, scope |
+| [`CHANGELOG.md`](CHANGELOG.md) | Version history (Keep a Changelog, SemVer) |
 
-## Release-Historie
+## Release history
 
-Vollständige Notes pro Release: [`CHANGELOG.md`](CHANGELOG.md).
+Full notes per release: [`CHANGELOG.md`](CHANGELOG.md).
 
-| Version | Datum | Headline |
+| Version | Date | Headline |
 |---|---|---|
-| [v1.2.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.1) | 2026-05-27 | **Patch-Release** — Hero-Bild + `og:image` für Social-Preview, StaticServer-Connection-Limit, `serve.py`-Tot-Code raus, EN-Übersetzungs-Stichproben-QA (君子-Vokabel konsistent als „noble one", Hex 11 + 49 Polish) |
-| [v1.2.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.0) | 2026-05-27 | **Zweisprachig DE/EN** — i18n-Layer für die komplette UI (Settings-Toggle, Browser-Sprache als Default), eigene Wilhelm→EN-Übersetzung aller 64 Hexagramme im Wilhelm-Stil. Plus Pages-Sync-Skript, King-Wen-Sanity-Test, Open-Graph-Tags, `.editorconfig` |
-| [v1.1.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.1.1) | 2026-05-25 | **Audit-Sweep-Patch** — Stream-Reader-Lock-Fix, HTML-Escape-Härtung, NWListener-Race weg, Pfad-Traversal-Guard, deterministisches Daten-Build |
-| [v1.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.1) | 2026-05-24 | **macOS-App ohne Python** — Swift-interner Static-Server, keine CLT-Abhängigkeit mehr, kleineres DMG |
-| [v1.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.0) | 2026-05-22 | **Initial Release** — Drei-Münzen-Methode, Wilhelm-Texte, LLM-Adapter (Ollama/OpenAI-kompatibel), PWA, Service Worker, macOS-App-Build |
+| [v1.3.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.3.0) | 2026-05-28 | **UI polish + bilingual README** — visible language switcher in the footer, minimalist inline-SVG header icons (Lucide) instead of Unicode glyphs, two-state theme toggle with a state icon. README split into EN (canonical) + DE, app bundle version brought up to 1.3.0 |
+| [v1.2.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.1) | 2026-05-27 | **Patch release** — hero image + `og:image` for social previews, StaticServer connection limit, `serve.py` dead code removed, EN translation spot-check QA (君子 vocabulary consistent as “noble one”, hex 11 + 49 polish) |
+| [v1.2.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.0) | 2026-05-27 | **Bilingual DE/EN** — i18n layer for the entire UI (settings toggle, browser language as default), an independent Wilhelm→EN translation of all 64 hexagrams in Wilhelm’s style. Plus pages-sync script, King Wen sanity test, Open Graph tags, `.editorconfig` |
+| [v1.1.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.1.1) | 2026-05-25 | **Audit sweep patch** — stream-reader lock fix, HTML-escape hardening, NWListener race removed, path-traversal guard, deterministic data build |
+| [v1.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.1) | 2026-05-24 | **macOS app without Python** — Swift-internal static server, no more CLT dependency, smaller DMG |
+| [v1.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.0) | 2026-05-22 | **Initial release** — three-coin method, Wilhelm texts, LLM adapter (Ollama/OpenAI-compatible), PWA, service worker, macOS app build |
 
-## Mitmachen
+## Contributing
 
-Issues, PRs und Übersetzungen sind willkommen. Bitte vorher
-[`CONTRIBUTING.md`](CONTRIBUTING.md) lesen — es gibt klare
-Architektur-Leitplanken (kein Framework, kein Build-Step, kein TypeScript).
-Für Bug-Reports und Feature-Requests gibt es Vorlagen unter
-[Codeberg → Neue Issue](https://codeberg.org/jkaindl/Yijing/issues/new/choose).
+Issues, PRs and translations are welcome. Please read
+[`CONTRIBUTING.md`](CONTRIBUTING.md) first — there are clear architectural
+guardrails (no framework, no build step, no TypeScript). For bug reports
+and feature requests there are templates under
+[Codeberg → New issue](https://codeberg.org/jkaindl/Yijing/issues/new/choose).
 
-### Warum keine Build-Pipeline?
+### Why no build pipeline?
 
-Yijing ist der siebte Anlauf nach sechs verworfenen Vorgängern (siehe
-`_archiv/`). Alle früheren Anläufe sind in strukturellem Over-Engineering
-versandet — Notebook-Workflows, Pydantic-Schichten, FastAPI-Wrapper.
-Dieser Anlauf ist absichtlich anders: **vanilla ES-Module + nativer
-`<script type="module">`-Import + statisches JSON**. Wenn die App
-wächst, splitten wir Code; wir führen kein Toolchain ein.
+Yijing is the seventh attempt after six discarded predecessors (see
+`_archiv/`). All earlier attempts foundered in structural over-engineering
+— notebook workflows, Pydantic layers, FastAPI wrappers. This attempt is
+deliberately different: **vanilla ES modules + native
+`<script type="module">` import + static JSON**. When the app grows we
+split code; we do not introduce a toolchain.
 
-## Sicherheit melden
+## Reporting security issues
 
-Sicherheitsrelevante Probleme bitte **nicht öffentlich als Issue
-posten**. Stattdessen siehe [`SECURITY.md`](SECURITY.md) — kurzer Weg
-über Codeberg-DM oder E-Mail.
+Please do **not** post security-relevant problems publicly as an issue.
+Instead see [`SECURITY.md`](SECURITY.md) — a short path via Codeberg DM or
+email.
 
-## Lizenz
+## License
 
-- **Code:** GNU Affero General Public License v3.0 oder später —
+- **Code:** GNU Affero General Public License v3.0 or later —
   [AGPL-3.0-or-later](LICENSE).
-- **Dokumentation** (`README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`,
-  `SECURITY.md`, `AGENTS.md`, `docs/`): Creative Commons Attribution-
-  ShareAlike 4.0 International — [CC BY-SA 4.0](LICENSE-DOCS).
-- **Wilhelm-Übersetzung** in `data/hexagrams.json`: gemeinfrei
-  (Wilhelm † 1930; Gemeinfreiheit in Deutschland seit 2001). Bei
-  Weiterverwendung bitte Richard Wilhelm als Quelle nennen.
+- **Documentation** (`README.md`, `README.de.md`, `CHANGELOG.md`,
+  `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `docs/`): Creative
+  Commons Attribution-ShareAlike 4.0 International —
+  [CC BY-SA 4.0](LICENSE-DOCS).
+- **Wilhelm translation** in `data/hexagrams.json`: public domain
+  (Wilhelm † 1930; public domain in Germany since 2001). When reusing,
+  please credit Richard Wilhelm as the source.
 
-### Warum AGPL?
+### Why AGPL?
 
-Diese Lizenzwahl ist nicht zufällig. AGPL ist der rechtliche
-Mechanismus, der eine bestimmte Logik schützt: Beiträge zur Allmende
-bleiben in der Allmende — auch wenn jemand versucht, sie über einen
-Netzwerkdienst zu kommerzialisieren.
+This license choice is not incidental. The AGPL is the legal mechanism
+that protects a particular logic: contributions to the commons stay in
+the commons — even if someone tries to commercialize them via a network
+service.
 
-Anders als permissive Lizenzen (MIT, Apache) oder file-level Copyleft
-(MPL) verhindert die Network-Klausel der AGPL (§13), dass dieser Code
-zur Grundlage geschlossener, kommerziell kontrollierter Infrastruktur
-wird. Wer eine modifizierte Variante als Netzwerkdienst betreibt, muss
-den Quellcode für die Nutzer dieses Dienstes verfügbar machen.
+Unlike permissive licenses (MIT, Apache) or file-level copyleft (MPL),
+the AGPL’s network clause (§13) prevents this code from becoming the
+foundation of closed, commercially controlled infrastructure. Whoever
+runs a modified variant as a network service must make the source code
+available to the users of that service.
 
-Das ist eine bewusste Entscheidung gegen maximale Verbreitung und für
-theoretische Kohärenz: Was als Beitrag zur Allmende veröffentlicht
-wurde, sollte in der Allmende bleiben — auch wenn das die Adoption
-durch Akteure einschränkt, deren Geschäftsmodell auf der
-Re-Privatisierung dieser Beiträge basiert.
+This is a deliberate decision against maximum distribution and in favor
+of theoretical coherence: what was published as a contribution to the
+commons should stay in the commons — even if that limits adoption by
+actors whose business model rests on re-privatizing those contributions.
 
-yijing hat keine externen Code-Abhängigkeiten — kein npm, kein
-Build-Step, keine Drittanbieter-JS-Bibliotheken. Die AGPL-Verpflichtungen
-gelten vollständig auf den ausgelieferten JavaScript-Code, der im
-Browser ohnehin direkt einsehbar ist. Externe LLM-Server (Ollama, MLX)
-werden via HTTP-API aufgerufen — kein Code-Linking; deren Lizenzen
-wirken separat.
+yijing has no external code dependencies — no npm, no build step, no
+third-party JS libraries. The AGPL obligations apply fully to the shipped
+JavaScript code, which is directly inspectable in the browser anyway.
+External LLM servers (Ollama, MLX) are called via HTTP API — no code
+linking; their licenses apply separately.
 
-## Quellen
+## Sources
 
 - Wilhelm, Richard: *I Ging — Das Buch der Wandlungen*, Diederichs, 1924
-- Trigramm-Stammdaten und chinesische Bezeichnungen aus
-  Standardliteratur und chinesischen Originalquellen
+- Trigram reference data and Chinese designations from standard
+  literature and Chinese original sources
 
 ## Status
 
-Hobbyprojekt nach sechs verworfenen Anläufen — siehe `_archiv/`. Dieser
-Anlauf ist absichtlich anders: schlank, abhängigkeitsfrei, lokal.
-Funktioniert vollständig im Browser; die KI-Anbindung ist optional und
-ausschließlich für lokale Server gedacht.
+A hobby project after six discarded attempts — see `_archiv/`. This
+attempt is deliberately different: lean, dependency-free, local. Works
+fully in the browser; the AI connection is optional and intended
+exclusively for local servers.
 
 ---
 

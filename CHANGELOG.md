@@ -5,6 +5,8 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-05-28
+
 ### Hinzugefügt
 
 - **Sprach-Umschalter im Footer** — adaptiver Link, der in die jeweils
@@ -26,6 +28,17 @@ Versionierung nach [SemVer](https://semver.org/lang/de/).
   bleibt der initiale Default beim ersten Besuch, ist danach aber nicht
   mehr aktiv wählbar.
 - **Settings: Sprach-Sektion an die erste Position** im Modal verschoben.
+- **README zweisprachig gesplittet** — `README.md` ist jetzt die
+  kanonische englische Fassung (OSS-Konvention; Codeberg rendert
+  `README.md` per Default), die deutsche Fassung liegt in `README.de.md`.
+  Sprach-Umschalt-Zeile oben in beiden Dateien.
+
+### Behoben
+
+- **App-Bundle-Version** (`scripts/macos-app/Info.plist`):
+  `CFBundleVersion` + `CFBundleShortVersionString` standen seit v1.0 auf
+  `1.0` und wurden bei den Releases nie nachgezogen. Jetzt auf `1.3.0`
+  gesetzt — die DMG-App meldet endlich ihre echte Version.
 
 ## [1.2.1] — 2026-05-27
 
