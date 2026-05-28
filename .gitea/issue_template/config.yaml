@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: CC-BY-SA-4.0
 blank_issues_enabled: true
 contact_links:
-  - name: Sicherheits-Meldung
+  - name: Security report
     url: https://codeberg.org/jkaindl/Yijing/src/branch/main/SECURITY.md
-    about: Sicherheitsrelevante Probleme bitte nicht öffentlich melden — siehe SECURITY.md.
-  - name: Frage zur Bedienung / Wilhelm-Text
+    about: Please do not report security-relevant problems publicly — see SECURITY.md.
+  - name: Question about usage / Wilhelm text
     url: https://codeberg.org/jkaindl/Yijing/src/branch/main/README.md
-    about: Erstmal in der README und docs/ schauen — oft schon dokumentiert.
+    about: Check the README and docs/ first — it's often already documented.

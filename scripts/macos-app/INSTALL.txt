@@ -1,80 +1,78 @@
 ════════════════════════════════════════════════════════════════════
-  YIJING ORAKEL — Installation auf dem Mac
+  YIJING ORACLE — Installing on your Mac
 ════════════════════════════════════════════════════════════════════
 
-Diese App startet das Yijing-Orakel in einem eigenen Fenster auf
-deinem Mac. Es werden keine Daten ins Internet gesendet — alles läuft
-lokal auf deinem Rechner.
+This app launches the Yijing oracle in its own window on your Mac.
+No data is sent to the internet — everything runs locally on your
+machine.
 
-Weil die App nicht aus dem App Store kommt, sind beim ALLERSTEN Start
-ein paar zusätzliche Klicks nötig. Das ist normal und nur einmal so.
-
-
-────────────────────────────────────────────────────────────────────
- SCHRITT 1 — Installieren
-────────────────────────────────────────────────────────────────────
-
-1. Doppelklick auf „Yijing.dmg".
-   Es öffnet sich ein Fenster mit dem „Yijing"-Symbol und einem
-   „Programme"-Ordner daneben.
-
-2. Ziehe „Yijing" mit der Maus auf den „Programme"-Ordner.
-   Damit ist die App installiert.
-
-3. Wirf das „Yijing Orakel"-Laufwerk wieder aus: im Finder auf das
-   Auswerf-Symbol neben „Yijing Orakel" klicken (oder das Symbol vom
-   Schreibtisch in den Papierkorb ziehen).
+Because the app does not come from the App Store, the VERY FIRST
+launch needs a few extra clicks. This is normal and only happens once.
 
 
 ────────────────────────────────────────────────────────────────────
- SCHRITT 2 — Der erste Start (einmalig)
+ STEP 1 — Install
 ────────────────────────────────────────────────────────────────────
 
-1. Öffne den Programme-Ordner und mache einen Doppelklick auf
-   „Yijing".
+1. Double-click "Yijing.dmg".
+   A window opens with the "Yijing" icon and an "Applications"
+   folder next to it.
 
-2. Es erscheint ein Hinweis, dass die App nicht geöffnet werden kann,
-   weil sie nicht aus dem App Store stammt.
-   → Klicke auf „Fertig" bzw. „OK".
-   → NICHT auf „In den Papierkorb legen" klicken!
+2. Drag "Yijing" onto the "Applications" folder.
+   That installs the app.
 
-3. Öffne die Systemeinstellungen:
-   Apple-Menü (  oben links)  →  „Systemeinstellungen…"
-
-4. Klicke links auf „Datenschutz & Sicherheit".
-
-5. Scrolle auf der rechten Seite ganz nach unten.
-   Dort steht sinngemäß:
-   „„Yijing" wurde blockiert, um deinen Mac zu schützen."
-   → Klicke daneben auf den Knopf „Trotzdem öffnen".
-
-6. Bestätige mit deinem Anmelde-Passwort oder per Touch ID.
-
-7. Es erscheint noch ein letzter Dialog.
-   → Klicke dort auf „Trotzdem öffnen".
-
-Fertig — die App öffnet sich in einem eigenen Fenster.
+3. Eject the "Yijing Oracle" volume again: in the Finder, click the
+   eject symbol next to "Yijing Oracle" (or drag the icon from the
+   desktop to the Trash).
 
 
 ────────────────────────────────────────────────────────────────────
- AB DEM ZWEITEN MAL
+ STEP 2 — The first launch (one time only)
 ────────────────────────────────────────────────────────────────────
 
-Einfach Doppelklick auf „Yijing" im Programme-Ordner — sonst nichts.
-Die Schritte aus Abschnitt 2 sind nie wieder nötig.
+1. Open the Applications folder and double-click "Yijing".
+
+2. A notice appears saying the app cannot be opened because it is
+   not from the App Store.
+   → Click "Done" or "OK".
+   → Do NOT click "Move to Trash"!
+
+3. Open System Settings:
+   Apple menu (  top left)  →  "System Settings…"
+
+4. On the left, click "Privacy & Security".
+
+5. Scroll all the way down on the right-hand side.
+   It will say something like:
+   ""Yijing" was blocked to protect your Mac."
+   → Click the "Open Anyway" button next to it.
+
+6. Confirm with your login password or Touch ID.
+
+7. One last dialog appears.
+   → Click "Open Anyway" there.
+
+Done — the app opens in its own window.
 
 
 ────────────────────────────────────────────────────────────────────
- DIE APP BEENDEN
+ FROM THE SECOND LAUNCH ON
 ────────────────────────────────────────────────────────────────────
 
-Schließe einfach das Fenster oder drücke Cmd+Q. Damit ist die App
-vollständig beendet.
+Just double-click "Yijing" in the Applications folder — nothing else.
+The steps from section 2 are never needed again.
+
+
+────────────────────────────────────────────────────────────────────
+ QUITTING THE APP
+────────────────────────────────────────────────────────────────────
+
+Just close the window or press Cmd+Q. That fully quits the app.
 
 
 ════════════════════════════════════════════════════════════════════
-  Viel Freude mit dem Orakel.
+  Enjoy the oracle.
 
-  Yijing Orakel · © Jay Kaindl · Lizenz: AGPL-3.0-or-later
-  Quellcode: https://codeberg.org/jkaindl/Yijing
+  Yijing Oracle · © 2026 Johannes Kaindl · License: AGPL-3.0-or-later
+  Source code: https://codeberg.org/jkaindl/Yijing
 ════════════════════════════════════════════════════════════════════

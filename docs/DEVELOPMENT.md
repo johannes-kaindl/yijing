@@ -185,6 +185,17 @@ Versioning follows [SemVer](https://semver.org/), the changelog
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Steps
 for a release (using `v1.1.1` as an example):
 
+> **Version-bump locations** — keep all of these in sync; it is easy to
+> miss one (e.g. `Info.plist` was stuck at `1.0` until v1.3.0):
+>
+> - `scripts/macos-app/Info.plist` — `CFBundleVersion` **and** `CFBundleShortVersionString`
+> - `CHANGELOG.md` — `[Unreleased]` → `[x.y.z] — YYYY-MM-DD`
+> - `README.md` **and** `README.de.md` — the download badge URL (`releases/download/<tag>/Yijing.dmg`)
+> - `README.md` **and** `README.de.md` — a new top row in the release-history table
+> - `web/index.html` — the footer download link `href`
+>
+> The shields.io release badge (`gitea/v/release`) updates itself — no manual edit.
+
 1. **Pull the CHANGELOG.** Rename the `[Unreleased]` section to
    `[1.1.1] — YYYY-MM-DD`. Create a fresh `[Unreleased]` section
    above it.

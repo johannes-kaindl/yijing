@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Johannes Kaindl
 # SPDX-License-Identifier: CC-BY-SA-4.0
-name: Bug-Report
-about: Etwas funktioniert nicht wie erwartet
+name: Bug report
+about: Something isn't working as expected
 title: "[Bug] "
 labels:
   - bug
@@ -9,82 +9,82 @@ body:
   - type: markdown
     attributes:
       value: |
-        Danke fürs Melden. Bitte halte den Report so konkret wie möglich —
-        je besser ich es reproduzieren kann, desto schneller geht der Fix.
+        Thanks for reporting. Please keep the report as concrete as possible —
+        the better I can reproduce it, the faster the fix.
 
-        **Sicherheitsrelevante Probleme** bitte nicht hier — siehe
+        **Security-relevant problems** do not belong here — see
         [`SECURITY.md`](https://codeberg.org/jkaindl/Yijing/src/branch/main/SECURITY.md).
   - type: textarea
     id: what-happened
     attributes:
-      label: Was ist passiert?
-      description: Eine kurze, präzise Beschreibung des Problems.
-      placeholder: Klick auf „Interpretieren" zeigt keine Antwort, aber auch keine Fehlermeldung.
+      label: What happened?
+      description: A short, precise description of the problem.
+      placeholder: Clicking "Interpret" shows no answer, but also no error message.
     validations:
       required: true
   - type: textarea
     id: reproduce
     attributes:
-      label: Reproduktion
-      description: Welche Schritte führen zuverlässig zum Fehler?
+      label: Reproduction
+      description: Which steps reliably trigger the bug?
       placeholder: |
-        1. App geöffnet auf https://jkaindl.codeberg.page/Yijing/
-        2. Frage eingetippt, „Münzen werfen" geklickt
-        3. „Interpretieren" geklickt
-        4. Nichts passiert, Browser-Konsole zeigt: …
+        1. Opened the app at https://jkaindl.codeberg.page/Yijing/
+        2. Typed a question, clicked "Cast coins"
+        3. Clicked "Interpret"
+        4. Nothing happens, the browser console shows: …
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Erwartetes Verhalten
-      placeholder: LLM-Antwort sollte streamend erscheinen.
+      label: Expected behavior
+      placeholder: The LLM answer should appear, streaming.
     validations:
       required: true
   - type: dropdown
     id: surface
     attributes:
-      label: Welche Oberfläche?
+      label: Which surface?
       options:
-        - Web (Codeberg-Pages-Live-Demo)
-        - Web (lokal via ./serve.sh)
-        - macOS-App (Yijing.app)
-        - Andere / weiß nicht
+        - Web (Codeberg Pages live demo)
+        - Web (local via ./serve.sh)
+        - macOS app (Yijing.app)
+        - Other / not sure
     validations:
       required: true
   - type: input
     id: version
     attributes:
       label: Version
-      description: Bei macOS-App im Menü „Über Yijing" — bei Web siehe Footer.
-      placeholder: v1.1.1
+      description: For the macOS app, in the "About Yijing" menu — for web, see the footer.
+      placeholder: v1.3.0
   - type: input
     id: browser
     attributes:
-      label: Browser / macOS-Version
+      label: Browser / macOS version
       placeholder: Safari 18.5, macOS 15.4
   - type: dropdown
     id: llm-backend
     attributes:
-      label: LLM-Backend (falls relevant)
+      label: LLM backend (if relevant)
       options:
-        - Nicht relevant
+        - Not relevant
         - Ollama
         - MLX (mlx_lm.server)
         - LM Studio
-        - vLLM / OpenClaw / anderes OpenAI-kompatibles
+        - vLLM / OpenClaw / other OpenAI-compatible
   - type: textarea
     id: console
     attributes:
-      label: Browser-Konsole / Logs
-      description: Fehler aus DevTools-Konsole oder Server-Logs, falls vorhanden.
+      label: Browser console / logs
+      description: Errors from the DevTools console or server logs, if available.
       render: shell
   - type: checkboxes
     id: checks
     attributes:
-      label: Vorab-Checks
+      label: Pre-flight checks
       options:
-        - label: Ich habe in [bestehenden Issues](https://codeberg.org/jkaindl/Yijing/issues) nach Duplikaten geschaut.
+        - label: I searched [existing issues](https://codeberg.org/jkaindl/Yijing/issues) for duplicates.
           required: true
-        - label: Es handelt sich nicht um ein Sicherheitsproblem (sonst → SECURITY.md).
+        - label: This is not a security issue (otherwise → SECURITY.md).
           required: true

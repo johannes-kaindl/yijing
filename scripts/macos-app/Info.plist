@@ -21,7 +21,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>© Jay Kaindl, AGPL-3.0-or-later</string>
+	<string>© 2026 Johannes Kaindl, AGPL-3.0-or-later</string>
 	<key>LSUIElement</key>
 	<false/>
 </dict>
