@@ -156,6 +156,23 @@ if (hexEnJson) {
           `hexagrams.en.json Hex ${eh.number} line ${i+1}: DE-${de}=${deHas} aber EN-${en}=${enHas}.`);
       }
     }
+    // Register-Parität: wo DE ein *_neutral hat, braucht EN das *_en_neutral.
+    const has = (o, k) => !!(o && o[k] && String(o[k]).trim());
+    for (const fld of ["meaning", "judgment", "image"]) {
+      check(has(dh, fld + "_neutral") === has(eh, fld + "_en_neutral"),
+        `Hex ${eh.number}: DE-${fld}_neutral=${has(dh, fld + "_neutral")} aber EN-${fld}_en_neutral=${has(eh, fld + "_en_neutral")}.`);
+    }
+    for (let i = 0; i < deLines.length; i++) {
+      for (const sub of ["text", "interpretation"]) {
+        check(has(deLines[i], sub + "_neutral") === has(enLines[i], sub + "_en_neutral"),
+          `Hex ${eh.number} line ${i+1}: DE-${sub}_neutral=${has(deLines[i], sub + "_neutral")} aber EN-${sub}_en_neutral=${has(enLines[i], sub + "_en_neutral")}.`);
+      }
+    }
+    const deNotes = dh.notes || [], enNotes = eh.notes || [];
+    for (let k = 0; k < deNotes.length; k++) {
+      check(has(deNotes[k], "text_neutral") === has(enNotes[k], "text_en_neutral"),
+        `Hex ${eh.number} note ${k}: DE-text_neutral=${has(deNotes[k], "text_neutral")} aber EN-text_en_neutral=${has(enNotes[k], "text_en_neutral")}.`);
+    }
     enChecked++;
   }
 }

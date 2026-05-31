@@ -342,6 +342,8 @@ def build() -> None:
     print(f"   Schriftzeichen: {with_chinese}/{HEXAGRAM_COUNT}, "
           f"Bild-Assoziationen: {with_img}/{HEXAGRAM_COUNT}, "
           f"Hexagramme mit Anmerkungen: {with_notes}")
+    print("   Hinweis: für die geschlechtsneutrale Fassung danach "
+          "`python3 scripts/apply_neutral.py` ausführen (ein Rebuild verwirft die *_neutral-Felder).")
 
 
 def _write_json_atomic(target: Path, data) -> None:

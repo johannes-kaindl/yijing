@@ -19,6 +19,16 @@ def paras(s: str) -> str:
     return "".join(f"<p>{b}</p>" for b in blocks) or "<p>—</p>"
 
 
+def fld(obj: dict, base: str) -> str:
+    """Render the NEUTRAL value (app default); show the historical one click away."""
+    neu = obj.get(base + "_neutral")
+    hist = obj.get(base, "")
+    out = paras(neu or hist)
+    if neu and neu != hist:
+        out += f"<details class=hist><summary>historisch (Wilhelm 1924)</summary>{paras(hist)}</details>"
+    return out
+
+
 parts = [
     "<!doctype html><meta charset=utf-8><title>Yijing data review</title>",
     "<style>"
@@ -28,26 +38,30 @@ parts = [
     "h3{font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;"
     "color:#9c7220;margin:1.3rem 0 .3rem}"
     ".pos{font-weight:bold;color:#9c7220;margin-top:1em}"
-    ".verse{font-weight:500}.note{color:#777;font-size:.9em}</style>",
+    ".verse{font-weight:500}.note{color:#777;font-size:.9em}"
+    ".hist{margin:.3em 0 .6em;color:#8a8068;font-size:.92em}"
+    ".hist summary{cursor:pointer;font-size:.8em;letter-spacing:.05em}</style>",
 ]
 for h in DATA:
     parts.append(f"<h2>{h['number']}. {html.escape(h['name_de'])} "
                  f"<small>{html.escape(h.get('name_chinese', ''))} "
                  f"{html.escape(h.get('pinyin', ''))}</small></h2>")
-    parts.append("<h3>Bedeutung</h3>" + paras(h["meaning"]))
-    parts.append("<h3>Das Urteil</h3>" + paras(h["judgment"]))
-    parts.append("<h3>Das Bild</h3>" + paras(h["image"]))
+    parts.append("<h3>Bedeutung</h3>" + fld(h, "meaning"))
+    parts.append("<h3>Das Urteil</h3>" + fld(h, "judgment"))
+    parts.append("<h3>Das Bild</h3>" + fld(h, "image"))
     if h.get("image_association"):
         parts.append("<h3>Bildmeditation</h3>"
                      f"<p>{html.escape(h['image_association'])}</p>")
     parts.append("<h3>Die einzelnen Linien</h3>")
     for l in h["lines"]:
+        verse = (l.get("text_neutral") or l["text"])
         parts.append(f"<div class=pos>{html.escape(l['position'])}</div>"
-                     f"<div class=verse>{html.escape(l['text']).replace(chr(10), '<br>')}</div>"
-                     + paras(l["interpretation"]))
+                     f"<div class=verse>{html.escape(verse).replace(chr(10), '<br>')}</div>"
+                     + fld(l, "interpretation"))
     if h.get("notes"):
         parts.append("<h3>Anmerkungen</h3>"
-                     + "".join(f"<p class=note>{html.escape(n['text'])}</p>" for n in h["notes"]))
+                     + "".join(f"<p class=note>{html.escape(n.get('text_neutral') or n['text'])}</p>"
+                               for n in h["notes"]))
 
 OUT.write_text("\n".join(parts), encoding="utf-8")
 print(f"OK: review -> {OUT.relative_to(ROOT)} ({len(DATA)} hexagrams)")

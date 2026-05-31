@@ -191,6 +191,29 @@ Consistency check: `node scripts/test-kingwen.mjs` verifies that the EN file
 is structurally symmetric to the DE source (same `number`/`binary`,
 parallel `_en` fields wherever the DE counterpart has a value).
 
+## Register variant: gender-neutral (default) vs. historical
+
+Orthogonal to the DE/EN language axis, the app has a **register** setting
+(`localStorage["yijing-register"]`, default `"neutral"`; toggle in Settings):
+
+- **neutral** (default) — generic role nouns are de-gendered ("der Edle" → "die
+  edle Person", "der große Mann" → "die große Persönlichkeit", with matching
+  pronouns), *dezent*: content-specific gendered imagery (the marrying maiden,
+  Father/Mother/Son/Daughter trigrams, the dragons) is preserved verbatim.
+- **historical** — Wilhelm's 1924 wording verbatim (the base fields).
+
+Stored as **overrides only where they differ**: `*_neutral` (DE) and
+`*_en_neutral` (EN) on `meaning`/`judgment`/`image`, per line
+(`text_neutral`/`interpretation_neutral` + `_en_` variants), and per note
+(`text_neutral`/`text_en_neutral`). A missing `*_neutral` means "same as
+historical" (the app resolves `field_neutral ?? field`).
+
+Source of truth: **`scripts/sources/neutral_overrides.json`** (committed),
+produced by a deterministic regex pass (`scripts/neutralize.py`) plus an LLM
+polish, then applied with **`scripts/apply_neutral.py`** (idempotent;
+run *after* `build_data.py`, which rebuilds the DE base and drops the neutral
+fields until re-applied). `test-kingwen.mjs` also checks DE/EN register parity.
+
 ## Source license
 
 - **Wilhelm texts** (`meaning`, `judgment`, `image`, `lines[].text`,

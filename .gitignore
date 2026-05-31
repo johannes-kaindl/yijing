@@ -40,3 +40,7 @@ scripts/sources/.html_cache/
 scripts/sources/gutenberg_diff_report.md
 scripts/sources/review.html
 scripts/sources/.en_work/
+
+# A2 gender-neutral work artifacts (neutral_overrides.json is committed)
+scripts/sources/neutral_draft.json
+scripts/sources/neutral_diff_report.md
