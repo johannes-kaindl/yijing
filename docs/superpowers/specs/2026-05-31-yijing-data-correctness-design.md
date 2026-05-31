@@ -46,10 +46,21 @@ Recon notes on the Gutenberg source (verified):
   from the URL.
 - Each page's content is **duplicated** (visible copy + hidden reading-mode
   copy) — dedupe to the first `book-reader__chapter-content-wrapper`.
-- `class="em"` is overloaded: it marks both the italic oracle text and inline
-  footnotes/parentheticals. Distinguish by content/position.
-- Line markers: the German intro phrases (`… bedeutet:`) are the reliable
-  delimiters; the `<a name="…_linie">` anchors are inconsistent.
+- **Block model (verified against cached chapter/3 = hex 1, chapter/12 = hex 2):**
+  the body is a flat run of `<p>` elements. `<p class="center">` holds headings
+  and *oracle/figure verse* (trigram lines, the Judgment verse, `DAS BILD`,
+  the Image verse, `Die Einzelnen Linien`, each line's position + line text);
+  `<p class="">` (empty class) holds *commentary prose*. The hexagram name is
+  the leading `<h2 class="title">` ("1. KIEN / DAS SCHÖPFERISCHE"). There is no
+  explicit "Das Urteil" heading — the Judgment is the first centered verse after
+  the meaning prose. Footnotes are a commentary `<p>` whose text is *wholly*
+  parenthetical `(…)`.
+- Line markers: a centered `<p>` whose text matches `…bedeutet:` starts a line
+  (position), followed by centered line-text verse and prose commentary. The
+  7th "all-moving" entry for hex 1 & 2 uses `…bedeutet das:` and reads "Wenn
+  lauter Neunen/Sechsen erscheinen, bedeutet das: …". German ordinals
+  ("Oberste") are **not** reliably present — assign line order by appearance,
+  and treat the `bedeutet das:` / "lauter Neunen|Sechsen" entry as the 7th.
 - The source has its own OCR artifacts to guard against (e.g. "das
   Schöpferisch", "Kungtse::", "DIE WIEDERKEHRT", "DAS HAFTENE").
 
@@ -142,28 +153,31 @@ Responsibilities:
   (dedupe), parse the leading `<h2>` with a tolerant regex
   `^\s*(\d{1,2})\s*\.?\s+(.+?)\s*/\s*(.+)$` → `(hexNumber, romanizedName,
   germanName)`. **Index output by parsed `hexNumber`.**
-- Extract, in document order:
-  - **meaning** — the intro/`Zeichen` commentary paragraphs before the first
-    Judgment oracle.
-  - **judgment** — the `em`-italic oracle line(s) after the intro + the
-    following `<p>` commentary.
-  - **image** — after the `DAS BILD` plain-text heading: `em`-italic oracle +
-    `<p>` commentary.
-  - **lines** — after `<hr>` + `Die Einzelnen Linien`: split on the
-    `… bedeutet:` phrases into the 6 lines (ordinal from the German phrase:
-    "Anfangs"=1 … "Oberste"=6), each = `{position, text, interpretation}`.
-    For hex **1 & 2**, additionally capture the 7th entry
-    ("Wird lauter Neunen/Sechsen gebraucht …") as `lines[6]`.
-  - **footnotes** — captured into a structured `notes` array (NOT discarded).
-    Detection heuristic: an `em`-span that is wholly parenthetical `(…)` and/or
-    carries the `*` anchor, sitting inside a `<p>` commentary paragraph (i.e.
-    not the oracle text that directly follows a Judgment/Image/line heading).
-    Each note records `{marker, text, anchor}` where `anchor` is the section it
-    was attached to (`meaning` / `judgment` / `image` / `line:<n>`), so it can
-    be rendered near its context. The bare `*` anchor marker is removed from
-    the note text. Detection is acknowledged-fragile and is checked in the
-    verification pass (§7a) — the fallback for an unparseable page is per-note
-    manual confirmation against the source.
+- Classify each body `<p>` as `center` (class contains `center` → oracle/
+  heading/verse) or `prose` (empty class → commentary). Then walk in document
+  order through state machine sections (meaning → judgment → image → lines):
+  - **meaning** — `prose` paragraphs after the two trigram `center` lines
+    (`oben …` / `unten …`) and before the first non-heading `center` verse
+    (the Judgment).
+  - **judgment** — the `center` verse run that precedes `DAS BILD` (joined with
+    `\n`), plus the following `prose` paragraphs as commentary.
+  - **image** — after the `center` heading `DAS BILD`: the `center` verse +
+    following `prose` commentary, until the `center` heading
+    `Die Einzelnen Linien`.
+  - **lines** — after `Die Einzelnen Linien`: each line begins at a `center`
+    paragraph whose text matches `…bedeutet:` (= `position`), followed by the
+    `center` line-text verse(s) (= `text`) and `prose` paragraphs
+    (= `interpretation`). Assign order by appearance. The entry whose marker is
+    `…bedeutet das:` (text "Wenn lauter Neunen/Sechsen erscheinen, bedeutet
+    das: …") is the **7th** all-moving line, captured as `lines[6]` for hex
+    1 & 2 (absent elsewhere). Split-marker regex: `bedeutet( das)?:`.
+  - **footnotes** — a `prose` paragraph whose stripped text is *wholly*
+    enclosed in `(…)` (optionally with a leading `*`) is a footnote, NOT
+    commentary. Captured into the `notes` array as `{anchor, marker, text}`
+    where `anchor` is the current section (`meaning`/`judgment`/`image`/
+    `line:<n>`); the leading `*` is stripped from the text. A `prose` paragraph
+    that merely *contains* an inline parenthetical (e.g. a citation "(Math, 5,
+    39)") is left intact as commentary. Detection is verified in §7a.
 - Normalize: `<br />` → `\n` (single line break within an oracle statement),
   paragraph boundaries → `\n\n`, collapse runs of spaces/tabs, normalize quotes
   to `»…«`, apply the **OCR fix-map** (section 4.6).
@@ -187,7 +201,7 @@ Responsibilities:
     "lines": [
       { "position": "Anfangs eine Neun bedeutet:", "text": "…", "interpretation": "…" },
       "… 5 more …",
-      { "position": "Wird lauter Neunen gebraucht, so bedeutet das:", "text": "…", "interpretation": "…" }
+      { "position": "Wenn lauter Neunen erscheinen, bedeutet das:", "text": "Es erscheint eine Schar von Drachen ohne Haupt. Heil!", "interpretation": "…" }
     ],
     "notes": [
       { "anchor": "meaning", "marker": "*", "text": "Das Zeichen ist dem 4. Monat …" },
