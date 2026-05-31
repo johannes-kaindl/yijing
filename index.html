@@ -163,6 +163,10 @@
           <summary data-i18n="reading.trigrams">Trigramme</summary>
           <div class="text-body" id="trigramText"></div>
         </details>
+        <details id="notesDetails" hidden>
+          <summary data-i18n="reading.notes">Anmerkungen</summary>
+          <div class="text-body" id="notesText"></div>
+        </details>
 
         <div id="changingSection" hidden>
           <h2 class="section-title" data-i18n="reading.changingLines">Wandelnde Linien</h2>
@@ -199,6 +203,18 @@
           <select id="languageSelect">
             <option value="de" data-i18n="settings.language.de">Deutsch (Wilhelm)</option>
             <option value="en" data-i18n="settings.language.en">English (Wilhelm — translated)</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="settings.register">Fassung / Wording</legend>
+        <p class="hint" data-i18n="settings.register.hint">Standardmäßig geschlechtsneutral. Schalte auf die historische Fassung, um Wilhelms Wortlaut von 1924 wörtlich zu lesen.</p>
+        <label class="row-inline">
+          <span data-i18n="settings.register.label">Fassung:</span>
+          <select id="registerSelect">
+            <option value="neutral" data-i18n="settings.register.neutral">Geschlechtsneutral</option>
+            <option value="historical" data-i18n="settings.register.historical">Historisch (Wilhelm 1924)</option>
           </select>
         </label>
       </fieldset>

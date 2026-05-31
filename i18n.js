@@ -53,6 +53,7 @@ const STRINGS = {
     "reading.meaning": "Bedeutung",
     "reading.association": "Bildmeditation",
     "reading.trigrams": "Trigramme",
+    "reading.notes": "Anmerkungen",
     "reading.trigramAbove": "oben",
     "reading.trigramBelow": "unten",
     "reading.trigramOver": "über", // "Trigramm X über Trigramm Y"
@@ -150,6 +151,12 @@ const STRINGS = {
       "Wirkt sofort auf die UI und auf den Beratungs-Prompt-Default. Lädt beim Wechsel die passenden Hexagramm-Texte nach.",
     "settings.language.de": "Deutsch (Wilhelm)",
     "settings.language.en": "English (Wilhelm — translated)",
+    "settings.register": "Fassung / Wording",
+    "settings.register.label": "Fassung:",
+    "settings.register.hint":
+      "Standardmäßig geschlechtsneutral. Schalte auf die historische Fassung, um Wilhelms Wortlaut von 1924 wörtlich zu lesen.",
+    "settings.register.neutral": "Geschlechtsneutral",
+    "settings.register.historical": "Historisch (Wilhelm 1924)",
 
     // ——— Theme-Knopf (Tooltip beschreibt die Klick-Aktion) ———
     "theme.toLight": "Zu hellem Design wechseln",
@@ -243,6 +250,7 @@ const STRINGS = {
     "reading.meaning": "Meaning",
     "reading.association": "Image meditation",
     "reading.trigrams": "Trigrams",
+    "reading.notes": "Notes",
     "reading.trigramAbove": "above",
     "reading.trigramBelow": "below",
     "reading.trigramOver": "over",
@@ -340,6 +348,12 @@ const STRINGS = {
       "Takes effect immediately on the UI and the counsel-prompt default. Loads the matching hexagram texts on switch.",
     "settings.language.de": "Deutsch (Wilhelm)",
     "settings.language.en": "English (Wilhelm — translated)",
+    "settings.register": "Fassung / Wording",
+    "settings.register.label": "Wording:",
+    "settings.register.hint":
+      "Gender-neutral by default. Switch to the historical wording to read Wilhelm's 1924 text verbatim.",
+    "settings.register.neutral": "Gender-neutral",
+    "settings.register.historical": "Historical (Wilhelm 1924)",
 
     // ——— Theme button (tooltip describes the click action) ———
     "theme.toLight": "Switch to light mode",

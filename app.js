@@ -130,6 +130,8 @@ const els = {
   meaningText: document.getElementById("meaningText"),
   associationDetails: document.getElementById("associationDetails"),
   associationText: document.getElementById("associationText"),
+  notesDetails: document.getElementById("notesDetails"),
+  notesText: document.getElementById("notesText"),
   trigramDetails: document.getElementById("trigramDetails"),
   trigramText: document.getElementById("trigramText"),
   changingSection: document.getElementById("changingSection"),
@@ -165,6 +167,7 @@ const els = {
   systemPromptInput: document.getElementById("systemPromptInput"),
   resetSystemPromptBtn: document.getElementById("resetSystemPrompt"),
   languageSelect: document.getElementById("languageSelect"),
+  registerSelect: document.getElementById("registerSelect"),
 };
 
 let HEXAGRAMS = null;
@@ -252,31 +255,48 @@ function renderHexCard(card, hexData, lines, changingMask) {
   renderHexFigure(card.querySelector(".hex-figure"), lines, changingMask);
 }
 
-function lineFieldsForLang(ln) {
-  if (getLang() === "en") {
-    return {
-      position: ln.position_en || ln.position,
-      text: ln.text_en || ln.text,
-      interpretation: ln.interpretation_en || ln.interpretation,
-    };
+// ——— Register (geschlechtsneutral / historisch) ———
+const REGISTER_KEY = "yijing-register";
+
+/** "neutral" (default, inclusive) oder "historical" (Wilhelm 1924 wörtlich). */
+function getRegister() {
+  return localStorage.getItem(REGISTER_KEY) === "historical" ? "historical" : "neutral";
+}
+function setRegister(reg) {
+  localStorage.setItem(REGISTER_KEY, reg === "historical" ? "historical" : "neutral");
+}
+
+/**
+ * Wählt den Feldwert nach Sprache (DE/EN) UND Register (neutral/historisch).
+ * Neutral bevorzugt *_neutral / *_en_neutral, fällt sauber auf die historische
+ * Fassung zurück, wenn kein neutrales Override existiert.
+ */
+function fieldFor(obj, base) {
+  const en = getLang() === "en";
+  const neutral = getRegister() === "neutral";
+  if (en) {
+    if (neutral && obj[base + "_en_neutral"]) return obj[base + "_en_neutral"];
+    return obj[base + "_en"] || obj[base];
   }
-  return { position: ln.position, text: ln.text, interpretation: ln.interpretation };
+  if (neutral && obj[base + "_neutral"]) return obj[base + "_neutral"];
+  return obj[base];
+}
+
+function lineFieldsForLang(ln) {
+  return {
+    // Position markers ("Anfangs eine Neun bedeutet:") are not gendered.
+    position: getLang() === "en" ? (ln.position_en || ln.position) : ln.position,
+    text: fieldFor(ln, "text"),
+    interpretation: fieldFor(ln, "interpretation"),
+  };
 }
 
 function hexTextFieldsForLang(hex) {
-  if (getLang() === "en") {
-    return {
-      judgment: hex.judgment_en || hex.judgment,
-      image: hex.image_en || hex.image,
-      meaning: hex.meaning_en || hex.meaning,
-      image_association: hex.image_association_en || hex.image_association,
-    };
-  }
   return {
-    judgment: hex.judgment,
-    image: hex.image,
-    meaning: hex.meaning,
-    image_association: hex.image_association,
+    judgment: fieldFor(hex, "judgment"),
+    image: fieldFor(hex, "image"),
+    meaning: fieldFor(hex, "meaning"),
+    image_association: fieldFor(hex, "image_association"),
   };
 }
 
@@ -288,8 +308,8 @@ function renderChangingLines(hexData, changingIndices) {
     block.className = "changing-line";
     block.innerHTML = `
       <div class="pos">${escapeHTML(ln.position)}</div>
-      <div class="text">${escapeHTML(ln.text)}</div>
-      ${ln.interpretation ? `<div class="interp">${escapeHTML(ln.interpretation)}</div>` : ""}
+      <div class="text">${escapeHTML(ln.text).replace(/\n/g, "<br>")}</div>
+      ${ln.interpretation ? `<div class="interp">${renderParagraphs(ln.interpretation)}</div>` : ""}
     `;
     els.changingLines.appendChild(block);
   }
@@ -322,6 +342,48 @@ function escapeHTML(s) {
     .replace(/>/g, "&gt;");
 }
 
+/** Render a plain-text field (\n\n = paragraph, \n = line break) as escaped <p> HTML. */
+function renderParagraphs(s) {
+  const text = String(s || "").trim();
+  if (!text) return "—";
+  return text
+    .split(/\n{2,}/)
+    .map((p) => `<p>${escapeHTML(p).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+}
+
+/** Language- and register-selected footnote text. */
+function noteTextForLang(note) {
+  return fieldFor(note, "text");
+}
+
+/** Render Wilhelm footnotes into the "Anmerkungen" block (hidden when none). */
+function renderNotes(hex) {
+  const notes = hex.notes || [];
+  if (!notes.length) {
+    els.notesDetails.hidden = true;
+    els.notesText.innerHTML = "";
+    return;
+  }
+  els.notesDetails.hidden = false;
+  els.notesText.innerHTML = notes
+    .map((n) => `<p class="note">${escapeHTML(noteTextForLang(n))}</p>`)
+    .join("");
+}
+
+/** Hexagram 1 & 2, all six lines moving: the "use the nine / use the six" oracle. */
+function renderSeventhLine(hexData) {
+  const ln = lineFieldsForLang(hexData.lines[6]);
+  els.changingLines.innerHTML = "";
+  const block = document.createElement("div");
+  block.className = "changing-line";
+  block.innerHTML =
+    `<div class="pos">${escapeHTML(ln.position)}</div>` +
+    `<div class="text">${escapeHTML(ln.text).replace(/\n/g, "<br>")}</div>` +
+    (ln.interpretation ? `<div class="interp">${renderParagraphs(ln.interpretation)}</div>` : "");
+  els.changingLines.appendChild(block);
+}
+
 /** Sprachabhängige typografische Anführungszeichen für die Frage-Echo. */
 function quoteForLang(s) {
   if (getLang() === "en") return `“${s}”`; // “…”
@@ -345,9 +407,9 @@ function showReading(question, lines, options = {}) {
   renderHexCard(els.primary, primaryHex, lines, changingMask);
 
   const primaryTexts = hexTextFieldsForLang(primaryHex);
-  els.judgmentText.textContent = primaryTexts.judgment || "—";
-  els.imageText.textContent = primaryTexts.image || "—";
-  els.meaningText.textContent = primaryTexts.meaning || "—";
+  els.judgmentText.innerHTML = renderParagraphs(primaryTexts.judgment);
+  els.imageText.innerHTML = renderParagraphs(primaryTexts.image);
+  els.meaningText.innerHTML = renderParagraphs(primaryTexts.meaning);
 
   if (primaryTexts.image_association) {
     els.associationDetails.hidden = false;
@@ -357,11 +419,18 @@ function showReading(question, lines, options = {}) {
   }
 
   renderTrigramDetails(primaryHex);
+  renderNotes(primaryHex);
 
   let resultingHex = null;
   if (changingIndices.length > 0) {
     els.changingSection.hidden = false;
-    renderChangingLines(primaryHex, changingIndices);
+    const allMoving = changingIndices.length === 6;
+    if (allMoving && (primaryHex.number === 1 || primaryHex.number === 2)
+        && primaryHex.lines.length >= 7) {
+      renderSeventhLine(primaryHex);  // "use the nine" / "use the six" oracle
+    } else {
+      renderChangingLines(primaryHex, changingIndices);
+    }
 
     const targetNum = kingWenFromBinary(targetBinary);
     resultingHex = HEXAGRAMS[targetNum];
@@ -376,7 +445,7 @@ function showReading(question, lines, options = {}) {
       name: hexNameForLang(resultingHex),
     });
     const resultingTexts = hexTextFieldsForLang(resultingHex);
-    els.resultingJudgment.textContent = resultingTexts.judgment || "—";
+    els.resultingJudgment.innerHTML = renderParagraphs(resultingTexts.judgment);
   } else {
     els.changingSection.hidden = true;
     els.resulting.hidden = true;
@@ -463,6 +532,7 @@ function tossAnimated(question) {
   els.resulting.hidden = true;
   els.resultingSection.hidden = true;
   els.associationDetails.hidden = true;
+  els.notesDetails.hidden = true;
   els.interpretation.hidden = true;
   els.interpBody.innerHTML = "";
   els.trigramText.innerHTML = "";
@@ -1003,6 +1073,7 @@ function openSettings() {
   els.systemPromptInput.value = SystemPrompt.get();
   els.defaultThinking.value = localStorage.getItem("yijing-default-thinking") || "default";
   if (els.languageSelect) els.languageSelect.value = getLang();
+  if (els.registerSelect) els.registerSelect.value = getRegister();
   els.newEpName.value = "";
   els.newEpUrl.value = "";
   els.newEpKey.value = "";
@@ -1166,6 +1237,24 @@ if (els.languageSelect) {
   });
 }
 
+// Register-Wechsel (geschlechtsneutral / historisch). Kein Daten-Reload nötig —
+// beide Fassungen liegen im selben JSON; nur die aktuelle Reading neu rendern.
+function changeRegister(reg) {
+  if (reg !== "neutral" && reg !== "historical") return;
+  if (reg === getRegister()) return;
+  setRegister(reg);
+  const m = window.location.hash.match(/^#r=([^&]+)$/);
+  if (m) {
+    const entry = findHistoryEntry(m[1]);
+    if (entry) showReadingFromEntry(entry);
+  }
+}
+if (els.registerSelect) {
+  els.registerSelect.addEventListener("change", () => {
+    changeRegister(els.registerSelect.value);
+  });
+}
+
 // Footer-Link wechselt in die jeweils andere Sprache. Der Link-TEXT wird von
 // applyI18n verwaltet (DE-Dict „English version", EN-Dict „Deutsche Version").
 const langSwitchLink = document.getElementById("langSwitch");
@@ -1240,6 +1329,7 @@ function applyTheme(mode) {
     renderHistory();
     refreshEndpointSelect();
     if (els.languageSelect) els.languageSelect.value = getLang();
+  if (els.registerSelect) els.registerSelect.value = getRegister();
     // Hintergrund: lokale LLM-Server suchen und Auswahl aktualisieren
     Endpoints.autoDiscover().then(() => refreshEndpointSelect());
     // Tiefer Link? — falls #r=<id> in der URL steht, Eintrag wiederherstellen
