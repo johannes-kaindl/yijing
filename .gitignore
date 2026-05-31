@@ -33,3 +33,9 @@ venv/
 # Lokale Notizen / Memory (nicht für Versionierung)
 .remember/
 .claude/
+
+# Gutenberg-Scrape: Roh-HTML-Cache + Build-/Verify-Artefakte.
+# Die geparste Quelle scripts/sources/gutenberg_iging.json wird committet.
+scripts/sources/.html_cache/
+scripts/sources/gutenberg_diff_report.md
+scripts/sources/review.html
