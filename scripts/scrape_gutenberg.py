@@ -46,7 +46,19 @@ OCR_FIXES = {
     "Kungtse::": "Kungtse:",
     "DIE WIEDERKEHRT": "DIE WIEDERKEHR",
     "DAS HAFTENE": "DAS HAFTENDE",
+    # Single-word OCR glitches, confirmed against the older _archiv extraction:
+    "seIber": "selber",                          # capital-I for l (hex 8)
+    "Fa11": "Fall",                              # digit-ones for ll (hex 8)
+    "der Denen moralischen": "der eigenen moralischen",  # hex 53
+    "treiben laßt": "treiben läßt",              # missing umlaut (hex 54)
+    "ober Dschen": "oben Dschen",                # hex 16 trigram line (also fixes the skip)
 }
+
+
+def apply_ocr(s: str) -> str:
+    for bad, good in OCR_FIXES.items():
+        s = s.replace(bad, good)
+    return s
 
 NAME_RE = re.compile(r"^\s*(\d{1,2})\s*\.?\s+(.+?)\s*/\s*(.+)$")
 # A changing-line position marker: an ordinal phrase up to "bedeutet:" — the
@@ -113,7 +125,7 @@ def content_wrapper(raw: str) -> str:
 def blocks(seg: str):
     """Yield (kind, text) in document order. kind in {'h2','center','prose'}."""
     for tag, attrs, inner in re.findall(r"<(h2|p)\b([^>]*)>(.*?)</\1>", seg, re.S):
-        txt = strip_tags(inner)
+        txt = apply_ocr(strip_tags(inner))  # fix OCR before parsing (e.g. trigram skip)
         if not txt:
             continue
         if tag == "h2":
@@ -235,8 +247,7 @@ def parse_page(raw: str) -> dict:
 # ---------- normalization + record assembly ------------------------------
 
 def normalize(s: str) -> str:
-    for bad, good in OCR_FIXES.items():
-        s = s.replace(bad, good)
+    # OCR fixes are applied earlier in blocks(); here only quote normalization.
     # straight double quotes -> German guillemets (paired)
     out, open_q = [], True
     for ch in s:
