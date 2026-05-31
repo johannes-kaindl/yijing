@@ -130,6 +130,8 @@ const els = {
   meaningText: document.getElementById("meaningText"),
   associationDetails: document.getElementById("associationDetails"),
   associationText: document.getElementById("associationText"),
+  notesDetails: document.getElementById("notesDetails"),
+  notesText: document.getElementById("notesText"),
   trigramDetails: document.getElementById("trigramDetails"),
   trigramText: document.getElementById("trigramText"),
   changingSection: document.getElementById("changingSection"),
@@ -289,7 +291,7 @@ function renderChangingLines(hexData, changingIndices) {
     block.innerHTML = `
       <div class="pos">${escapeHTML(ln.position)}</div>
       <div class="text">${escapeHTML(ln.text)}</div>
-      ${ln.interpretation ? `<div class="interp">${escapeHTML(ln.interpretation)}</div>` : ""}
+      ${ln.interpretation ? `<div class="interp">${renderParagraphs(ln.interpretation)}</div>` : ""}
     `;
     els.changingLines.appendChild(block);
   }
@@ -322,6 +324,48 @@ function escapeHTML(s) {
     .replace(/>/g, "&gt;");
 }
 
+/** Render a plain-text field (\n\n = paragraph, \n = line break) as escaped <p> HTML. */
+function renderParagraphs(s) {
+  const text = String(s || "").trim();
+  if (!text) return "—";
+  return text
+    .split(/\n{2,}/)
+    .map((p) => `<p>${escapeHTML(p).replace(/\n/g, "<br>")}</p>`)
+    .join("");
+}
+
+/** Language-selected footnote text. */
+function noteTextForLang(note) {
+  return getLang() === "en" ? (note.text_en || note.text) : note.text;
+}
+
+/** Render Wilhelm footnotes into the "Anmerkungen" block (hidden when none). */
+function renderNotes(hex) {
+  const notes = hex.notes || [];
+  if (!notes.length) {
+    els.notesDetails.hidden = true;
+    els.notesText.innerHTML = "";
+    return;
+  }
+  els.notesDetails.hidden = false;
+  els.notesText.innerHTML = notes
+    .map((n) => `<p class="note">${escapeHTML(noteTextForLang(n))}</p>`)
+    .join("");
+}
+
+/** Hexagram 1 & 2, all six lines moving: the "use the nine / use the six" oracle. */
+function renderSeventhLine(hexData) {
+  const ln = lineFieldsForLang(hexData.lines[6]);
+  els.changingLines.innerHTML = "";
+  const block = document.createElement("div");
+  block.className = "changing-line";
+  block.innerHTML =
+    `<div class="pos">${escapeHTML(ln.position)}</div>` +
+    `<div class="text">${escapeHTML(ln.text)}</div>` +
+    (ln.interpretation ? `<div class="interp">${renderParagraphs(ln.interpretation)}</div>` : "");
+  els.changingLines.appendChild(block);
+}
+
 /** Sprachabhängige typografische Anführungszeichen für die Frage-Echo. */
 function quoteForLang(s) {
   if (getLang() === "en") return `“${s}”`; // “…”
@@ -345,9 +389,9 @@ function showReading(question, lines, options = {}) {
   renderHexCard(els.primary, primaryHex, lines, changingMask);
 
   const primaryTexts = hexTextFieldsForLang(primaryHex);
-  els.judgmentText.textContent = primaryTexts.judgment || "—";
-  els.imageText.textContent = primaryTexts.image || "—";
-  els.meaningText.textContent = primaryTexts.meaning || "—";
+  els.judgmentText.innerHTML = renderParagraphs(primaryTexts.judgment);
+  els.imageText.innerHTML = renderParagraphs(primaryTexts.image);
+  els.meaningText.innerHTML = renderParagraphs(primaryTexts.meaning);
 
   if (primaryTexts.image_association) {
     els.associationDetails.hidden = false;
@@ -357,11 +401,18 @@ function showReading(question, lines, options = {}) {
   }
 
   renderTrigramDetails(primaryHex);
+  renderNotes(primaryHex);
 
   let resultingHex = null;
   if (changingIndices.length > 0) {
     els.changingSection.hidden = false;
-    renderChangingLines(primaryHex, changingIndices);
+    const allMoving = changingIndices.length === 6;
+    if (allMoving && (primaryHex.number === 1 || primaryHex.number === 2)
+        && primaryHex.lines.length >= 7) {
+      renderSeventhLine(primaryHex);  // "use the nine" / "use the six" oracle
+    } else {
+      renderChangingLines(primaryHex, changingIndices);
+    }
 
     const targetNum = kingWenFromBinary(targetBinary);
     resultingHex = HEXAGRAMS[targetNum];
@@ -376,7 +427,7 @@ function showReading(question, lines, options = {}) {
       name: hexNameForLang(resultingHex),
     });
     const resultingTexts = hexTextFieldsForLang(resultingHex);
-    els.resultingJudgment.textContent = resultingTexts.judgment || "—";
+    els.resultingJudgment.innerHTML = renderParagraphs(resultingTexts.judgment);
   } else {
     els.changingSection.hidden = true;
     els.resulting.hidden = true;
@@ -463,6 +514,7 @@ function tossAnimated(question) {
   els.resulting.hidden = true;
   els.resultingSection.hidden = true;
   els.associationDetails.hidden = true;
+  els.notesDetails.hidden = true;
   els.interpretation.hidden = true;
   els.interpBody.innerHTML = "";
   els.trigramText.innerHTML = "";

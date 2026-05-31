@@ -368,6 +368,25 @@ button.ghost:hover {
   line-height: 1.65;
 }
 
+/* Texts now render as real <p> paragraphs (see renderParagraphs in app.js). */
+.text-body p {
+  margin: 0 0 0.7em;
+}
+.text-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Wilhelm footnotes in the "Anmerkungen" block. */
+.note {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 0 0.6em;
+}
+.note:last-child {
+  margin-bottom: 0;
+}
+
 .section-title {
   font-size: 0.85rem;
   letter-spacing: 0.2em;
@@ -404,6 +423,12 @@ button.ghost:hover {
   font-size: 0.92rem;
   white-space: pre-wrap;
   line-height: 1.6;
+}
+.changing-line .interp p {
+  margin: 0 0 0.5em;
+}
+.changing-line .interp p:last-child {
+  margin-bottom: 0;
 }
 
 /* History */

@@ -53,6 +53,7 @@ const STRINGS = {
     "reading.meaning": "Bedeutung",
     "reading.association": "Bildmeditation",
     "reading.trigrams": "Trigramme",
+    "reading.notes": "Anmerkungen",
     "reading.trigramAbove": "oben",
     "reading.trigramBelow": "unten",
     "reading.trigramOver": "über", // "Trigramm X über Trigramm Y"
@@ -243,6 +244,7 @@ const STRINGS = {
     "reading.meaning": "Meaning",
     "reading.association": "Image meditation",
     "reading.trigrams": "Trigrams",
+    "reading.notes": "Notes",
     "reading.trigramAbove": "above",
     "reading.trigramBelow": "below",
     "reading.trigramOver": "over",
