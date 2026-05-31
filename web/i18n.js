@@ -42,6 +42,8 @@ const STRINGS = {
     "ask.exportMd.title": "Als Markdown exportieren",
     "ask.exportPdf": "PDF",
     "ask.exportPdf.title": "Als PDF drucken / speichern",
+    "ask.pdfBw": "Druck (S/W)",
+    "ask.pdfGlossy": "App-Design",
 
     "reading.primary": "Ursprungsbild",
     "reading.resulting": "Zielbild",
@@ -239,6 +241,8 @@ const STRINGS = {
     "ask.exportMd.title": "Export as Markdown",
     "ask.exportPdf": "PDF",
     "ask.exportPdf.title": "Print / save as PDF",
+    "ask.pdfBw": "Print (B/W)",
+    "ask.pdfGlossy": "App design",
 
     "reading.primary": "Primary hexagram",
     "reading.resulting": "Resulting hexagram",

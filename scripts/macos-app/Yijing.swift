@@ -8,9 +8,10 @@ import WebKit
 
 // MARK: - App-Delegate
 
-final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKScriptMessageHandler {
     private var server: StaticServer!
     private var window: NSWindow!
+    private var webView: WKWebView!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let resourceURL = Bundle.main.resourceURL else {
@@ -35,8 +36,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     }
 
     private func openWindow() {
-        let webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
+        // Bridge: web app -> native (export). WKWebView supports neither
+        // window.print() nor <a download> blobs, so MD/PDF export must be native.
+        let config = WKWebViewConfiguration()
+        config.userContentController.add(self, name: "yijing")
+        let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = self
+        self.webView = webView
 
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 900, height: 820),
@@ -51,6 +57,60 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
 
         let url = URL(string: "http://localhost:\(server.port)/web/index.html")!
         webView.load(URLRequest(url: url))
+    }
+
+    // MARK: - Export-Bridge (web -> native)
+
+    func userContentController(_ ucc: WKUserContentController,
+                              didReceive message: WKScriptMessage) {
+        guard let body = message.body as? [String: Any],
+              let action = body["action"] as? String else { return }
+        switch action {
+        case "saveMarkdown":
+            saveMarkdown(content: body["content"] as? String ?? "",
+                         filename: body["filename"] as? String ?? "yijing.md")
+        case "savePdf":
+            savePdf(mode: body["mode"] as? String ?? "bw",
+                    filename: body["filename"] as? String ?? "yijing.pdf")
+        default:
+            break
+        }
+    }
+
+    private func saveMarkdown(content: String, filename: String) {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = filename
+        panel.beginSheetModal(for: window) { resp in
+            guard resp == .OK, let url = panel.url else { return }
+            try? content.data(using: .utf8)?.write(to: url)
+        }
+    }
+
+    /// Native PDF via NSPrintOperation. The web side has already set the
+    /// print-mode class (pdf-bw / pdf-glossy) and --print-question; glossy uses
+    /// zero margins for a full-bleed, theme-matching page.
+    private func savePdf(mode: String, filename: String) {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = filename
+        panel.beginSheetModal(for: window) { resp in
+            let cleanup = { self.webView.evaluateJavaScript(
+                "window.__yijingAfterPrint && window.__yijingAfterPrint()", completionHandler: nil) }
+            guard resp == .OK, let url = panel.url else { cleanup(); return }
+            let info = NSPrintInfo()
+            info.paperSize = NSSize(width: 595.28, height: 841.89)  // A4 points
+            let m: CGFloat = (mode == "glossy") ? 0 : 28
+            info.topMargin = m; info.bottomMargin = m
+            info.leftMargin = m; info.rightMargin = m
+            info.isHorizontallyCentered = false
+            info.isVerticallyCentered = false
+            info.jobDisposition = .save
+            info.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = url
+            let op = self.webView.printOperation(with: info)
+            op.showsPrintPanel = false
+            op.showsProgressPanel = false
+            op.runModal(for: self.window, delegate: nil, didRun: nil, contextInfo: nil)
+            cleanup()
+        }
     }
 
     // Externe Links (Footer: Codeberg, Lizenzen) im Standard-Browser öffnen.

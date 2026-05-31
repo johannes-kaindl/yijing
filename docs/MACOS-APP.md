@@ -85,6 +85,23 @@ On startup (`Yijing.swift`):
 External links (footer: Codeberg, licenses) open in the default browser,
 not in the app window.
 
+## Export bridge (Markdown / PDF)
+
+WKWebView supports neither `window.print()` nor `<a download>` blob downloads,
+so the web app's export must go through a native bridge. The `WKWebView` is
+created with a `WKWebViewConfiguration` whose `userContentController` registers a
+`WKScriptMessageHandler` named `yijing`. The page detects
+`window.webkit.messageHandlers.yijing` (else it falls back to the browser path)
+and posts:
+
+- `{action: "saveMarkdown", filename, content}` → `NSSavePanel` → write UTF-8.
+- `{action: "savePdf", mode, filename}` → `NSPrintOperation` to a chosen file
+  (`jobDisposition = .save`, no print panel). `mode` is `"bw"` (print-optimized,
+  small margins) or `"glossy"` (App-Design, **zero margins** → full-bleed,
+  reflecting the active theme). The web side sets the `pdf-bw`/`pdf-glossy` class
+  and `--print-question` first; Swift calls `window.__yijingAfterPrint()` to
+  restore the screen afterwards.
+
 ## Distribution and installation
 
 Send `Yijing.dmg` — it contains the app, an Applications alias
