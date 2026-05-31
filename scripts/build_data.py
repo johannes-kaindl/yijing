@@ -26,8 +26,10 @@ SRC_HEX_JSON = ARCHIV / "Yijing_6" / "yijing" / "resources" / "hexagram_json"
 SRC_HEX_CSV = ARCHIV / "yijing_5" / "data" / "processed" / "hexagram_df.csv"
 SRC_TRIGRAM_CSV = ARCHIV / "yijing_5" / "data" / "processed" / "trigram_df.csv"
 SRC_IMAGES = ARCHIV / "yijing_3"
+SRC_GUTENBERG = ROOT / "scripts" / "sources" / "gutenberg_iging.json"
 OUT_HEX = ROOT / "data" / "hexagrams.json"
 OUT_TRIGRAMS = ROOT / "data" / "trigrams.json"
+DIFF_REPORT = ROOT / "scripts" / "sources" / "gutenberg_diff_report.md"
 
 # Bottom-to-top Binärstring → King-Wen-Nummer (1–64).
 KING_WEN_BINARY = {
@@ -54,6 +56,23 @@ FALLBACK_NAMES = {
     26: {"chinese": "大畜", "pinyin": "dà chù", "latin": "Da Tschu"},
     42: {"chinese": "益", "pinyin": "yì", "latin": "I"},
 }
+
+# Inhalt, der in der Gutenberg-Ausgabe GENUIN fehlt — aus dem kanonischen
+# Wilhelm-Text 1924 ergänzt (Provenienz dokumentiert). REVIEW-FLAG: vom
+# Menschen gegenprüfen lassen. Hex 2 hat auf Gutenberg keine „Das Bild"-Sektion;
+# das Bild-Orakel des Empfangenden ist hier kanonisch eingesetzt.
+GAP_FILL = {
+    (2, "image"): (
+        "Die Erdbeschaffenheit ist Hingebung.\n"
+        "So trägt der Edle in der Fülle seines Wesens die Außenwelt."
+    ),
+}
+
+# Bild-Assoziationen aus yijing_3 waren bei diesen Hexagrammen im Dateinamen
+# mitten im Wort abgeschnitten (Dateisystem-Limit) — nicht rekonstruierbar und
+# nicht Wilhelm-Text, sondern eigene Bild-Prompts. Statt kaputte Fragmente zu
+# zeigen oder Text zu erfinden: leeren. Können später neu generiert werden.
+IMAGE_ASSOC_DROP = {2, 3, 4, 5, 6, 7, 11, 27, 28, 56, 57, 58, 59, 60, 61, 62, 63}
 
 
 def clean_text(s: str) -> str:
@@ -127,6 +146,19 @@ def _norm_v2(raw: dict) -> dict:
         "image": join_text((raw.get("image", {}) or {}).get("text", [])),
         "lines": lines,
     }
+
+
+# ---------- Wilhelm-Texte aus Projekt-Gutenberg (kanonisch) --------------
+
+def load_gutenberg() -> dict[int, dict]:
+    """Geparste Gutenberg-Quelle (scripts/scrape_gutenberg.py). Kanonisch für
+    die Wilhelm-Textfelder (meaning/judgment/image/lines/notes)."""
+    if not SRC_GUTENBERG.exists():
+        raise SystemExit(
+            f"Gutenberg-Quelle fehlt: {SRC_GUTENBERG}\n"
+            f"Erst `python3 scripts/scrape_gutenberg.py` ausführen.")
+    raw = json.loads(SRC_GUTENBERG.read_text(encoding="utf-8"))
+    return {int(k): v for k, v in raw.items()}
 
 
 # ---------- chinesische Bezeichnungen aus yijing_5 -----------------------
@@ -223,16 +255,18 @@ def load_image_prompts() -> dict[int, str]:
             name = f.stem
             if re.match(r"^IMG_\d+$", name, re.IGNORECASE):
                 continue
-            cleaned = re.sub(r"\s*p(-\d+)?\s*$", "", name, flags=re.IGNORECASE).strip()
+            # Strip a trailing " p"/"p-N" marker AND a bare "-N" filename-number.
+            cleaned = re.sub(r"\s*p(-\d+)?\s*$", "", name, flags=re.IGNORECASE)
+            cleaned = re.sub(r"-\d+\s*$", "", cleaned).strip()
             if cleaned and not re.match(r"^IMG_", cleaned, re.IGNORECASE):
-                # Normalisiere die Großschreibung
                 cleaned = cleaned[0].upper() + cleaned[1:]
                 out[n].add(cleaned)
-    # Pro Hexagramm den längsten / vollständigsten Prompt wählen (mehr Substanz).
-    # sorted() macht die Auswahl deterministisch — ohne diesen Sort entscheidet
-    # bei gleich langen Kandidaten die Set-Iteration, was zwischen Runs wechseln
-    # kann.
-    return {n: max(sorted(prompts), key=len) for n, prompts in out.items()}
+
+    def pick(cands: set[str]) -> str:
+        # Prefer a candidate without a leftover "-N" suffix; tie-break by length.
+        return sorted(cands, key=lambda c: (bool(re.search(r"-\d+$", c)), -len(c)))[0]
+
+    return {n: pick(prompts) for n, prompts in out.items() if prompts}
 
 
 # ---------- Zusammenführen -----------------------------------------------
@@ -244,20 +278,34 @@ def build() -> None:
     chinese = load_chinese_names()
     trigrams_db = load_trigrams()
     image_prompts = load_image_prompts()
+    gutenberg = load_gutenberg()
 
     hexagrams = []
     for n in range(1, HEXAGRAM_COUNT + 1):
-        text = load_wilhelm_text(n)
         binary = KING_WEN_BINARY[n]
 
-        # Name aufbereiten — meistens "1. KIEN / DAS SCHÖPFERISCHE", manchmal
-        # ohne Punkt ("26 DA TSCHU / ...") oder mit Hilfspunkt ("42 I. / ...").
+        # Name (lateinisch/deutsch) weiterhin aus den _archiv-Quellen ableiten;
+        # text dient zudem als Fallback für ein leeres Gutenberg-Feld.
+        text = load_wilhelm_text(n)
         name_full = text["name_full"]
         m = re.match(r"^\d+\.?\s+(.+?)\s*/\s*(.+)$", name_full)
         latin_name = m.group(1).strip().rstrip(".").title() if m else ""
         german_name = m.group(2).strip() if m else name_full
-
         ch = chinese.get(n) or FALLBACK_NAMES.get(n) or {}
+
+        # Wilhelm-Textfelder: Gutenberg gewinnt, Archiv nur als Fallback.
+        g = gutenberg.get(n)
+        if not g:
+            raise SystemExit(f"Gutenberg-Eintrag fehlt für Hexagramm {n}")
+        meaning = g["meaning"] or text["meaning"]
+        judgment = g["judgment"] or text["judgment"]
+        image = g["image"] or text["image"] or GAP_FILL.get((n, "image"), "")
+        lines = g["lines"] or text["lines"]
+        notes = g.get("notes", [])
+        if not g["image"] and (n, "image") in GAP_FILL:
+            print(f"   GAP_FILL: Hexagramm {n} 'image' aus kanonischem Wilhelm (REVIEW)")
+
+        image_assoc = "" if n in IMAGE_ASSOC_DROP else image_prompts.get(n, "")
 
         hexagrams.append({
             "number": n,
@@ -268,12 +316,16 @@ def build() -> None:
             "name_chinese": ch.get("chinese", ""),
             "pinyin": ch.get("pinyin", ""),
             "trigrams": trigrams_for(binary, trigrams_db),
-            "meaning": text["meaning"],
-            "judgment": text["judgment"],
-            "image": text["image"],
-            "image_association": image_prompts.get(n, ""),
-            "lines": text["lines"],
+            "meaning": meaning,
+            "judgment": judgment,
+            "image": image,
+            "image_association": image_assoc,
+            "lines": lines,
+            "notes": notes,
         })
+
+    write_diff_report(hexagrams)   # vor dem Überschreiben — Vergleich mit altem File
+    assert_complete(hexagrams)
 
     OUT_HEX.parent.mkdir(exist_ok=True)
     _write_json_atomic(OUT_HEX, hexagrams)
@@ -286,8 +338,10 @@ def build() -> None:
     # Statistik
     with_img = sum(1 for h in hexagrams if h["image_association"])
     with_chinese = sum(1 for h in hexagrams if h["name_chinese"])
+    with_notes = sum(1 for h in hexagrams if h["notes"])
     print(f"   Schriftzeichen: {with_chinese}/{HEXAGRAM_COUNT}, "
-          f"Bild-Assoziationen: {with_img}/{HEXAGRAM_COUNT}")
+          f"Bild-Assoziationen: {with_img}/{HEXAGRAM_COUNT}, "
+          f"Hexagramme mit Anmerkungen: {with_notes}")
 
 
 def _write_json_atomic(target: Path, data) -> None:
@@ -297,6 +351,52 @@ def _write_json_atomic(target: Path, data) -> None:
     with tmp.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     tmp.replace(target)
+
+
+def assert_complete(hexagrams: list[dict]) -> None:
+    """Harte Vollständigkeits-/Sauberkeits-Garantie vor dem Schreiben."""
+    problems = []
+    for h in hexagrams:
+        n = h["number"]
+        for fld in ("meaning", "judgment", "image"):
+            if not h[fld]:
+                problems.append(f"hex {n}: leeres Feld '{fld}'")
+        regular = [l for l in h["lines"] if "bedeutet das:" not in l["position"]]
+        if len(regular) != 6:
+            problems.append(f"hex {n}: {len(regular)} reguläre Linien (erwartet 6)")
+        for i, l in enumerate(h["lines"]):
+            for sub in ("position", "text"):
+                if not l[sub]:
+                    problems.append(f"hex {n} Linie {i}: leeres '{sub}'")
+        if re.search(r"-\d+$", h.get("image_association", "")):
+            problems.append(f"hex {n}: abgeschnittene image_association")
+    if problems:
+        raise SystemExit("assert_complete fehlgeschlagen:\n  " + "\n  ".join(problems))
+
+
+def write_diff_report(new: list[dict]) -> None:
+    """Nicht-blockierender Report: was ändert sich ggü. dem alten hexagrams.json."""
+    if not OUT_HEX.exists():
+        return
+    old = {x["number"]: x for x in json.loads(OUT_HEX.read_text(encoding="utf-8"))}
+    lines = ["# Gutenberg diff report", ""]
+    changes = 0
+    for h in new:
+        o = old.get(h["number"], {})
+        for fld in ("meaning", "judgment", "image"):
+            a, b = (o.get(fld) or ""), h[fld]
+            if a == b:
+                continue
+            tag = "FILLED" if not a else ("EMPTIED" if not b else "CHANGED")
+            lines.append(f"- hex {h['number']} `{fld}` **{tag}** "
+                         f"(alt {len(a)}c → neu {len(b)}c)")
+            changes += 1
+        if len(o.get("lines", [])) != len(h["lines"]):
+            lines.append(f"- hex {h['number']} `lines` "
+                         f"{len(o.get('lines', []))} → {len(h['lines'])}")
+            changes += 1
+    DIFF_REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"   Diff-Report → {DIFF_REPORT.relative_to(ROOT)} ({changes} Feldänderungen)")
 
 
 if __name__ == "__main__":
