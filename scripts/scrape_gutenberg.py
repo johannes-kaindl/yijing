@@ -109,6 +109,10 @@ def strip_tags(s: str) -> str:
     s = html.unescape(s)
     s = re.sub(r"[ \t]+", " ", s)
     s = re.sub(r" *\n *", "\n", s)
+    # A single source block is never a paragraph break: collapse its internal
+    # multi-line gaps (from <br><br>) to single line breaks. Paragraph breaks
+    # (\n\n) come only from joining separate blocks (see _join_paras).
+    s = re.sub(r"\n{2,}", "\n", s)
     return s.strip()
 
 

@@ -290,7 +290,7 @@ function renderChangingLines(hexData, changingIndices) {
     block.className = "changing-line";
     block.innerHTML = `
       <div class="pos">${escapeHTML(ln.position)}</div>
-      <div class="text">${escapeHTML(ln.text)}</div>
+      <div class="text">${escapeHTML(ln.text).replace(/\n/g, "<br>")}</div>
       ${ln.interpretation ? `<div class="interp">${renderParagraphs(ln.interpretation)}</div>` : ""}
     `;
     els.changingLines.appendChild(block);
@@ -361,7 +361,7 @@ function renderSeventhLine(hexData) {
   block.className = "changing-line";
   block.innerHTML =
     `<div class="pos">${escapeHTML(ln.position)}</div>` +
-    `<div class="text">${escapeHTML(ln.text)}</div>` +
+    `<div class="text">${escapeHTML(ln.text).replace(/\n/g, "<br>")}</div>` +
     (ln.interpretation ? `<div class="interp">${renderParagraphs(ln.interpretation)}</div>` : "");
   els.changingLines.appendChild(block);
 }
