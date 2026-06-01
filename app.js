@@ -120,7 +120,9 @@ const els = {
   castBtn: document.getElementById("cast"),
   resetBtn: document.getElementById("reset"),
   exportMdBtn: document.getElementById("exportMd"),
-  exportPdfBtn: document.getElementById("exportPdf"),
+  pdfMenu: document.getElementById("pdfMenu"),
+  pdfBwBtn: document.getElementById("pdfBw"),
+  pdfGlossyBtn: document.getElementById("pdfGlossy"),
   reading: document.getElementById("reading"),
   questionEcho: document.getElementById("questionEcho"),
   primary: document.getElementById("primary"),
@@ -462,7 +464,7 @@ function showReading(question, lines, options = {}) {
   els.reading.hidden = false;
   els.resetBtn.hidden = false;
   els.exportMdBtn.hidden = false;
-  els.exportPdfBtn.hidden = false;
+  els.pdfMenu.hidden = false;
   els.castBtn.disabled = true;
 
   // LLM-Sektion einblenden, falls Endpunkte konfiguriert
@@ -1145,7 +1147,7 @@ els.resetBtn.addEventListener("click", () => {
   els.reading.hidden = true;
   els.resetBtn.hidden = true;
   els.exportMdBtn.hidden = true;
-  els.exportPdfBtn.hidden = true;
+  els.pdfMenu.hidden = true;
   els.castBtn.disabled = false;
   els.question.value = "";
   els.question.focus();
@@ -1153,29 +1155,70 @@ els.resetBtn.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-els.exportMdBtn.addEventListener("click", () => {
-  if (!CURRENT_READING) return;
-  const md = buildMarkdownExport(CURRENT_READING, els.interpBody.textContent || "");
+// ——— Export — native Bridge in der macOS-App (WKWebView kann kein
+// window.print() / <a download>), Browser-Fallback sonst ———
+const nativeBridge = window.webkit?.messageHandlers?.yijing || null;
+
+function exportFilename(ext) {
   const dateStr = new Date().toISOString().slice(0, 10);
   const slug = (CURRENT_READING.primaryHex.name_latin || t("export.filenameSlug"))
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  downloadFile(`yijing-${dateStr}-${slug}.md`, md, "text/markdown");
+  return `yijing-${dateStr}-${slug}.${ext}`;
+}
+
+els.exportMdBtn.addEventListener("click", () => {
+  if (!CURRENT_READING) return;
+  const md = buildMarkdownExport(CURRENT_READING, els.interpBody.textContent || "");
+  const filename = exportFilename("md");
+  if (nativeBridge) {
+    nativeBridge.postMessage({ action: "saveMarkdown", filename, content: md });
+  } else {
+    downloadFile(filename, md, "text/markdown");
+  }
 });
 
-els.exportPdfBtn.addEventListener("click", () => {
-  // Alle <details> für den Druck aufklappen, dann drucken, dann zurücksetzen
+// PDF: zwei Modi — "bw" (Druck S/W) und "glossy" (App-Design, randlos, spiegelt
+// das aktive Theme). Die Web-Seite setzt die Druck-Modus-Klasse + --print-question;
+// in der App druckt Swift nativ (NSPrintOperation), im Browser window.print().
+let __pdfRestore = null;
+function preparePrint(mode, exporting) {
+  const root = document.documentElement;
+  root.classList.remove("pdf-bw", "pdf-glossy", "exporting");
+  root.classList.add(mode === "glossy" ? "pdf-glossy" : "pdf-bw");
+  // "exporting" = native createPDF-Erfassung (Screen-Media), sonst Browser-@media-print.
+  if (exporting) root.classList.add("exporting");
+  const q = (CURRENT_READING && CURRENT_READING.question) || "";
+  root.style.setProperty("--print-question", q ? JSON.stringify(q) : '""');
   const detailsList = Array.from(els.reading.querySelectorAll("details"));
   const previouslyOpen = detailsList.map((d) => d.open);
   detailsList.forEach((d) => (d.open = true));
-  // Browser-Druck-Dialog
-  window.print();
-  // Nach dem Druck wieder zurück (kleine Verzögerung damit print-Layout fertig ist)
-  setTimeout(() => {
+  __pdfRestore = () => {
+    root.classList.remove("pdf-bw", "pdf-glossy", "exporting");
+    root.style.removeProperty("--print-question");
     detailsList.forEach((d, i) => (d.open = previouslyOpen[i]));
-  }, 200);
-});
+  };
+}
+// Wird von Swift nach der nativen PDF-Erfassung (und im Browser per Timeout) aufgerufen.
+window.__yijingAfterPrint = () => {
+  if (__pdfRestore) { __pdfRestore(); __pdfRestore = null; }
+};
+
+function exportPdf(mode) {
+  if (!CURRENT_READING) return;
+  if (els.pdfMenu) els.pdfMenu.open = false;
+  if (nativeBridge) {
+    preparePrint(mode, true);   // Screen-Export-Stil → Swift erfasst per createPDF
+    nativeBridge.postMessage({ action: "savePdf", mode, filename: exportFilename("pdf") });
+  } else {
+    preparePrint(mode, false);  // Browser: @media print
+    window.print();
+    setTimeout(() => window.__yijingAfterPrint(), 300);
+  }
+}
+if (els.pdfBwBtn) els.pdfBwBtn.addEventListener("click", () => exportPdf("bw"));
+if (els.pdfGlossyBtn) els.pdfGlossyBtn.addEventListener("click", () => exportPdf("glossy"));
 
 els.clearHistoryBtn.addEventListener("click", () => {
   if (confirm(t("history.clearConfirm"))) {

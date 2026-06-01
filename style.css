@@ -460,7 +460,7 @@ button.ghost:hover {
 .history-item {
   display: flex;
   gap: 0.8rem;
-  align-items: baseline;
+  align-items: flex-start;
   padding: 0.6rem 0.4rem;
   font-size: 0.9rem;
   color: var(--ink-soft);
@@ -479,9 +479,9 @@ button.ghost:hover {
   color: var(--ink);
 }
 
-.history-item .date { color: var(--ink-faint); font-size: 0.8rem; min-width: 8.5em; }
-.history-item .q { flex: 1; font-style: italic; }
-.history-item .h { color: var(--accent); font-weight: 500; }
+.history-item .date { color: var(--ink-faint); font-size: 0.8rem; flex: 0 0 8.5em; }
+.history-item .q { flex: 2 1 0; min-width: 0; font-style: italic; }
+.history-item .h { flex: 3 1 0; min-width: 0; color: var(--accent); font-weight: 500; }
 
 @media (max-width: 540px) {
   .history-item { flex-wrap: wrap; }
@@ -1056,9 +1056,105 @@ button.ghost:hover {
   .add-endpoint .grid { grid-template-columns: 1fr; }
 }
 
-/* ——— Print-Layout für PDF-Export ——— */
+/* ——— PDF-Export-Menü (ein Button „PDF" + zwei Modi) ——— */
+.pdf-menu { position: relative; display: inline-block; }
+/* Summary als Ghost-Button (button/.ghost greifen nicht auf <summary>). */
+.pdf-menu > summary {
+  list-style: none;
+  display: inline-block;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.7rem 1.4rem;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.pdf-menu > summary:hover { border-color: var(--accent-soft); color: var(--accent); }
+.pdf-menu > summary::-webkit-details-marker { display: none; }
+.pdf-menu > summary::marker { content: ""; }
+.pdf-menu-items {
+  position: absolute;
+  z-index: 5;
+  margin-top: 0.3rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 11rem;
+}
+.pdf-menu-items button { text-align: left; white-space: nowrap; }
+
+/* ——— Screen-Export-Stil (native macOS-App: WKWebView createPDF erfasst die
+   gerenderte Seite INKL. Hintergrund — anders als NSPrintOperation). JS setzt
+   html.exporting + html.pdf-bw|pdf-glossy vor der Erfassung. ——— */
+html.exporting header,
+html.exporting footer,
+html.exporting .ask,
+html.exporting .history,
+html.exporting .interp-controls,
+html.exporting .interp-status,
+html.exporting .thinking-details,
+html.exporting .icon-btn,
+html.exporting dialog { display: none !important; }
+
+html.exporting body { padding: 0 !important; }
+html.exporting main { max-width: 760px !important; margin: 0 auto !important; padding: 2.4rem 2rem 3rem !important; }
+html.exporting .reading { margin-top: 0 !important; }
+html.exporting #questionEcho { margin-bottom: 1.3rem; }
+/* Wandelnde Linien / Karten im Export nicht über Seiten zerreißen (Browser-Print). */
+html.exporting .changing-line,
+html.exporting .hex-card,
+html.exporting .texts details { break-inside: avoid; }
+
+/* — S/W-Druckfassung: weiße Seite, schwarze Tinte, KEIN Gold (echtes S/W). — */
+html.exporting.pdf-bw,
+html.exporting.pdf-bw body { background: #ffffff !important; color: #1a1814 !important; }
+html.exporting.pdf-bw .text-body,
+html.exporting.pdf-bw .hex-name,
+html.exporting.pdf-bw #questionEcho,
+html.exporting.pdf-bw .changing-line .text,
+html.exporting.pdf-bw .hex-chinese .ch-name { color: #1a1814 !important; }
+html.exporting.pdf-bw .hex-title,
+html.exporting.pdf-bw .hex-trigrams,
+html.exporting.pdf-bw .hex-chinese .ch-pinyin,
+html.exporting.pdf-bw .hex-chinese .ch-latin,
+html.exporting.pdf-bw .changing-line .interp { color: #4a4a4a !important; }
+html.exporting.pdf-bw .section-title,
+html.exporting.pdf-bw .changing-line .pos,
+html.exporting.pdf-bw .hex-chinese .ch-symbol,
+html.exporting.pdf-bw .interp-body h2,
+html.exporting.pdf-bw .texts details > summary { color: #222222 !important; }
+html.exporting.pdf-bw .hex-card,
+html.exporting.pdf-bw .interpretation,
+html.exporting.pdf-bw .texts details,
+html.exporting.pdf-bw .changing-line {
+  background: transparent !important;
+  border-color: #cccccc !important;
+  box-shadow: none !important;
+}
+html.exporting.pdf-bw .changing-line { border-left: 3px solid #888888 !important; }
+html.exporting.pdf-bw .hex-line .seg { background: #1a1814 !important; box-shadow: none !important; }
+html.exporting.pdf-bw .hex-line.changing .seg { background: #555555 !important; box-shadow: none !important; }
+html.exporting.pdf-bw .hex-line.changing::after { color: #555555 !important; }
+
+/* — Hochglanz / App-Design: das aktive Theme bleibt; nur Chrome ist weg.
+   createPDF erfasst den vollflächigen Theme-Hintergrund. — */
+html.exporting.pdf-glossy,
+html.exporting.pdf-glossy body { background: var(--bg) !important; }
+
+/* ——— Print-Layout für PDF-Export (Browser-Fallback window.print()) ——— */
 @media print {
-  :root {
+  /* S/W-Druckmodus (Default + .pdf-bw): weiße Seite, dunkle Tinte. Im
+     Hochglanz-Modus (.pdf-glossy) bleiben dagegen die Theme-Variablen erhalten. */
+  html:not(.pdf-glossy) {
     --bg: #ffffff;
     --bg-card: #ffffff;
     --ink: #1a1814;
@@ -1070,10 +1166,13 @@ button.ghost:hover {
     --shadow: none;
   }
 
-  html, body {
+  html:not(.pdf-glossy),
+  html:not(.pdf-glossy) body {
     background: #fff !important;
     color: #1a1814 !important;
   }
+
+  body { padding: 1.6cm 1.4cm !important; }
 
   /* Alles wegblenden, das beim Druck stört */
   header,
@@ -1083,9 +1182,9 @@ button.ghost:hover {
   .interp-controls,
   .interp-status,
   #questionEcho,
-  #resetBtn,
+  #reset,
   #exportMd,
-  #exportPdf,
+  #pdfMenu,
   #stopInterpretBtn,
   #interpretBtn,
   #endpointSelect,
@@ -1209,6 +1308,54 @@ button.ghost:hover {
   #trigramText { white-space: normal !important; }
 
   @page {
-    margin: 1.6cm 1.4cm;
+    margin: 0;
+  }
+
+  /* ——— Hochglanz / App-Design (.pdf-glossy): aktives Theme spiegeln, randlos.
+     Höhere Spezifität als die S/W-Regeln oben → gewinnt. In der App setzt
+     NSPrintInfo margin=0; der Vollflächen-Hintergrund sorgt für randlose Optik. */
+  html.pdf-glossy,
+  html.pdf-glossy body {
+    background: var(--bg) !important;
+    color: var(--ink) !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  html.pdf-glossy * {
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+  html.pdf-glossy body { padding: 1.2cm !important; }
+  html.pdf-glossy .reading::before { color: var(--ink-soft) !important; }
+  html.pdf-glossy .text-body,
+  html.pdf-glossy .hex-name,
+  html.pdf-glossy .hex-chinese .ch-name { color: var(--ink) !important; }
+  html.pdf-glossy .hex-title,
+  html.pdf-glossy .hex-trigrams,
+  html.pdf-glossy .hex-chinese .ch-pinyin,
+  html.pdf-glossy .hex-chinese .ch-latin,
+  html.pdf-glossy .changing-line .interp { color: var(--ink-soft) !important; }
+  html.pdf-glossy .texts details > summary { color: var(--ink) !important; }
+  html.pdf-glossy .section-title,
+  html.pdf-glossy .changing-line .pos,
+  html.pdf-glossy .hex-chinese .ch-symbol,
+  html.pdf-glossy .interp-body h2 { color: var(--accent) !important; }
+  html.pdf-glossy .interpretation { border-top: 1px solid var(--line) !important; }
+  html.pdf-glossy .changing-line { border-left: 3px solid var(--accent) !important; }
+  html.pdf-glossy .hex-line .seg { background: var(--ink) !important; }
+  html.pdf-glossy .hex-line.changing .seg { background: var(--accent) !important; }
+  html.pdf-glossy .hex-line.changing::after { color: var(--accent) !important; }
+  html.pdf-glossy .interp-body h1,
+  html.pdf-glossy .interp-body h3,
+  html.pdf-glossy .interp-body h4 { color: var(--ink) !important; }
+  html.pdf-glossy .interp-body blockquote {
+    background: var(--bg-card) !important;
+    color: var(--ink-soft) !important;
+    border-left: 3px solid var(--accent) !important;
+  }
+  html.pdf-glossy .interp-body code,
+  html.pdf-glossy .interp-body pre {
+    background: var(--bg-card) !important;
+    color: var(--ink) !important;
   }
 }
