@@ -6,9 +6,6 @@ This app launches the Yijing oracle in its own window on your Mac.
 No data is sent to the internet — everything runs locally on your
 machine.
 
-Because the app does not come from the App Store, the VERY FIRST
-launch needs a few extra clicks. This is normal and only happens once.
-
 
 ────────────────────────────────────────────────────────────────────
  STEP 1 — Install
@@ -27,40 +24,36 @@ launch needs a few extra clicks. This is normal and only happens once.
 
 
 ────────────────────────────────────────────────────────────────────
- STEP 2 — The first launch (one time only)
+ STEP 2 — Launch
 ────────────────────────────────────────────────────────────────────
 
-1. Open the Applications folder and double-click "Yijing".
+Open the Applications folder and double-click "Yijing".
+The app opens in its own window. That's it — nothing else to do.
 
-2. A notice appears saying the app cannot be opened because it is
-   not from the App Store.
-   → Click "Done" or "OK".
-   → Do NOT click "Move to Trash"!
 
-3. Open System Settings:
-   Apple menu (  top left)  →  "System Settings…"
+────────────────────────────────────────────────────────────────────
+ IF MACOS BLOCKS THE APP (un-notarized builds only)
+────────────────────────────────────────────────────────────────────
 
-4. On the left, click "Privacy & Security".
+Official releases are Apple-notarized and open without any warning.
+You only need the steps below if you received an un-notarized build
+and macOS says the app "cannot be opened because it is not from the
+App Store". This is then needed once:
 
-5. Scroll all the way down on the right-hand side.
-   It will say something like:
-   ""Yijing" was blocked to protect your Mac."
+1. Click "Done" or "OK".  → Do NOT click "Move to Trash"!
+
+2. Apple menu (  top left)  →  "System Settings…"
+
+3. On the left, click "Privacy & Security".
+
+4. Scroll all the way down on the right-hand side. It will say
+   something like:  ""Yijing" was blocked to protect your Mac."
    → Click the "Open Anyway" button next to it.
 
-6. Confirm with your login password or Touch ID.
+5. Confirm with your login password or Touch ID, then click
+   "Open Anyway" once more.
 
-7. One last dialog appears.
-   → Click "Open Anyway" there.
-
-Done — the app opens in its own window.
-
-
-────────────────────────────────────────────────────────────────────
- FROM THE SECOND LAUNCH ON
-────────────────────────────────────────────────────────────────────
-
-Just double-click "Yijing" in the Applications folder — nothing else.
-The steps from section 2 are never needed again.
+Done — the app opens, and this is never needed again.
 
 
 ────────────────────────────────────────────────────────────────────

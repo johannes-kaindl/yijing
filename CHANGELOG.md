@@ -5,6 +5,25 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Developer ID signing + Apple notarization pipeline** for the macOS app,
+  opt-in via the `YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE` environment
+  variables on `scripts/build-macos-app.sh`. It runs the whole chain in the one
+  correct order (sign → notarize → staple the `.app`, rebuild the `.dmg` from the
+  stapled app, sign → notarize → staple the `.dmg`, then `stapler`/`spctl`
+  verification). Without the variables the build stays unsigned, unchanged. The
+  app is signed **without an entitlements file** — Hardened Runtime is a signing
+  flag, the app is not sandboxed, and its loopback `NWListener` + WKWebView need
+  no entitlement keys. See `docs/MACOS-APP.md`.
+
+### Changed
+
+- **`INSTALL.txt` now leads with the notarized happy path** (drag, double-click,
+  done); the Gatekeeper "Open Anyway" steps are demoted to an "un-notarized
+  builds only" fallback. `docs/MACOS-APP.md` updated for macOS 15/26 Gatekeeper
+  (the Control-click → Open bypass for un-notarized apps is gone).
+
 ## [1.4.0] — 2026-06-01
 
 ### Added

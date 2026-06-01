@@ -28,6 +28,11 @@ The build embeds the **committed** repo state (`git archive HEAD`),
 not the working directory. Local, uncommitted changes therefore
 deliberately do not end up in the app.
 
+For signed, Apple-notarized release builds (no Gatekeeper warning on the
+user's side) see [Signing & notarization](#signing--notarization-developer-id).
+Without the signing variables the script produces an unsigned build,
+unchanged from before.
+
 ## Bundle layout
 
 ```
@@ -105,29 +110,122 @@ and posts:
 ## Distribution and installation
 
 Send `Yijing.dmg` — it contains the app, an Applications alias
-to drag into and the `INSTALL.txt`. The app is **not
-Apple-notarized** (no Developer account) — so on first launch the
-Gatekeeper path is needed once: System Settings →
-Privacy & Security → "Open Anyway". `INSTALL.txt` guides you
-step by step through the procedure.
+to drag into and the `INSTALL.txt`.
 
-**Fallback without the UI path** (in case on newer macOS versions the
-"Open Anyway" button does not appear or you want to help directly in
-the terminal):
+**Official releases are Developer ID-signed and Apple-notarized**
+(see [Signing & notarization](#signing--notarization-developer-id)).
+They launch by double-click with no Gatekeeper warning, online or
+offline — `INSTALL.txt` then only covers the drag-to-Applications step.
+
+**Un-notarized builds** (e.g. a local build by a contributor without an
+Apple Developer account) are not accepted silently by Gatekeeper. Since
+macOS 15 Sequoia the Control-click → "Open" bypass is gone; the app must
+be cleared once via System Settings → Privacy & Security → "Open Anyway",
+or — equivalently — from the terminal:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/Yijing.app
 ```
 
-Removes only the quarantine flag that macOS attaches on download/mount.
-After that the app starts without further Gatekeeper dialogs.
+This removes only the quarantine flag that macOS attaches on
+download/mount. After that the app starts without further Gatekeeper
+dialogs.
+
+## Signing & notarization (Developer ID)
+
+As of macOS 15 Sequoia / 26 Tahoe, Gatekeeper requires a **Developer ID
+signature plus Apple notarization** for apps distributed outside the Mac
+App Store. `build-macos-app.sh` runs the whole chain when two environment
+variables are set; without them it produces an unsigned build (the
+default for contributors without a certificate).
+
+### One-time setup
+
+1. **Apple Developer Program** membership — enroll as an *individual*
+   (Apple ID + identity check via the Apple Developer app; 99 USD/year,
+   must be active). No D-U-N-S / organization needed.
+2. **Developer ID Application certificate** in your login keychain.
+   Create a CSR in *Keychain Access → Certificate Assistant → Request a
+   Certificate from a CA* (CA Email empty, *Saved to disk*), upload it at
+   `developer.apple.com/account` under *Certificates → Developer ID
+   Application* (not *Apple Development* / *Apple Distribution*), download
+   the `.cer`, double-click to install. Verify:
+   ```bash
+   security find-identity -v -p codesigning
+   # → Developer ID Application: <NAME> (<TEAM_ID>)
+   ```
+3. **notarytool credentials** stored once (app-specific password from
+   `account.apple.com → Sign-In & Security → App-Specific Passwords`):
+   ```bash
+   xcrun notarytool store-credentials "yijing-notary" \
+     --apple-id "<APPLE_ID_EMAIL>" --team-id "<TEAM_ID>" \
+     --password "<APP_SPECIFIC_PASSWORD>"
+   ```
+   (For CI/teams the App Store Connect API key — `--key/--key-id/--issuer`
+   — is the alternative.)
+
+### Building a signed, notarized release
+
+```bash
+YIJING_SIGN_IDENTITY="Developer ID Application: <NAME> (<TEAM_ID>)" \
+YIJING_NOTARY_PROFILE="yijing-notary" \
+./scripts/build-macos-app.sh
+```
+
+`YIJING_SIGN_IDENTITY="auto"` picks the first *Developer ID Application*
+identity from the keychain. With only `YIJING_SIGN_IDENTITY` set (no
+profile) the script signs but does **not** notarize — useful to test the
+signature locally. The Mac must be **online** (secure timestamp + notary
+upload). The script runs the steps in the one correct order:
+
+1. Sign the `.app` — a single `codesign --options runtime --timestamp`
+   call (Hardened Runtime + secure timestamp; **no `--deep`**, **no
+   `--entitlements`** — see below).
+2. Notarize the `.app` (zipped for upload) and **staple** the ticket.
+3. Build the `.dmg` *from the stapled app*.
+4. Sign, notarize and staple the `.dmg`.
+5. Verify with `stapler validate` + `spctl` (must report *accepted,
+   source=Notarized Developer ID*).
+
+### Why no entitlements
+
+Yijing is **not** App-Sandboxed and contains exactly one Mach-O (no
+frameworks/helpers/XPC). Notarization needs the **Hardened Runtime** (a
+signing flag), not the sandbox. The 127.0.0.1 `NWListener` and the
+WKWebView's outbound HTTP to localhost LLM servers need no entitlements —
+`network.*` are sandbox-only keys, and the Hardened Runtime does not gate
+sockets. WKWebView's JS JIT runs in a separate WebContent process, so no
+`allow-jit` either. The app is therefore signed **without an
+`--entitlements` file**. Do not add `allow-jit`/`allow-unsigned-executable-memory`
+"just in case" — they only weaken the Hardened Runtime.
+
+### Verifying & troubleshooting
+
+The build runs the Gatekeeper checks itself, but test the real download
+experience on a **clean/second Mac** — the signing machine does not
+re-evaluate an app the same way, so a stapling defect can hide locally.
+On a notarization failure, fetch the detailed log via the Submission ID
+that `notarytool submit` printed:
+
+```bash
+xcrun notarytool log <SUBMISSION_ID> -p "yijing-notary" developer_log.json
+```
+
+The internal server binds **loopback-only**
+(`requiredInterfaceType = .loopback` in `StaticServer.swift`), so it
+triggers neither the macOS *Local Network* privacy prompt nor the
+application firewall — signing and notarization do not change that.
 
 ## Updating
 
 New app version:
 
 1. Commit changes.
-2. Run `./scripts/build-macos-app.sh` again.
+2. Bump `CFBundleShortVersionString` / `CFBundleVersion` in
+   `scripts/macos-app/Info.plist` (keep them monotonic), then run
+   `./scripts/build-macos-app.sh` again — for an official release with the
+   `YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE` variables set (see
+   [Signing & notarization](#signing--notarization-developer-id)).
 3. Create a new release with a new tag on Codeberg and upload the fresh
    `dist/Yijing.dmg` as an attachment.
 4. Update the **direct download links** to the new tag:
