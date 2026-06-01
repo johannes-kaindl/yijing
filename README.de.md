@@ -26,7 +26,7 @@ offline-fähig als PWA.
   </a>
 </p>
 
-[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.4.1/Yijing.dmg)
+[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.5.0/Yijing.dmg)
 [![Live-Demo öffnen](https://img.shields.io/badge/Live--Demo_%C3%B6ffnen-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
 
 Disk-Image öffnen, „Yijing" in den Programme-Ordner ziehen — fertig.
@@ -244,6 +244,7 @@ Vollständige Notes pro Release: [`CHANGELOG.md`](CHANGELOG.md).
 
 | Version | Datum | Headline |
 |---|---|---|
+| [v1.5.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.5.0) | 2026-06-01 | **Nachschlagewerk + vollständige geschlechtsneutrale Fassung** — alle 64 Hexagramme durchblättern (8×8-Übersicht, Vor/Zurück, Deep-Links) mit vollständigem Wilhelm-Text, unabhängig vom Wurf; bilingual und register-bewusst. Jeder generische geschlechtsbezogene Personenbezug in DE + EN neutralisiert, leak-frei verifiziert; OCR-Scan-Fehler im Quelltext korrigiert |
 | [v1.4.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.1) | 2026-06-01 | **Notarisierte macOS-App** — die Release-DMG ist jetzt Developer-ID-signiert und Apple-notarisiert und startet ohne Gatekeeper-Warnung (der alte „Trotzdem öffnen"-/`xattr`-Workaround entfällt). Opt-in-Signatur-Pipeline in `build-macos-app.sh` (`YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE`); README, INSTALL und `docs/MACOS-APP.md` für macOS-15/26-Gatekeeper aktualisiert |
 | [v1.4.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.0) | 2026-06-01 | **Daten-Korrektheit + geschlechtsneutrale Fassung + Export-Reparatur** — Wilhelm-Texte aus Projekt-Gutenberg neu bezogen (leere Bedeutungen gefüllt, Hexagramm-2-Bild ergänzt, Fußnoten + „alle Linien wandeln"-Spruch für Hex 1 & 2, Linien-Kontamination aus den Bild-Feldern entfernt, OCR-Patzer korrigiert), eine standardmäßig geschlechtsneutrale Textfassung mit Settings-Umschalter auf den historischen Wortlaut von 1924 (DE + EN), und ein funktionierender Markdown-/PDF-Export in der macOS-App über eine native WKWebView-Bridge mit zwei PDF-Modi (Druck S/W und randloses App-Design) |
 | [v1.3.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.3.0) | 2026-05-28 | **UI-Politur + zweisprachige README** — sichtbarer Sprach-Umschalter im Footer, minimalistische Inline-SVG-Header-Icons (Lucide) statt Unicode-Glyphen, 2-stufiger Theme-Toggle mit Zustands-Icon. README in EN (kanonisch) + DE gesplittet, App-Bundle-Version auf 1.3.0 nachgezogen |

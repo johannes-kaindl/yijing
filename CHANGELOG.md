@@ -5,6 +5,8 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-06-01
+
 ### Added
 
 - **Nachschlagewerk / read-through reader** — a new in-app mode to browse all 64
