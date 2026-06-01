@@ -529,6 +529,10 @@ button.ghost:hover {
 
 .reader-card { margin: 0 auto 0.5rem; }
 
+/* Trigramm-Block trägt strukturelles HTML, keinen vorformatierten Text —
+   wie #trigramText im Orakel; .trigram-assoc behält sein pre-wrap selbst. */
+#readerTexts .reader-trigrams { white-space: normal; }
+
 @media (max-width: 540px) {
   .reader-index { grid-template-columns: repeat(4, 1fr); }
   .mode-btn span { font-size: 0.82rem; }
