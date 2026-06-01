@@ -104,6 +104,11 @@ Voraussetzung zum Bauen: Xcode Command Line Tools
   Markierung
 - **Wilhelm-Übersetzung** (1924, gemeinfrei): Urteil, Bild, Bedeutung,
   alle sechs Linientexte mit Konfuzius-Kommentar
+- **Nachschlagewerk** — alle 64 Hexagramme in King-Wen-Reihenfolge mit
+  vollständigem Text und Anmerkungen durchblättern, unabhängig vom Wurf
+  (8×8-Übersicht, Vor/Zurück, Deep-Links)
+- **Geschlechtsneutrale Fassung als Standard**, per Klick umschaltbar auf
+  Wilhelms historischen Wortlaut von 1924 — in beiden Sprachen
 - **Chinesisches Schriftzeichen + Pīnyīn** pro Hexagramm
 - **Trigramme** mit Familie, Natur, Jahreszeit, Himmelsrichtung,
   Assoziationen

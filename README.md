@@ -102,6 +102,11 @@ Line Tools (`xcode-select --install`). Details:
   marking
 - **Wilhelm translation** (1924, public domain): judgment, image, meaning,
   all six line texts with Confucius commentary
+- **Read-through reference** ("Nachschlagewerk") — browse all 64 hexagrams in
+  King-Wen order with their full text and notes, independent of casting (8×8
+  index, prev/next, deep links)
+- **Gender-neutral wording by default**, with a one-click switch to Wilhelm's
+  historical 1924 phrasing — in both languages
 - **Chinese character + Pīnyīn** per hexagram
 - **Trigrams** with family, nature, season, cardinal direction,
   associations

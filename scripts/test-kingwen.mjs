@@ -156,22 +156,34 @@ if (hexEnJson) {
           `hexagrams.en.json Hex ${eh.number} line ${i+1}: DE-${de}=${deHas} aber EN-${en}=${enHas}.`);
       }
     }
-    // Register-Parität: wo DE ein *_neutral hat, braucht EN das *_en_neutral.
-    const has = (o, k) => !!(o && o[k] && String(o[k]).trim());
+    // Register-Integrität (KEINE erzwungene DE⟺EN-Parität): DE und EN gendern
+    // unterschiedlich — deutsches unpersönliches „man" ist bereits neutral,
+    // englisches „he" nicht. Ein Feld braucht daher legitim nur in einer Sprache
+    // ein *_neutral. Geprüft wird stattdessen: wo ein neutrales Feld existiert,
+    // muss es nicht-leer sein UND sich vom historischen Basistext unterscheiden
+    // (sonst zeigt build_review.py einen „historisch"-Umschalter bei identischem
+    // Text und die JSON-Assets blähen unnötig auf).
+    const neutralOk = (o, base, neu, label) => {
+      if (!o || o[neu] === undefined) return; // kein Override → Fallback, ok
+      const nv = String(o[neu] || "").trim();
+      check(nv.length > 0, `${label}: ${neu} ist leer.`);
+      check(nv !== String(o[base] || "").trim(),
+        `${label}: ${neu} ist identisch zum Basistext (überflüssiges Override).`);
+    };
     for (const fld of ["meaning", "judgment", "image"]) {
-      check(has(dh, fld + "_neutral") === has(eh, fld + "_en_neutral"),
-        `Hex ${eh.number}: DE-${fld}_neutral=${has(dh, fld + "_neutral")} aber EN-${fld}_en_neutral=${has(eh, fld + "_en_neutral")}.`);
+      neutralOk(dh, fld, fld + "_neutral", `Hex ${eh.number}`);
+      neutralOk(eh, fld + "_en", fld + "_en_neutral", `Hex ${eh.number} (EN)`);
     }
     for (let i = 0; i < deLines.length; i++) {
       for (const sub of ["text", "interpretation"]) {
-        check(has(deLines[i], sub + "_neutral") === has(enLines[i], sub + "_en_neutral"),
-          `Hex ${eh.number} line ${i+1}: DE-${sub}_neutral=${has(deLines[i], sub + "_neutral")} aber EN-${sub}_en_neutral=${has(enLines[i], sub + "_en_neutral")}.`);
+        neutralOk(deLines[i], sub, sub + "_neutral", `Hex ${eh.number} line ${i + 1}`);
+        neutralOk(enLines[i], sub + "_en", sub + "_en_neutral", `Hex ${eh.number} line ${i + 1} (EN)`);
       }
     }
     const deNotes = dh.notes || [], enNotes = eh.notes || [];
     for (let k = 0; k < deNotes.length; k++) {
-      check(has(deNotes[k], "text_neutral") === has(enNotes[k], "text_en_neutral"),
-        `Hex ${eh.number} note ${k}: DE-text_neutral=${has(deNotes[k], "text_neutral")} aber EN-text_en_neutral=${has(enNotes[k], "text_en_neutral")}.`);
+      neutralOk(deNotes[k], "text", "text_neutral", `Hex ${eh.number} note ${k}`);
+      neutralOk(enNotes[k], "text_en", "text_en_neutral", `Hex ${eh.number} note ${k} (EN)`);
     }
     enChecked++;
   }

@@ -52,6 +52,14 @@ OCR_FIXES = {
     "der Denen moralischen": "der eigenen moralischen",  # hex 53
     "treiben laßt": "treiben läßt",              # missing umlaut (hex 54)
     "ober Dschen": "oben Dschen",                # hex 16 trigram line (also fixes the skip)
+    # digit-for-letter glitches surfaced by the read-through audit (1->l, 9->fl):
+    "A1s": "Als", "a1s": "als",                 # hex 5,7,16,22,32,37,50,54,56,60
+    "al1er": "aller",                            # hex 52, 59
+    "al1mählichen": "allmählichen",             # hex 64
+    "al1mahlich": "allmählich",                 # hex 58
+    "gänz1ich": "gänzlich",                      # hex 37
+    "p9egen": "pflegen",                         # hex 7 (fl -> 9)
+    "tei1s": "teils",                            # hex 48
 }
 
 

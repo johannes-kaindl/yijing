@@ -67,6 +67,13 @@
 
 
   <main>
+    <nav class="mode-nav" aria-label="Modus">
+      <button id="navOracle" type="button" class="mode-btn active" data-i18n="nav.oracle"
+              aria-pressed="true"><svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg><span>Orakel</span></button>
+      <button id="navReader" type="button" class="mode-btn" data-i18n="nav.reader"
+              aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><span>Nachschlagewerk</span></button>
+    </nav>
+
     <section class="ask" id="ask">
       <label for="question" data-i18n="ask.label">Deine Frage</label>
       <textarea
@@ -190,6 +197,30 @@
       <h2 data-i18n="history.heading">Verlauf</h2>
       <ul id="historyList"></ul>
       <button id="clearHistory" type="button" class="ghost" data-i18n="history.clear">Verlauf löschen</button>
+    </section>
+
+    <!-- Nachschlagewerk: alle 64 Hexagramme durchblättern (King-Wen-Reihenfolge),
+         unabhängig vom Wurf. Sprache + Fassung über die globalen Umschalter. -->
+    <section class="reader" id="reader" hidden>
+      <div class="reader-bar">
+        <button id="readerPrev" type="button" class="ghost reader-step"
+                data-i18n-aria="reader.prev" aria-label="Vorheriges Hexagramm">←</button>
+        <button id="readerIndexToggle" type="button" class="ghost reader-index-toggle"
+                aria-expanded="false"><span id="readerPos" class="reader-pos">1 / 64</span></button>
+        <button id="readerNext" type="button" class="ghost reader-step"
+                data-i18n-aria="reader.next" aria-label="Nächstes Hexagramm">→</button>
+      </div>
+
+      <div class="reader-index" id="readerIndex" hidden></div>
+
+      <article class="hex-card reader-card" id="readerCard">
+        <div class="hex-figure"></div>
+        <div class="hex-chinese"></div>
+        <h2 class="hex-name"></h2>
+        <p class="hex-trigrams"></p>
+      </article>
+
+      <section class="texts" id="readerTexts"></section>
     </section>
   </main>
 

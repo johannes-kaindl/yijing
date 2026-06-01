@@ -5,6 +5,47 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Nachschlagewerk / read-through reader** — a new in-app mode to browse all 64
+  hexagrams in King-Wen order, independent of casting. An 8×8 index grid,
+  previous/next navigation, deep links (`#h=<n>`), and the full Wilhelm text per
+  hexagram: judgment, image, meaning, trigrams, **all** line texts +
+  interpretations, and footnotes. Bilingual (DE/EN) and register-aware
+  (neutral/historical) through the existing toggles, rendered with the same
+  components as a reading. Reached via a segmented "Oracle / Reference" control
+  at the top of the page (`review.html` was its seed; see Sub-project C).
+- **Gender-neutral edition completed to full coverage.** Every generic,
+  gender-implying reference to a *person* (the everyman / the querent) is now
+  de-gendered across all dimensions — judgment, image, meaning, all 386 line
+  texts + interpretations, and notes — in both DE and EN. This extends beyond the
+  role nouns the regex pass caught to the generic pronouns that follow them
+  (DE pronouns agree with the neutral noun, generic everyman "er" recast to
+  "man"/plural; EN singular *they*). Generated and pronoun-polished per hexagram,
+  then verified by an adversarial leak/fidelity audit — zero residual generic
+  gendered person-references in the neutral register, content otherwise
+  unchanged. Content-specific gendered figures (the marrying maiden, the
+  Father/Mother/Son/Daughter trigram roles, kings, dragons) are preserved
+  verbatim. Coverage is per language (German and English gender differently), and
+  stored as overrides only where they differ from the historical base.
+
+### Fixed
+
+- **OCR scan artifacts in the public-domain Wilhelm source** surfaced by the
+  read-through audit (digit-for-letter glitches): `a1s`→`als`, `al1er`→`aller`,
+  `al1mählich(en)`→`allmählich(en)`, `gänz1ich`→`gänzlich`, `p9egen`→`pflegen`,
+  `tei1s`→`teils` across hexagrams 5/7/16/22/32/37/48/50/52/54/56/58/59/60/64.
+  Added to the `scrape_gutenberg.py` OCR fix-map so re-scrapes stay clean, and
+  carried into `gutenberg_iging.json` and the built data.
+
+### Changed
+
+- **`test-kingwen.mjs` register check** — replaced the DE⟺EN neutral-parity
+  assertion (linguistically wrong: German's impersonal "man" is neutral, English
+  "he" is not, so coverage is legitimately asymmetric) with a per-language
+  integrity check: every stored `*_neutral` must be non-empty and actually differ
+  from its base, catching redundant identical overrides.
+
 ## [1.4.1] — 2026-06-01
 
 ### Added

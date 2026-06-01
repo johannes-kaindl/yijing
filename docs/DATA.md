@@ -196,23 +196,36 @@ parallel `_en` fields wherever the DE counterpart has a value).
 Orthogonal to the DE/EN language axis, the app has a **register** setting
 (`localStorage["yijing-register"]`, default `"neutral"`; toggle in Settings):
 
-- **neutral** (default) — generic role nouns are de-gendered ("der Edle" → "die
-  edle Person", "der große Mann" → "die große Persönlichkeit", with matching
-  pronouns), *dezent*: content-specific gendered imagery (the marrying maiden,
-  Father/Mother/Son/Daughter trigrams, the dragons) is preserved verbatim.
+- **neutral** (default) — every generic, gender-implying reference to a *person*
+  (the everyman / the querent) is de-gendered, across **all** text dimensions
+  (judgment, image, meaning, every line text + interpretation, notes): role nouns
+  ("der Edle" → "die edle Person", "der große Mann" → "der große Mensch", "the
+  superior man" → "the superior person") **and** the generic pronouns that follow
+  (DE: pronouns agree with the neutral noun — "die edle Person … sie/ihr";
+  generic everyman "er" recast to "man"/plural. EN: singular *they/their*).
+  Content-specific gendered figures are preserved verbatim: the marrying maiden,
+  woman, the Father/Mother/Son/Daughter trigram roles, king/prince, the dragons.
 - **historical** — Wilhelm's 1924 wording verbatim (the base fields).
 
-Stored as **overrides only where they differ**: `*_neutral` (DE) and
-`*_en_neutral` (EN) on `meaning`/`judgment`/`image`, per line
-(`text_neutral`/`interpretation_neutral` + `_en_` variants), and per note
-(`text_neutral`/`text_en_neutral`). A missing `*_neutral` means "same as
-historical" (the app resolves `field_neutral ?? field`).
+Coverage is **per language, not symmetric**: German and English gender
+differently (German's impersonal "man" is already neutral, English "he" is not),
+so a field legitimately carries a neutral override in one language but not the
+other. Stored as **overrides only where they differ** from the base: `*_neutral`
+(DE) / `*_en_neutral` (EN) on `meaning`/`judgment`/`image`, per line
+(`text_neutral`/`interpretation_neutral` + `_en_` variants) and per note. A
+missing `*_neutral` means "already neutral — identical to historical" (the app
+resolves `field_neutral ?? field`).
 
-Source of truth: **`scripts/sources/neutral_overrides.json`** (committed),
-produced by a deterministic regex pass (`scripts/neutralize.py`) plus an LLM
-polish, then applied with **`scripts/apply_neutral.py`** (idempotent;
-run *after* `build_data.py`, which rebuilds the DE base and drops the neutral
-fields until re-applied). `test-kingwen.mjs` also checks DE/EN register parity.
+Source of truth: **`scripts/sources/neutral_overrides.json`** (committed). Built
+in layers: a deterministic regex pass for role nouns (`scripts/neutralize.py`),
+then an LLM completion + pronoun polish over all 64 hexagrams, then an
+adversarial leak/fidelity audit (no generic gendered person-reference survives in
+the neutral register; content unchanged otherwise). Applied with
+**`scripts/apply_neutral.py`** (idempotent; run *after* `build_data.py`, which
+rebuilds the DE base and drops the neutral fields until re-applied).
+`test-kingwen.mjs` verifies every stored `*_neutral` is non-empty and actually
+differs from its base (no redundant copies); it does **not** force DE⟺EN parity
+(per-language coverage is expected).
 
 ## Source license
 
