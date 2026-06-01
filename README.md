@@ -25,7 +25,7 @@ no build step, no backend, offline-capable as a PWA.
   </a>
 </p>
 
-[![Download for macOS](https://img.shields.io/badge/Download_for_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.3.0/Yijing.dmg)
+[![Download for macOS](https://img.shields.io/badge/Download_for_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.4.0/Yijing.dmg)
 [![Open live demo](https://img.shields.io/badge/Open_live_demo-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
 
 Open the disk image, drag “Yijing” into your Applications folder — done.
@@ -249,6 +249,7 @@ Full notes per release: [`CHANGELOG.md`](CHANGELOG.md).
 
 | Version | Date | Headline |
 |---|---|---|
+| [v1.4.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.0) | 2026-06-01 | **Data correctness + gender-neutral edition + export repair** — Wilhelm texts re-sourced from Projekt-Gutenberg (filled the empty meanings, restored hexagram 2’s image, added footnotes and the all-lines-moving oracle for hexagrams 1 & 2, removed line-contamination from the image fields, fixed OCR glitches), a gender-neutral text variant on by default with a settings toggle to the verbatim 1924 wording (DE + EN), and a working Markdown/PDF export in the macOS app via a native WKWebView bridge with two PDF modes (print B/W and full-bleed app design) |
 | [v1.3.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.3.0) | 2026-05-28 | **UI polish + bilingual README** — visible language switcher in the footer, minimalist inline-SVG header icons (Lucide) instead of Unicode glyphs, two-state theme toggle with a state icon. README split into EN (canonical) + DE, app bundle version brought up to 1.3.0 |
 | [v1.2.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.1) | 2026-05-27 | **Patch release** — hero image + `og:image` for social previews, StaticServer connection limit, `serve.py` dead code removed, EN translation spot-check QA (君子 vocabulary consistent as “noble one”, hex 11 + 49 polish) |
 | [v1.2.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.0) | 2026-05-27 | **Bilingual DE/EN** — i18n layer for the entire UI (settings toggle, browser language as default), an independent Wilhelm→EN translation of all 64 hexagrams in Wilhelm’s style. Plus pages-sync script, King Wen sanity test, Open Graph tags, `.editorconfig` |

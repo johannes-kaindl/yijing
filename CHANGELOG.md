@@ -5,6 +5,40 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-06-01
+
+### Added
+
+- **Gender-neutral text variant, on by default**, with a *register* toggle in
+  the settings (DE + EN). Generic role nouns are de-gendered ("der Edle" → "die
+  edle Person", with matching pronouns); content-specific imagery (the marrying
+  maiden, the Father/Mother trigrams, the dragons) is preserved. The verbatim
+  Wilhelm 1924 wording stays one click away ("Historisch"). Stored as
+  `*_neutral` / `*_en_neutral` overrides; produced by `scripts/neutralize.py`
+  (deterministic regex) + an LLM polish, applied by `scripts/apply_neutral.py`.
+- **Working Markdown / PDF export in the macOS app** via a native WKWebView
+  bridge (`WKScriptMessageHandler`): Markdown through `NSSavePanel`, PDF through
+  `WKWebView.createPDF`. Previously both buttons were dead — WKWebView supports
+  neither `window.print()` nor `<a download>` blobs.
+- **Two PDF modes** (one button + a small menu): **Print (B/W)** and
+  **App design** (full-bleed, mirrors the active theme).
+- **Footnotes** ("Anmerkungen") per hexagram, and the all-lines-moving oracle
+  ("use the nine / use the six") for hexagrams 1 & 2.
+
+### Changed
+
+- **Wilhelm texts re-sourced from Projekt-Gutenberg** as the canonical 1924
+  edition (`scripts/scrape_gutenberg.py` → committed source asset). Texts now
+  render as real paragraphs instead of one pre-wrapped string.
+
+### Fixed
+
+- Empty `meaning` for hexagrams 17/25/47/48/53/56 and the missing hexagram 2
+  image are restored; OCR glitches corrected; the changing-lines section that
+  had leaked into several `image` fields is removed (now only in `lines`).
+- The reading question was silently dropped from the printed PDF.
+- History list: the question column collapsed to one word per line.
+
 ## [1.3.0] — 2026-05-28
 
 ### Added
