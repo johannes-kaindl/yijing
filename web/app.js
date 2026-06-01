@@ -1183,22 +1183,24 @@ els.exportMdBtn.addEventListener("click", () => {
 // das aktive Theme). Die Web-Seite setzt die Druck-Modus-Klasse + --print-question;
 // in der App druckt Swift nativ (NSPrintOperation), im Browser window.print().
 let __pdfRestore = null;
-function preparePrint(mode) {
+function preparePrint(mode, exporting) {
   const root = document.documentElement;
-  root.classList.remove("pdf-bw", "pdf-glossy");
+  root.classList.remove("pdf-bw", "pdf-glossy", "exporting");
   root.classList.add(mode === "glossy" ? "pdf-glossy" : "pdf-bw");
+  // "exporting" = native createPDF-Erfassung (Screen-Media), sonst Browser-@media-print.
+  if (exporting) root.classList.add("exporting");
   const q = (CURRENT_READING && CURRENT_READING.question) || "";
   root.style.setProperty("--print-question", q ? JSON.stringify(q) : '""');
   const detailsList = Array.from(els.reading.querySelectorAll("details"));
   const previouslyOpen = detailsList.map((d) => d.open);
   detailsList.forEach((d) => (d.open = true));
   __pdfRestore = () => {
-    root.classList.remove("pdf-bw", "pdf-glossy");
+    root.classList.remove("pdf-bw", "pdf-glossy", "exporting");
     root.style.removeProperty("--print-question");
     detailsList.forEach((d, i) => (d.open = previouslyOpen[i]));
   };
 }
-// Wird von Swift nach dem nativen Druck (und im Browser per Timeout) aufgerufen.
+// Wird von Swift nach der nativen PDF-Erfassung (und im Browser per Timeout) aufgerufen.
 window.__yijingAfterPrint = () => {
   if (__pdfRestore) { __pdfRestore(); __pdfRestore = null; }
 };
@@ -1206,10 +1208,11 @@ window.__yijingAfterPrint = () => {
 function exportPdf(mode) {
   if (!CURRENT_READING) return;
   if (els.pdfMenu) els.pdfMenu.open = false;
-  preparePrint(mode);
   if (nativeBridge) {
+    preparePrint(mode, true);   // Screen-Export-Stil → Swift erfasst per createPDF
     nativeBridge.postMessage({ action: "savePdf", mode, filename: exportFilename("pdf") });
   } else {
+    preparePrint(mode, false);  // Browser: @media print
     window.print();
     setTimeout(() => window.__yijingAfterPrint(), 300);
   }

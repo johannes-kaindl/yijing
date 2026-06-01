@@ -86,9 +86,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         }
     }
 
-    /// Native PDF via NSPrintOperation. The web side has already set the
-    /// print-mode class (pdf-bw / pdf-glossy) and --print-question; glossy uses
-    /// zero margins for a full-bleed, theme-matching page.
+    /// Native PDF via `createPDF` — captures the RENDERED page including CSS
+    /// backgrounds (NSPrintOperation drops them) and as one continuous page (no
+    /// page-break tearing). The mode look (S/W vs App-Design, full-bleed theme)
+    /// is set by the web side via html.exporting + html.pdf-bw|pdf-glossy.
     private func savePdf(mode: String, filename: String) {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = filename
@@ -96,20 +97,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
             let cleanup = { self.webView.evaluateJavaScript(
                 "window.__yijingAfterPrint && window.__yijingAfterPrint()", completionHandler: nil) }
             guard resp == .OK, let url = panel.url else { cleanup(); return }
-            let info = NSPrintInfo()
-            info.paperSize = NSSize(width: 595.28, height: 841.89)  // A4 points
-            let m: CGFloat = (mode == "glossy") ? 0 : 28
-            info.topMargin = m; info.bottomMargin = m
-            info.leftMargin = m; info.rightMargin = m
-            info.isHorizontallyCentered = false
-            info.isVerticallyCentered = false
-            info.jobDisposition = .save
-            info.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = url
-            let op = self.webView.printOperation(with: info)
-            op.showsPrintPanel = false
-            op.showsProgressPanel = false
-            op.runModal(for: self.window, delegate: nil, didRun: nil, contextInfo: nil)
-            cleanup()
+            // Give the layout one runloop tick to settle after the class change.
+            DispatchQueue.main.async {
+                self.webView.createPDF(configuration: WKPDFConfiguration()) { result in
+                    if case .success(let data) = result { try? data.write(to: url) }
+                    cleanup()
+                }
+            }
         }
     }
 
