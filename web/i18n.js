@@ -80,6 +80,7 @@ const STRINGS = {
     "llm.interpret": "Interpretieren",
     "llm.stop": "Abbrechen",
     "llm.thinkingDetails": "Denkprozess",
+    "llm.bodyPlaceholder": "Wähle Endpunkt + Modell und klick „Interpretieren“.",
 
     "llm.status.thinking": "… denke nach",
     "llm.status.aborted": "Abgebrochen.",
@@ -287,6 +288,7 @@ const STRINGS = {
     "llm.interpret": "Interpret",
     "llm.stop": "Stop",
     "llm.thinkingDetails": "Thinking trace",
+    "llm.bodyPlaceholder": "Pick an endpoint and model, then click “Interpret”.",
 
     "llm.status.thinking": "… thinking",
     "llm.status.aborted": "Aborted.",

@@ -5,6 +5,13 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **AI-interpretation placeholder localized** — the empty-state hint ("Pick an
+  endpoint + model and click Interpret") was hardcoded in German in `style.css`
+  and showed in English mode too. It now follows the UI language via an
+  i18n-driven `data-placeholder` attribute read by CSS `content: attr(...)`.
+
 ## [1.5.0] — 2026-06-01
 
 ### Added
