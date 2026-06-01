@@ -280,6 +280,12 @@ email.
 - **Wilhelm translation** in `data/hexagrams.json`: public domain
   (Wilhelm † 1930; public domain in Germany since 2001). When reusing,
   please credit Richard Wilhelm as the source.
+- **Commercial license:** the AGPL's copyleft does not fit every use (e.g. a
+  closed-source product, or an Apple App Store build, which is incompatible
+  with the AGPL). A separate commercial license is available — see
+  [`LICENSING.md`](LICENSING.md). Contributions are covered by the
+  [Contributor License Agreement](CLA.md), which keeps this dual-licensing
+  option open.
 
 ### Why AGPL?
 
