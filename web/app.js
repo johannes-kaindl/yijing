@@ -809,9 +809,9 @@ function readerLineHTML(ln) {
 /** Vollständige Text-Sektion eines Hexagramms fürs Nachschlagewerk (zeigt ALLE Linien). */
 function renderReaderTexts(hex) {
   const tx = hexTextFieldsForLang(hex);
-  const details = (summaryKey, bodyHTML, open) =>
+  const details = (summaryKey, bodyHTML, open, bodyClass = "") =>
     `<details${open ? " open" : ""}><summary>${escapeHTML(t(summaryKey))}</summary>` +
-    `<div class="text-body">${bodyHTML}</div></details>`;
+    `<div class="text-body${bodyClass ? " " + bodyClass : ""}">${bodyHTML}</div></details>`;
 
   let html = "";
   html += details("reading.judgment", renderParagraphs(tx.judgment), true);
@@ -820,7 +820,9 @@ function renderReaderTexts(hex) {
   if (tx.image_association) {
     html += details("reading.association", `<p>${escapeHTML(tx.image_association)}</p>`, false);
   }
-  html += details("reading.trigrams", trigramDetailsHTML(hex), false);
+  // Trigramm-HTML enthält strukturelle Zeilenumbrüche — Container auf normal
+  // stellen (wie #trigramText im Orakel), sonst rendert pre-wrap große Lücken.
+  html += details("reading.trigrams", trigramDetailsHTML(hex), false, "reader-trigrams");
   html += `<h2 class="section-title">${escapeHTML(t("reading.allLines"))}</h2>`;
   html += (hex.lines || []).map(readerLineHTML).join("");
   const notes = hex.notes || [];
