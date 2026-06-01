@@ -170,6 +170,17 @@ const els = {
   resetSystemPromptBtn: document.getElementById("resetSystemPrompt"),
   languageSelect: document.getElementById("languageSelect"),
   registerSelect: document.getElementById("registerSelect"),
+  // Nachschlagewerk / Reader
+  navOracle: document.getElementById("navOracle"),
+  navReader: document.getElementById("navReader"),
+  reader: document.getElementById("reader"),
+  readerCard: document.getElementById("readerCard"),
+  readerTexts: document.getElementById("readerTexts"),
+  readerIndex: document.getElementById("readerIndex"),
+  readerIndexToggle: document.getElementById("readerIndexToggle"),
+  readerPos: document.getElementById("readerPos"),
+  readerPrev: document.getElementById("readerPrev"),
+  readerNext: document.getElementById("readerNext"),
 };
 
 let HEXAGRAMS = null;
@@ -317,12 +328,10 @@ function renderChangingLines(hexData, changingIndices) {
   }
 }
 
-function renderTrigramDetails(hex) {
+/** Baut das Trigramm-Detail-HTML (oben/unten) — geteilt von Reading und Reader. */
+function trigramDetailsHTML(hex) {
   const tr = hex.trigrams || {};
-  if (!tr.above || !tr.below) {
-    els.trigramText.innerHTML = "—";
-    return;
-  }
+  if (!tr.above || !tr.below) return "—";
   const block = (label, tri) => `
     <div class="trigram-block">
       <div class="trigram-head">
@@ -333,8 +342,11 @@ function renderTrigramDetails(hex) {
       ${tri.associations ? `<div class="trigram-assoc">${escapeHTML(tri.associations)}</div>` : ""}
     </div>
   `;
-  els.trigramText.innerHTML =
-    block(t("reading.trigramAbove"), tr.above) + block(t("reading.trigramBelow"), tr.below);
+  return block(t("reading.trigramAbove"), tr.above) + block(t("reading.trigramBelow"), tr.below);
+}
+
+function renderTrigramDetails(hex) {
+  els.trigramText.innerHTML = trigramDetailsHTML(hex);
 }
 
 function escapeHTML(s) {
@@ -753,12 +765,149 @@ function findHistoryEntry(id) {
 }
 
 function applyHashIfAny() {
+  // Nachschlagewerk-Deeplink: #h=<1..64>
+  const rh = window.location.hash.match(/^#h=(\d{1,2})$/);
+  if (rh) {
+    const n = Number(rh[1]);
+    if (n >= 1 && n <= 64) {
+      openReader(n);
+      return true;
+    }
+  }
   const m = window.location.hash.match(/^#r=([^&]+)$/);
   if (!m) return false;
   const entry = findHistoryEntry(m[1]);
   if (!entry) return false;
+  if (!els.reader.hidden) closeReader(); // ggf. aus dem Reader zurück in den Orakel-Modus
   showReadingFromEntry(entry);
   return true;
+}
+
+// ——— Nachschlagewerk / Reader (alle 64 Hexagramme durchblättern) ———
+
+const READER = { current: 1, prevView: null };
+
+/** Linien aus dem Binärstring (Index 0 = unterste Linie); feste Linien, nichts wandelt. */
+function linesFromBinary(binary) {
+  return String(binary)
+    .split("")
+    .map((c) => ({ value: c === "1" ? 7 : 8 }));
+}
+
+/** Ein Linien-Block (Position / Text / Deutung) — gleiche Optik wie wandelnde Linien. */
+function readerLineHTML(ln) {
+  const f = lineFieldsForLang(ln);
+  return (
+    `<div class="changing-line reader-line">` +
+    `<div class="pos">${escapeHTML(f.position)}</div>` +
+    `<div class="text">${escapeHTML(f.text).replace(/\n/g, "<br>")}</div>` +
+    (f.interpretation ? `<div class="interp">${renderParagraphs(f.interpretation)}</div>` : "") +
+    `</div>`
+  );
+}
+
+/** Vollständige Text-Sektion eines Hexagramms fürs Nachschlagewerk (zeigt ALLE Linien). */
+function renderReaderTexts(hex) {
+  const tx = hexTextFieldsForLang(hex);
+  const details = (summaryKey, bodyHTML, open) =>
+    `<details${open ? " open" : ""}><summary>${escapeHTML(t(summaryKey))}</summary>` +
+    `<div class="text-body">${bodyHTML}</div></details>`;
+
+  let html = "";
+  html += details("reading.judgment", renderParagraphs(tx.judgment), true);
+  html += details("reading.image", renderParagraphs(tx.image), false);
+  html += details("reading.meaning", renderParagraphs(tx.meaning), false);
+  if (tx.image_association) {
+    html += details("reading.association", `<p>${escapeHTML(tx.image_association)}</p>`, false);
+  }
+  html += details("reading.trigrams", trigramDetailsHTML(hex), false);
+  html += `<h2 class="section-title">${escapeHTML(t("reading.allLines"))}</h2>`;
+  html += (hex.lines || []).map(readerLineHTML).join("");
+  const notes = hex.notes || [];
+  if (notes.length) {
+    const body = notes.map((n) => `<p class="note">${escapeHTML(noteTextForLang(n))}</p>`).join("");
+    html += details("reading.notes", body, false);
+  }
+  els.readerTexts.innerHTML = html;
+}
+
+function renderReader(num) {
+  const n = Math.min(64, Math.max(1, Number(num) | 0));
+  const hex = HEXAGRAMS[n];
+  if (!hex) return;
+  READER.current = n;
+  renderHexCard(els.readerCard, hex, linesFromBinary(hex.binary), null);
+  renderReaderTexts(hex);
+  els.readerPos.textContent = `${n} / 64`;
+  els.readerIndex.querySelectorAll(".reader-cell").forEach((c) => {
+    c.classList.toggle("active", Number(c.dataset.n) === n);
+  });
+  const newHash = `#h=${n}`;
+  if (window.location.hash !== newHash) history.replaceState(null, "", newHash);
+}
+
+/** Baut das 8×8-Übersichtsgitter (einmalig bzw. nach Sprachwechsel neu). */
+function renderReaderIndex() {
+  if (els.readerIndex.childElementCount) return;
+  const frag = document.createDocumentFragment();
+  for (let n = 1; n <= 64; n++) {
+    const hex = HEXAGRAMS[n];
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "reader-cell";
+    cell.dataset.n = String(n);
+    cell.innerHTML =
+      `<span class="rc-sym">${escapeHTML(hex?.unicode || "")}</span>` +
+      `<span class="rc-num">${n}</span>`;
+    if (hex) cell.title = `${n} · ${hexNameForLang(hex)}`;
+    cell.addEventListener("click", () => {
+      renderReader(n);
+      toggleReaderIndex(false);
+      els.readerCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    frag.appendChild(cell);
+  }
+  els.readerIndex.appendChild(frag);
+}
+
+function toggleReaderIndex(force) {
+  const show = typeof force === "boolean" ? force : els.readerIndex.hidden;
+  els.readerIndex.hidden = !show;
+  els.readerIndexToggle.setAttribute("aria-expanded", String(show));
+}
+
+function setNavActive(reader) {
+  els.navReader.classList.toggle("active", reader);
+  els.navOracle.classList.toggle("active", !reader);
+  els.navReader.setAttribute("aria-pressed", String(reader));
+  els.navOracle.setAttribute("aria-pressed", String(!reader));
+}
+
+function openReader(num = READER.current) {
+  READER.prevView = {
+    ask: els.ask.hidden,
+    reading: els.reading.hidden,
+    history: els.history.hidden,
+  };
+  els.ask.hidden = true;
+  els.reading.hidden = true;
+  els.history.hidden = true;
+  els.reader.hidden = false;
+  setNavActive(true);
+  renderReaderIndex();
+  renderReader(num);
+}
+
+function closeReader() {
+  els.reader.hidden = true;
+  const pv = READER.prevView || { ask: false, reading: true, history: true };
+  els.ask.hidden = pv.ask;
+  els.reading.hidden = pv.reading;
+  els.history.hidden = pv.history;
+  setNavActive(false);
+  if (/^#h=/.test(window.location.hash)) {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
 }
 
 // ——— LLM-Interpretation ———
@@ -1122,6 +1271,12 @@ async function changeLanguage(lang) {
   }
   // System-Prompt-Default sprach-passend aktualisieren, wenn kein Custom gespeichert.
   els.systemPromptInput.value = SystemPrompt.get();
+  // Nachschlagewerk in neuer Sprache neu rendern (Index-Titel sind sprachabhängig).
+  els.readerIndex.innerHTML = "";
+  if (!els.reader.hidden) {
+    renderReaderIndex();
+    renderReader(READER.current);
+  }
   // Aktuelle Reading neu rendern — nimmt das History-Entry, damit die Linien-
   // werte erhalten bleiben und nicht aus binary+changing rekonstruiert werden.
   const hashMatch = window.location.hash.match(/^#r=([^&]+)$/);
@@ -1291,12 +1446,25 @@ function changeRegister(reg) {
     const entry = findHistoryEntry(m[1]);
     if (entry) showReadingFromEntry(entry);
   }
+  // Nachschlagewerk spiegelt die Fassung sofort — nur neu rendern, kein Reload.
+  if (!els.reader.hidden) renderReader(READER.current);
 }
 if (els.registerSelect) {
   els.registerSelect.addEventListener("change", () => {
     changeRegister(els.registerSelect.value);
   });
 }
+
+// ——— Nachschlagewerk-Steuerung ———
+els.navOracle.addEventListener("click", () => {
+  if (!els.reader.hidden) closeReader();
+});
+els.navReader.addEventListener("click", () => {
+  if (els.reader.hidden) openReader();
+});
+els.readerPrev.addEventListener("click", () => renderReader(READER.current - 1));
+els.readerNext.addEventListener("click", () => renderReader(READER.current + 1));
+els.readerIndexToggle.addEventListener("click", () => toggleReaderIndex());
 
 // Footer-Link wechselt in die jeweils andere Sprache. Der Link-TEXT wird von
 // applyI18n verwaltet (DE-Dict „English version", EN-Dict „Deutsche Version").

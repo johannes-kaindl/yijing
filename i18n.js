@@ -60,6 +60,14 @@ const STRINGS = {
     "reading.trigramBelow": "unten",
     "reading.trigramOver": "über", // "Trigramm X über Trigramm Y"
 
+    // ——— Reader / Nachschlagewerk ———
+    "nav.oracle": "Orakel",
+    "nav.reader": "Nachschlagewerk",
+    "reader.prev": "Vorheriges Hexagramm",
+    "reader.next": "Nächstes Hexagramm",
+    "reader.index": "Übersicht aller 64 Hexagramme",
+    "reader.allLines": "Die einzelnen Linien",
+
     // ——— LLM-Interpretation ———
     "llm.heading": "KI-Interpretation",
     "llm.endpointSelect": "LLM-Endpunkt",
@@ -258,6 +266,14 @@ const STRINGS = {
     "reading.trigramAbove": "above",
     "reading.trigramBelow": "below",
     "reading.trigramOver": "over",
+
+    // ——— Reader / reference ———
+    "nav.oracle": "Oracle",
+    "nav.reader": "Reference",
+    "reader.prev": "Previous hexagram",
+    "reader.next": "Next hexagram",
+    "reader.index": "Index of all 64 hexagrams",
+    "reader.allLines": "The individual lines",
 
     // ——— LLM-Interpretation ———
     "llm.heading": "AI interpretation",
