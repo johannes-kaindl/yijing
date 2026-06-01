@@ -123,6 +123,12 @@ Line Tools (`xcode-select --install`). Details:
   setting
 - **Keyboard operation** for casting, reset and settings
 
+<p align="center">
+  <img src="docs/screenshots/reader-en.png" width="720"
+       alt="The read-through reference: an 8×8 index grid of all 64 hexagrams above the selected hexagram with its figure, Chinese name and full Wilhelm text" />
+  <br><em>Read-through reference — browse all 64 hexagrams with their full text, independent of casting.</em>
+</p>
+
 ## Language (German / English)
 
 The app starts in your browser’s language (`navigator.language`):
@@ -167,6 +173,12 @@ MLX and LM Studio are open by default. Details and troubleshooting:
 [`docs/LLM.md`](docs/LLM.md#cors-troubleshooting).
 
 ## How a reading works
+
+<p align="center">
+  <img src="docs/screenshots/reading-en.png" width="720"
+       alt="A cast reading: the question, the primary hexagram and the resulting hexagram with changing-line markers" />
+  <br><em>A cast reading — the primary and the resulting hexagram, with the changing lines marked.</em>
+</p>
 
 ```mermaid
 flowchart TD

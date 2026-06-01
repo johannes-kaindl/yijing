@@ -125,6 +125,12 @@ Voraussetzung zum Bauen: Xcode Command Line Tools
   System­einstellung
 - **Tastatur-Bedienung** für Wurf, Reset und Settings
 
+<p align="center">
+  <img src="docs/screenshots/reader-de.png" width="720"
+       alt="Das Nachschlagewerk: ein 8×8-Übersichtsgitter aller 64 Hexagramme über dem gewählten Hexagramm mit Figur, chinesischem Namen und vollständigem Wilhelm-Text" />
+  <br><em>Nachschlagewerk — alle 64 Hexagramme mit vollständigem Text durchblättern, unabhängig vom Wurf.</em>
+</p>
+
 ## Sprache (Deutsch / English)
 
 Die App startet in der Sprache deines Browsers (`navigator.language`):
@@ -169,6 +175,12 @@ MLX und LM Studio sind standardmäßig offen. Details und Fehlersuche:
 [`docs/LLM.md`](docs/LLM.md#cors-troubleshooting).
 
 ## Wie ein Wurf abläuft
+
+<p align="center">
+  <img src="docs/screenshots/reading-de.png" width="720"
+       alt="Eine Lesung: die Frage, das Ursprungsbild und das Zielbild mit Markierungen der wandelnden Linien" />
+  <br><em>Eine gewürfelte Lesung — Ursprungs- und Zielbild, mit den wandelnden Linien markiert.</em>
+</p>
 
 ```mermaid
 flowchart TD
