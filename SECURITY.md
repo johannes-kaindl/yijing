@@ -79,8 +79,10 @@ synced keys) are in scope and especially welcome.
   welcome.
 - **`localStorage` is not encrypted.** This is browser-standard;
   device security is up to the user.
-- **The macOS app is not Apple-notarized.** Gatekeeper warns on the
-  first launch — this is expected and documented in the README.
+- **The macOS app is Developer ID-signed and Apple-notarized.** Official
+  release DMGs launch with no Gatekeeper warning. A locally built,
+  un-notarized app (a contributor without a certificate) still warns on
+  first launch — expected; see `docs/MACOS-APP.md`.
 - **`_archiv/yijing_1/.env`** historically contains a plaintext Google
   API key. The folder is excluded via `.gitignore` and never
   committed. If you have the _archiv locally: please rotate it.

@@ -26,25 +26,13 @@ offline-fähig als PWA.
   </a>
 </p>
 
-[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.4.0/Yijing.dmg)
+[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.4.1/Yijing.dmg)
 [![Live-Demo öffnen](https://img.shields.io/badge/Live--Demo_%C3%B6ffnen-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
 
 Disk-Image öffnen, „Yijing" in den Programme-Ordner ziehen — fertig.
-
-> **Beim ersten Start meldet macOS „Apple konnte die App nicht prüfen".**
-> Das ist normal (Hobbyprojekt ohne Apple-Notarisierung) und in zwei
-> Minuten gelöst:
->
-> 1. Auf die Warnung **„Fertig"** klicken (nicht „In den Papierkorb"!).
-> 2. **Apple-Menü → Systemeinstellungen → Datenschutz & Sicherheit**.
-> 3. Ganz nach unten scrollen → **„Trotzdem öffnen"** neben dem
->    Yijing-Hinweis → mit Passwort/Touch ID bestätigen.
-> 4. Letzter Dialog: nochmal **„Trotzdem öffnen"**.
->
-> Beim zweiten Start ist nichts mehr nötig. Falls der „Trotzdem öffnen"-
-> Knopf fehlt (neuere macOS-Versionen), im Terminal:
-> `xattr -dr com.apple.quarantine /Applications/Yijing.app`. Details und
-> Hintergrund: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
+Die App ist **Developer-ID-signiert und Apple-notarisiert** und startet
+sofort, ohne Gatekeeper-Warnung. Hintergrund und die Signatur-Pipeline:
+[`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 
 ---
 
@@ -251,6 +239,7 @@ Vollständige Notes pro Release: [`CHANGELOG.md`](CHANGELOG.md).
 
 | Version | Datum | Headline |
 |---|---|---|
+| [v1.4.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.1) | 2026-06-01 | **Notarisierte macOS-App** — die Release-DMG ist jetzt Developer-ID-signiert und Apple-notarisiert und startet ohne Gatekeeper-Warnung (der alte „Trotzdem öffnen"-/`xattr`-Workaround entfällt). Opt-in-Signatur-Pipeline in `build-macos-app.sh` (`YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE`); README, INSTALL und `docs/MACOS-APP.md` für macOS-15/26-Gatekeeper aktualisiert |
 | [v1.4.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.0) | 2026-06-01 | **Daten-Korrektheit + geschlechtsneutrale Fassung + Export-Reparatur** — Wilhelm-Texte aus Projekt-Gutenberg neu bezogen (leere Bedeutungen gefüllt, Hexagramm-2-Bild ergänzt, Fußnoten + „alle Linien wandeln"-Spruch für Hex 1 & 2, Linien-Kontamination aus den Bild-Feldern entfernt, OCR-Patzer korrigiert), eine standardmäßig geschlechtsneutrale Textfassung mit Settings-Umschalter auf den historischen Wortlaut von 1924 (DE + EN), und ein funktionierender Markdown-/PDF-Export in der macOS-App über eine native WKWebView-Bridge mit zwei PDF-Modi (Druck S/W und randloses App-Design) |
 | [v1.3.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.3.0) | 2026-05-28 | **UI-Politur + zweisprachige README** — sichtbarer Sprach-Umschalter im Footer, minimalistische Inline-SVG-Header-Icons (Lucide) statt Unicode-Glyphen, 2-stufiger Theme-Toggle mit Zustands-Icon. README in EN (kanonisch) + DE gesplittet, App-Bundle-Version auf 1.3.0 nachgezogen |
 | [v1.2.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.1) | 2026-05-27 | **Patch-Release** — Hero-Bild + `og:image` für Social-Preview, StaticServer-Connection-Limit, `serve.py`-Tot-Code raus, EN-Übersetzungs-Stichproben-QA (君子-Vokabel konsistent als „noble one", Hex 11 + 49 Polish) |

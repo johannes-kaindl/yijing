@@ -5,6 +5,8 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.4.1] — 2026-06-01
+
 ### Added
 
 - **Developer ID signing + Apple notarization pipeline** for the macOS app,
@@ -23,6 +25,9 @@ Versioning follows [SemVer](https://semver.org/).
   done); the Gatekeeper "Open Anyway" steps are demoted to an "un-notarized
   builds only" fallback. `docs/MACOS-APP.md` updated for macOS 15/26 Gatekeeper
   (the Control-click → Open bypass for un-notarized apps is gone).
+- **README (EN + DE) and `SECURITY.md` no longer document the Gatekeeper
+  "Open Anyway" / `xattr` workaround** — release DMGs are now notarized and
+  open without a warning.
 
 ## [1.4.0] — 2026-06-01
 
