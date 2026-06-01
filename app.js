@@ -1533,6 +1533,15 @@ function applyTheme(mode) {
   });
 })();
 
+// ——— KI-Platzhalter (leerer Interpretations-Body) ———
+// CSS rendert `.interp-body:empty::before { content: attr(data-placeholder) }`;
+// der Text kommt sprachabhängig aus i18n und folgt jedem Sprachwechsel.
+function setInterpPlaceholder() {
+  if (els.interpBody) els.interpBody.dataset.placeholder = t("llm.bodyPlaceholder");
+}
+document.addEventListener("i18n:changed", setInterpPlaceholder);
+setInterpPlaceholder();
+
 // ——— Init ———
 
 (async () => {

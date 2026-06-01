@@ -802,7 +802,7 @@ button.ghost:hover {
 }
 
 .interp-body:empty::before {
-  content: "Wähle Endpunkt + Modell und klick „Interpretieren“.";
+  content: attr(data-placeholder);
   color: var(--ink-faint);
   font-style: italic;
 }
