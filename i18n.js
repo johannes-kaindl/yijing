@@ -42,8 +42,9 @@ const STRINGS = {
     "ask.exportMd.title": "Als Markdown exportieren",
     "ask.exportPdf": "PDF",
     "ask.exportPdf.title": "Als PDF drucken / speichern",
-    "ask.pdfBw": "Druck (S/W)",
-    "ask.pdfGlossy": "App-Design",
+    "ask.share": "Teilen",
+    "ask.pdfBw": "PDF (S/W)",
+    "ask.pdfGlossy": "PDF (App-Design)",
 
     "reading.primary": "Ursprungsbild",
     "reading.resulting": "Zielbild",
@@ -111,6 +112,8 @@ const STRINGS = {
     "settings.heading": "Einstellungen",
     "settings.close": "Schließen",
     "settings.endpoints": "LLM-Endpunkte",
+    "settings.activeEndpoint": "Für Deutung:",
+    "settings.activeModel": "Modell:",
     "settings.endpoints.hint":
       'Lokale Modelle via <strong>Ollama</strong> (Standardport <code>11434</code>) oder <strong>OpenAI-kompatibel</strong> (MLX, LM Studio …). CORS auf dem Server muss erlaubt sein — für Ollama z.&nbsp;B. <code>OLLAMA_ORIGINS=*</code>.',
     "settings.endpoints.add": "+ Endpunkt hinzufügen",
@@ -261,8 +264,9 @@ const STRINGS = {
     "ask.exportMd.title": "Export as Markdown",
     "ask.exportPdf": "PDF",
     "ask.exportPdf.title": "Print / save as PDF",
-    "ask.pdfBw": "Print (B/W)",
-    "ask.pdfGlossy": "App design",
+    "ask.share": "Share",
+    "ask.pdfBw": "PDF (B/W)",
+    "ask.pdfGlossy": "PDF (app style)",
 
     "reading.primary": "Primary hexagram",
     "reading.resulting": "Resulting hexagram",
@@ -330,6 +334,8 @@ const STRINGS = {
     "settings.heading": "Settings",
     "settings.close": "Close",
     "settings.endpoints": "LLM endpoints",
+    "settings.activeEndpoint": "For interpretation:",
+    "settings.activeModel": "Model:",
     "settings.endpoints.hint":
       'Local models via <strong>Ollama</strong> (default port <code>11434</code>) or <strong>OpenAI-compatible</strong> (MLX, LM Studio …). CORS must be allowed on the server — for Ollama e.&nbsp;g. <code>OLLAMA_ORIGINS=*</code>.',
     "settings.endpoints.add": "+ Add endpoint",

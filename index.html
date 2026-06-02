@@ -85,15 +85,12 @@
       <div class="controls">
         <button id="cast" type="button" data-i18n="ask.cast">Münzen werfen</button>
         <button id="reset" type="button" class="ghost" data-i18n="ask.reset" hidden>Neue Frage</button>
-        <button id="exportMd" type="button" class="ghost"
-                data-i18n="ask.exportMd"
-                data-i18n-title="ask.exportMd.title"
-                title="Als Markdown exportieren" hidden>Markdown</button>
-        <details id="pdfMenu" class="pdf-menu" hidden>
-          <summary class="ghost" data-i18n="ask.exportPdf">PDF</summary>
+        <details id="exportMenu" class="pdf-menu" hidden>
+          <summary class="ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg><span data-i18n="ask.share">Teilen</span></summary>
           <div class="pdf-menu-items">
-            <button id="pdfBw" type="button" class="ghost" data-i18n="ask.pdfBw">Druck (S/W)</button>
-            <button id="pdfGlossy" type="button" class="ghost" data-i18n="ask.pdfGlossy">App-Design</button>
+            <button id="exportMd" type="button" class="ghost" data-i18n="ask.exportMd">Markdown</button>
+            <button id="pdfBw" type="button" class="ghost" data-i18n="ask.pdfBw">PDF (S/W)</button>
+            <button id="pdfGlossy" type="button" class="ghost" data-i18n="ask.pdfGlossy">PDF (App-Design)</button>
           </div>
         </details>
       </div>
@@ -146,20 +143,6 @@
         <div class="interp-controls">
           <h2 class="section-title" data-i18n="llm.heading">KI-Interpretation</h2>
           <div class="interp-picker">
-            <select id="endpointSelect"
-                    data-i18n-aria="llm.endpointSelect"
-                    aria-label="LLM-Endpunkt"></select>
-            <select id="modelSelect"
-                    data-i18n-aria="llm.modelSelect"
-                    aria-label="Modell"></select>
-            <select id="thinkingSelect"
-                    data-i18n-aria="llm.thinkingSelect"
-                    data-i18n-title="llm.thinkingSelect.title"
-                    aria-label="Reasoning-Modus" title="Reasoning / Thinking">
-              <option value="default" data-i18n="llm.thinking.default">Reasoning: Default</option>
-              <option value="on" data-i18n="llm.thinking.on">Reasoning: An</option>
-              <option value="off" data-i18n="llm.thinking.off">Reasoning: Aus</option>
-            </select>
             <button id="interpretBtn" type="button" data-i18n="llm.interpret">Interpretieren</button>
             <button id="stopInterpretBtn" type="button" class="ghost" data-i18n="llm.stop" hidden>Abbrechen</button>
           </div>
@@ -282,6 +265,14 @@
           <strong>OpenAI-kompatibel</strong> (MLX, LM Studio …). CORS auf dem Server muss erlaubt sein —
           für Ollama z.&nbsp;B. <code>OLLAMA_ORIGINS=*</code>.
         </p>
+        <label class="row-inline">
+          <span data-i18n="settings.activeEndpoint">Für Deutung:</span>
+          <select id="endpointSelect" data-i18n-aria="llm.endpointSelect" aria-label="LLM-Endpunkt"></select>
+        </label>
+        <label class="row-inline">
+          <span data-i18n="settings.activeModel">Modell:</span>
+          <select id="modelSelect" data-i18n-aria="llm.modelSelect" aria-label="Modell"></select>
+        </label>
         <ul id="endpointList" class="endpoint-list"></ul>
         <details class="add-endpoint">
           <summary data-i18n="settings.endpoints.add">+ Endpunkt hinzufügen</summary>

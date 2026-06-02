@@ -1260,7 +1260,9 @@ button.ghost:hover {
 /* Summary als Ghost-Button (button/.ghost greifen nicht auf <summary>). */
 .pdf-menu > summary {
   list-style: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-family: inherit;
   font-size: 1rem;
   padding: 0.7rem 1.4rem;
