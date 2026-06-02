@@ -1255,8 +1255,11 @@ button.ghost:hover {
   .add-endpoint .grid { grid-template-columns: 1fr; }
 }
 
-/* ——— PDF-Export-Menü (ein Button „PDF" + zwei Modi) ——— */
+/* ——— Export/Teilen-Menü (ein Share-Button, MD + zwei PDF-Modi) ——— */
 .pdf-menu { position: relative; display: inline-block; }
+/* display:inline-block oben würde sonst das [hidden]-Attribut aushebeln
+   (Author-Style schlägt UA-display:none) — explizit zurücksetzen. */
+.pdf-menu[hidden] { display: none; }
 /* Summary als Ghost-Button (button/.ghost greifen nicht auf <summary>). */
 .pdf-menu > summary {
   list-style: none;
