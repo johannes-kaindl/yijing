@@ -69,7 +69,56 @@ Start it in the settings under → Developer → Local Server. Default port `123
 
 When the app is first opened, auto-discovery probes the typical
 local endpoints (11434, 8080/v1, 1234/v1) on its own — if something
-responds, the endpoint is created automatically.
+responds, the endpoint is created automatically. Auto-discovery only
+runs when the page itself is served over **http** (the macOS app's
+internal loopback server, the local dev server). On an **https** origin
+(e.g. the hosted Codeberg Pages site) it is skipped, because a secure
+page cannot reach a plain-`http://localhost` server anyway (see below).
+
+## Remote endpoint for mobile / the hosted web app
+
+The oracle calls the model server **directly from the browser**. That
+works great on a desktop where Ollama/MLX runs on the same machine —
+but two situations have no local server reachable that way:
+
+- **Mobile** (the installed PWA, a future store build): a phone has no
+  `localhost` Ollama.
+- **The hosted https site:** a page served over **https** can only fetch
+  **https** endpoints. A plain `http://…` endpoint (other than
+  `localhost`/`127.0.0.1`, which browsers exempt) is blocked as
+  *mixed content*. The app warns you when you enter such a URL.
+
+In both cases, point the app at a **remote OpenAI-compatible endpoint
+over https**. Casting a reading and the reference reader keep working
+fully offline without any of this — only the AI interpretation needs an
+endpoint.
+
+### Expose a local model over https with Tailscale
+
+If you already run Ollama/MLX at home, the leanest way to reach it from
+your phone is [Tailscale](https://tailscale.com) — it gives the server a
+stable https name on your private network:
+
+```bash
+# on the machine running Ollama (default port 11434)
+tailscale serve --bg 11434
+# → prints an https URL like https://your-host.your-tailnet.ts.net/
+```
+
+Then add an endpoint in the app:
+
+- **Type:** `OpenAI-compatible` (use Ollama's OpenAI route) or `Ollama`
+- **URL:** the `https://…ts.net/` name (append `/v1` for the
+  OpenAI-compatible route)
+- **API key:** only if your server requires one
+
+### Any OpenAI-compatible https endpoint works
+
+The `OpenAI-compatible` type speaks the standard `/v1/models` +
+`/v1/chat/completions` (SSE) protocol, with an optional
+`Authorization: Bearer <key>`. So any reachable https endpoint that
+implements it — a self-hosted gateway, a privacy-friendly provider —
+plugs in the same way. No app change required.
 
 ## Reasoning/thinking mode
 

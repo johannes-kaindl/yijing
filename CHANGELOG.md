@@ -5,12 +5,39 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Discoverable AI-interpretation setup on devices without a local LLM.** When
+  no endpoint is configured (a phone, the hosted https site), the interpretation
+  section now shows a subtle, purely informational setup card — a short
+  explainer plus "Set up in settings" and a "Guide" link — instead of vanishing
+  entirely. No active interpret button, so it stays cleanly degraded (the casting
+  oracle and reference reader remain fully functional offline). This is the
+  keystone for app-store readiness: stores require the LLM feature to degrade
+  gracefully rather than ship visibly broken on an LLM-less machine.
+- **Remote-endpoint guidance** (`docs/LLM.md`): how to reach a model server from
+  mobile / the hosted site over https (`tailscale serve` example); any
+  OpenAI-compatible https endpoint plugs in unchanged.
+
+### Changed
+
+- **Auto-discovery is now https-aware.** The localhost endpoint probes only run
+  on `http` origins (the macOS app's loopback server, the dev server — and, later,
+  an on-device loopback LLM in a native mobile shell). On `https` origins they are
+  skipped, avoiding pointless mixed-content requests and console errors.
+- **Interpretation visibility is now reactive** — it updates after auto-discovery
+  and after adding/removing an endpoint in settings, instead of only on the next
+  cast.
+
 ### Fixed
 
 - **AI-interpretation placeholder localized** — the empty-state hint ("Pick an
   endpoint + model and click Interpret") was hardcoded in German in `style.css`
   and showed in English mode too. It now follows the UI language via an
   i18n-driven `data-placeholder` attribute read by CSS `content: attr(...)`.
+- **Mixed-content warning when adding an endpoint** — entering a plain `http://`
+  endpoint (other than localhost) on an https page now shows a non-blocking
+  warning that a secure page cannot reach it.
 
 ## [1.5.0] — 2026-06-01
 

@@ -146,6 +146,9 @@ const els = {
   clearHistoryBtn: document.getElementById("clearHistory"),
   // LLM
   interpretation: document.getElementById("interpretation"),
+  interpActive: document.getElementById("interpActive"),
+  interpSetup: document.getElementById("interpSetup"),
+  interpSetupConfigure: document.getElementById("interpSetupConfigure"),
   endpointSelect: document.getElementById("endpointSelect"),
   modelSelect: document.getElementById("modelSelect"),
   interpretBtn: document.getElementById("interpretBtn"),
@@ -165,6 +168,7 @@ const els = {
   newEpType: document.getElementById("newEpType"),
   newEpUrl: document.getElementById("newEpUrl"),
   newEpKey: document.getElementById("newEpKey"),
+  newEpWarn: document.getElementById("newEpWarn"),
   addEndpointBtn: document.getElementById("addEndpointBtn"),
   systemPromptInput: document.getElementById("systemPromptInput"),
   resetSystemPromptBtn: document.getElementById("resetSystemPrompt"),
@@ -479,8 +483,6 @@ function showReading(question, lines, options = {}) {
   els.pdfMenu.hidden = false;
   els.castBtn.disabled = true;
 
-  // LLM-Sektion einblenden, falls Endpunkte konfiguriert
-  els.interpretation.hidden = Endpoints.list().length === 0;
   els.interpBody.innerHTML = "";
   els.interpStatus.textContent = "";
 
@@ -490,6 +492,8 @@ function showReading(question, lines, options = {}) {
     resultingHex,
     changingIndices,
   };
+  // LLM-Sektion: volle UI bei ≥1 Endpoint, sonst dezenter Einrichtungs-Hinweis
+  refreshInterpretationVisibility();
 
   let activeEntryId = entryId;
   if (save) {
@@ -914,6 +918,49 @@ function closeReader() {
 
 // ——— LLM-Interpretation ———
 
+/**
+ * Entscheidet, ob die Interpretations-Sektion die volle UI (≥1 Endpoint) oder
+ * den dezenten Einrichtungs-Hinweis (0 Endpoints) zeigt. Die Sektion erscheint
+ * nur im Kontext einer aktiven Lesung. Aufgerufen aus showReading(), nach
+ * autoDiscover() und nach Endpoint-Änderungen in den Settings — so wandert die
+ * Sichtbarkeit reaktiv mit, statt erst bei der nächsten Lesung.
+ */
+function refreshInterpretationVisibility() {
+  const hasReading = CURRENT_READING !== null;
+  const hasEndpoint = Endpoints.list().length > 0;
+  els.interpretation.hidden = !hasReading;
+  if (els.interpSetup) els.interpSetup.hidden = hasEndpoint;
+  if (els.interpActive) els.interpActive.hidden = !hasEndpoint;
+}
+
+/**
+ * Mixed-Content-Realität: eine über HTTPS ausgelieferte Seite (Codeberg Pages,
+ * künftige Mobile-Shells) kann keinen http://-Endpoint erreichen — außer
+ * localhost (Browser-Sonderfall). Warnt nicht-blockierend; der Endpoint wird
+ * trotzdem gespeichert, falls der/die Nutzer:in weiß, was er/sie tut.
+ */
+function isMixedContentEndpoint(url) {
+  if (typeof location === "undefined" || location.protocol !== "https:") return false;
+  let host;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "http:") return false;
+    host = u.hostname;
+  } catch {
+    return false;
+  }
+  // localhost-Sonderfälle, die Browser von Mixed-Content ausnehmen (inkl.
+  // IPv6-Loopback; new URL(...).hostname liefert ihn als „[::1]").
+  return host !== "localhost" && host !== "127.0.0.1" && host !== "[::1]";
+}
+
+function updateMixedContentWarn() {
+  if (!els.newEpWarn) return;
+  const warn = isMixedContentEndpoint(els.newEpUrl.value.trim());
+  els.newEpWarn.textContent = warn ? t("settings.endpoints.mixedContentWarn") : "";
+  els.newEpWarn.hidden = !warn;
+}
+
 function refreshEndpointSelect() {
   const list = Endpoints.list();
   els.endpointSelect.innerHTML = "";
@@ -1155,6 +1202,7 @@ function renderEndpointList() {
         Endpoints.remove(ep.id);
         renderEndpointList();
         refreshEndpointSelect();
+        refreshInterpretationVisibility();
       }
     });
     li.querySelector('[data-act="test"]').addEventListener("click", async () => {
@@ -1230,6 +1278,7 @@ function openSettings() {
   els.newEpName.value = "";
   els.newEpUrl.value = "";
   els.newEpKey.value = "";
+  updateMixedContentWarn();
   if (typeof els.settingsModal.showModal === "function") {
     els.settingsModal.showModal();
   } else {
@@ -1257,6 +1306,7 @@ function suggestUrlForType() {
   if (els.newEpUrl.value && els.newEpUrl.value.trim()) return;
   els.newEpUrl.value =
     els.newEpType.value === "ollama" ? "http://localhost:11434" : "http://localhost:8080/v1";
+  updateMixedContentWarn();
 }
 
 // ——— Sprach-Wechsel-Handler ———
@@ -1386,12 +1436,15 @@ els.clearHistoryBtn.addEventListener("click", () => {
 
 els.openSettingsBtn.addEventListener("click", openSettings);
 els.closeSettingsBtn.addEventListener("click", closeSettings);
+els.interpSetupConfigure?.addEventListener("click", openSettings);
 els.settingsModal.addEventListener("close", () => {
   SystemPrompt.set(els.systemPromptInput.value);
   refreshEndpointSelect();
+  refreshInterpretationVisibility();
 });
 els.newEpType.addEventListener("change", suggestUrlForType);
 els.newEpUrl.addEventListener("focus", suggestUrlForType);
+els.newEpUrl.addEventListener("input", updateMixedContentWarn);
 els.addEndpointBtn.addEventListener("click", () => {
   const name = els.newEpName.value.trim();
   const url = els.newEpUrl.value.trim();
@@ -1408,9 +1461,11 @@ els.addEndpointBtn.addEventListener("click", () => {
     defaultModel: "",
   });
   renderEndpointList();
+  refreshInterpretationVisibility();
   els.newEpName.value = "";
   els.newEpUrl.value = "";
   els.newEpKey.value = "";
+  updateMixedContentWarn();
 });
 
 els.resetSystemPromptBtn.addEventListener("click", () => {
@@ -1553,7 +1608,10 @@ setInterpPlaceholder();
     if (els.languageSelect) els.languageSelect.value = getLang();
   if (els.registerSelect) els.registerSelect.value = getRegister();
     // Hintergrund: lokale LLM-Server suchen und Auswahl aktualisieren
-    Endpoints.autoDiscover().then(() => refreshEndpointSelect());
+    Endpoints.autoDiscover().then(() => {
+      refreshEndpointSelect();
+      refreshInterpretationVisibility();
+    });
     // Tiefer Link? — falls #r=<id> in der URL steht, Eintrag wiederherstellen
     applyHashIfAny();
     window.addEventListener("hashchange", () => {

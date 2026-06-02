@@ -82,6 +82,12 @@ const STRINGS = {
     "llm.thinkingDetails": "Denkprozess",
     "llm.bodyPlaceholder": "Wähle Endpunkt + Modell und klick „Interpretieren“.",
 
+    "llm.setup.title": "KI-Interpretation",
+    "llm.setup.explain":
+      "Die KI-Interpretation braucht einen eigenen LLM-Endpoint — lokal am Desktop (Ollama/MLX) oder erreichbar als Remote-Endpoint. Würfeln und Nachschlagewerk funktionieren auch ohne.",
+    "llm.setup.configure": "In Einstellungen einrichten",
+    "llm.setup.guide": "Anleitung",
+
     "llm.status.thinking": "… denke nach",
     "llm.status.aborted": "Abgebrochen.",
     "llm.status.error": "Fehler: {message}",
@@ -139,6 +145,8 @@ const STRINGS = {
     "settings.endpoints.thinkingProbe.verdictErr":
       "Keine Reasoning-Tokens beobachtet — dieses Modell unterstützt es vermutlich nicht.",
     "settings.endpoints.addMissingFields": "Name und URL angeben.",
+    "settings.endpoints.mixedContentWarn":
+      "Diese Seite läuft über HTTPS und kann keinen HTTP-Endpoint erreichen (außer localhost). Nutze einen HTTPS-Endpoint — z. B. „tailscale serve“.",
 
     "settings.thinkingDefault": "Reasoning-Default",
     "settings.thinkingDefault.hint":
@@ -290,6 +298,12 @@ const STRINGS = {
     "llm.thinkingDetails": "Thinking trace",
     "llm.bodyPlaceholder": "Pick an endpoint and model, then click “Interpret”.",
 
+    "llm.setup.title": "AI interpretation",
+    "llm.setup.explain":
+      "AI interpretation needs its own LLM endpoint — local on the desktop (Ollama/MLX) or reachable as a remote endpoint. Casting and the reference reader work without it.",
+    "llm.setup.configure": "Set up in settings",
+    "llm.setup.guide": "Guide",
+
     "llm.status.thinking": "… thinking",
     "llm.status.aborted": "Aborted.",
     "llm.status.error": "Error: {message}",
@@ -347,6 +361,8 @@ const STRINGS = {
     "settings.endpoints.thinkingProbe.verdictErr":
       "No reasoning tokens observed — this model likely doesn't support it.",
     "settings.endpoints.addMissingFields": "Please provide name and URL.",
+    "settings.endpoints.mixedContentWarn":
+      "This page runs over HTTPS and cannot reach an HTTP endpoint (except localhost). Use an HTTPS endpoint — e.g. “tailscale serve”.",
 
     "settings.thinkingDefault": "Reasoning default",
     "settings.thinkingDefault.hint":
