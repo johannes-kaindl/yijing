@@ -19,6 +19,9 @@ import {
   Endpoints,
   SystemPrompt,
   getDefaultSystemPrompt,
+  PROMPT_PRESETS,
+  getPresetBody,
+  PromptPresets,
   makeClient,
   buildUserPrompt,
   testThinkingMode,
@@ -171,6 +174,10 @@ const els = {
   addEndpointBtn: document.getElementById("addEndpointBtn"),
   systemPromptInput: document.getElementById("systemPromptInput"),
   resetSystemPromptBtn: document.getElementById("resetSystemPrompt"),
+  promptPresetSelect: document.getElementById("promptPresetSelect"),
+  savePromptPresetBtn: document.getElementById("savePromptPreset"),
+  deletePromptPresetBtn: document.getElementById("deletePromptPreset"),
+  fontSizeSelect: document.getElementById("fontSizeSelect"),
   languageSelect: document.getElementById("languageSelect"),
   registerSelect: document.getElementById("registerSelect"),
   // Nachschlagewerk / Reader
@@ -1270,6 +1277,8 @@ function verdictText(v, on, _off) {
 function openSettings() {
   renderEndpointList();
   els.systemPromptInput.value = SystemPrompt.get();
+  renderPromptPresets();
+  if (els.fontSizeSelect) els.fontSizeSelect.value = currentFontSize();
   els.defaultThinking.value = localStorage.getItem("yijing-default-thinking") || "default";
   if (els.languageSelect) els.languageSelect.value = getLang();
   if (els.registerSelect) els.registerSelect.value = getRegister();
@@ -1307,6 +1316,87 @@ function suggestUrlForType() {
   updateMixedContentWarn();
 }
 
+// ——— Prompt-Vorlagen (Presets) ———
+//
+// Vorlagen befüllen nur die System-Prompt-Textarea; ab da greift die normale
+// SystemPrompt.set()-Persistenz beim Schließen. Der <select> zeigt die aktive
+// Vorlage an (oder „eigener Text", wenn der Inhalt keiner Vorlage entspricht).
+
+/** Findet zur Textarea eine passende Vorlage; liefert den <select>-Wert
+ *  ("builtin:<id>" / "user:<id>") oder "" (= eigener Text). */
+function matchPresetForText(text) {
+  const cur = (text || "").trim();
+  if (!cur) return "";
+  const lang = getLang();
+  for (const p of PROMPT_PRESETS) {
+    if ((getPresetBody(p.id, lang) || "").trim() === cur) return "builtin:" + p.id;
+  }
+  for (const p of PromptPresets.list()) {
+    if ((p.body || "").trim() === cur) return "user:" + p.id;
+  }
+  return "";
+}
+
+/** Synct die <select>-Auswahl + Sichtbarkeit des Löschen-Buttons zum Textarea-Inhalt. */
+function syncPresetSelection() {
+  if (!els.promptPresetSelect) return;
+  const val = matchPresetForText(els.systemPromptInput.value);
+  els.promptPresetSelect.value = val;
+  if (els.deletePromptPresetBtn) els.deletePromptPresetBtn.hidden = !val.startsWith("user:");
+}
+
+/** Baut den Vorlagen-<select> neu (Built-in + eigene) und synct die Auswahl. */
+function renderPromptPresets() {
+  const sel = els.promptPresetSelect;
+  if (!sel) return;
+  sel.innerHTML = "";
+
+  const custom = document.createElement("option");
+  custom.value = "";
+  custom.textContent = t("settings.presets.custom");
+  sel.appendChild(custom);
+
+  const gBuiltin = document.createElement("optgroup");
+  gBuiltin.label = t("settings.presets.builtinGroup");
+  for (const p of PROMPT_PRESETS) {
+    const o = document.createElement("option");
+    o.value = "builtin:" + p.id;
+    o.textContent = t("settings.presets." + p.id);
+    gBuiltin.appendChild(o);
+  }
+  sel.appendChild(gBuiltin);
+
+  const users = PromptPresets.list();
+  if (users.length) {
+    const gUser = document.createElement("optgroup");
+    gUser.label = t("settings.presets.userGroup");
+    for (const p of users) {
+      const o = document.createElement("option");
+      o.value = "user:" + p.id;
+      o.textContent = p.name;
+      gUser.appendChild(o);
+    }
+    sel.appendChild(gUser);
+  }
+
+  syncPresetSelection();
+}
+
+// ——— Schriftgröße der Lese-Ansicht ———
+// Das Inline-Script im <head> setzt data-font-size bereits vor dem ersten Paint;
+// hier nur Persistenz + Live-Umschaltung. Werte: sm | md | lg | xl.
+
+const FONT_SIZE_KEY = "yijing-font-size-v1";
+
+function currentFontSize() {
+  const v = localStorage.getItem(FONT_SIZE_KEY);
+  return v === "sm" || v === "lg" || v === "xl" ? v : "md";
+}
+
+function applyFontSize(size) {
+  document.documentElement.dataset.fontSize = size;
+}
+
 // ——— Sprach-Wechsel-Handler ———
 
 async function changeLanguage(lang) {
@@ -1321,6 +1411,8 @@ async function changeLanguage(lang) {
   }
   // System-Prompt-Default sprach-passend aktualisieren, wenn kein Custom gespeichert.
   els.systemPromptInput.value = SystemPrompt.get();
+  // Vorlagen-Namen + -Bodies sind sprachabhängig — neu aufbauen und Auswahl matchen.
+  renderPromptPresets();
   // Nachschlagewerk in neuer Sprache neu rendern (Index-Titel sind sprachabhängig).
   els.readerIndex.innerHTML = "";
   if (!els.reader.hidden) {
@@ -1468,6 +1560,51 @@ els.addEndpointBtn.addEventListener("click", () => {
 
 els.resetSystemPromptBtn.addEventListener("click", () => {
   els.systemPromptInput.value = getDefaultSystemPrompt(getLang());
+  syncPresetSelection();
+});
+
+// Vorlage gewählt → Body in die Textarea laden.
+els.promptPresetSelect?.addEventListener("change", () => {
+  const v = els.promptPresetSelect.value;
+  if (v.startsWith("builtin:")) {
+    els.systemPromptInput.value = getPresetBody(v.slice(8), getLang()) || "";
+  } else if (v.startsWith("user:")) {
+    const p = PromptPresets.list().find((x) => x.id === v.slice(5));
+    if (p) els.systemPromptInput.value = p.body;
+  }
+  if (els.deletePromptPresetBtn) els.deletePromptPresetBtn.hidden = !v.startsWith("user:");
+});
+
+// Aktuellen Textarea-Inhalt als eigene Vorlage speichern.
+els.savePromptPresetBtn?.addEventListener("click", () => {
+  const body = els.systemPromptInput.value.trim();
+  if (!body) return;
+  const name = (prompt(t("settings.presets.namePrompt")) || "").trim();
+  if (!name) return;
+  PromptPresets.add({ name, body });
+  renderPromptPresets(); // matcht die frisch gespeicherte Vorlage automatisch
+});
+
+// Gewählte eigene Vorlage löschen.
+els.deletePromptPresetBtn?.addEventListener("click", () => {
+  const v = els.promptPresetSelect.value;
+  if (!v.startsWith("user:")) return;
+  const p = PromptPresets.list().find((x) => x.id === v.slice(5));
+  if (p && confirm(t("settings.presets.removeConfirm", { name: p.name }))) {
+    PromptPresets.remove(p.id);
+    renderPromptPresets();
+  }
+});
+
+// Tippen im Textfeld → Auswahl auf „eigener Text" springen lassen, sobald der
+// Inhalt keiner Vorlage mehr entspricht.
+els.systemPromptInput?.addEventListener("input", syncPresetSelection);
+
+// Schriftgröße der Lese-Ansicht — sofort wirksam + persistiert.
+els.fontSizeSelect?.addEventListener("change", () => {
+  const v = els.fontSizeSelect.value;
+  localStorage.setItem(FONT_SIZE_KEY, v);
+  applyFontSize(v);
 });
 
 els.endpointSelect.addEventListener("change", () => {
@@ -1600,6 +1737,7 @@ setInterpPlaceholder();
 (async () => {
   try {
     initI18n();
+    applyFontSize(currentFontSize()); // robust, falls das <head>-Inline-Script nicht lief
     await loadData();
     renderHistory();
     refreshEndpointSelect();

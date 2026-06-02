@@ -13,8 +13,18 @@
   --max: 760px;
   --radius: 6px;
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  /* Skaliert die Lese-Texte (Hexagramm-Texte + KI-Deutung). Über
+     data-font-size auf <html> umgeschaltet — analog zum Theme. Nur ein
+     Multiplikator für ausgewählte Lese-Selektoren, KEIN globales
+     font-size auf :root/html (würde Browser-Zoom + Layout stören). */
+  --reading-scale: 1;
   color-scheme: dark;
 }
+
+/* Schriftgröße der Lese-Ansicht. „md" = Default (1), braucht keinen Override. */
+:root[data-font-size="sm"] { --reading-scale: 0.9; }
+:root[data-font-size="lg"] { --reading-scale: 1.12; }
+:root[data-font-size="xl"] { --reading-scale: 1.26; }
 
 /* Light-Theme — überschreibt die Farb-Variablen. Aktiviert via
    data-theme="light" auf <html> (gesetzt durch das Theme-Script). */
@@ -222,7 +232,7 @@ button.ghost:hover {
   color: var(--ink-soft);
   text-align: center;
   margin-bottom: 1.5rem;
-  font-size: 1.05rem;
+  font-size: calc(1.05rem * var(--reading-scale));
 }
 
 .hexagrams {
@@ -321,14 +331,14 @@ button.ghost:hover {
 
 .hex-name {
   margin: 0.5rem 0 0.3rem;
-  font-size: 1.15rem;
+  font-size: calc(1.15rem * var(--reading-scale));
   font-weight: 500;
   letter-spacing: 0.02em;
 }
 
 .hex-trigrams {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--reading-scale));
   color: var(--ink-faint);
   line-height: 1.4;
 }
@@ -369,7 +379,7 @@ button.ghost:hover {
 
 .text-body {
   color: var(--ink);
-  font-size: 0.98rem;
+  font-size: calc(0.98rem * var(--reading-scale));
   white-space: pre-wrap;
   line-height: 1.65;
 }
@@ -385,7 +395,7 @@ button.ghost:hover {
 /* Wilhelm footnotes in the "Anmerkungen" block. */
 .note {
   color: var(--ink-soft);
-  font-size: 0.92rem;
+  font-size: calc(0.92rem * var(--reading-scale));
   line-height: 1.6;
   margin: 0 0 0.6em;
 }
@@ -421,12 +431,12 @@ button.ghost:hover {
 .changing-line .text {
   margin: 0.4rem 0 0.6rem;
   font-weight: 500;
-  font-size: 1.02rem;
+  font-size: calc(1.02rem * var(--reading-scale));
 }
 
 .changing-line .interp {
   color: var(--ink-soft);
-  font-size: 0.92rem;
+  font-size: calc(0.92rem * var(--reading-scale));
   white-space: pre-wrap;
   line-height: 1.6;
 }
@@ -866,7 +876,7 @@ button.ghost:hover {
 
 .interp-body {
   line-height: 1.65;
-  font-size: 0.98rem;
+  font-size: calc(0.98rem * var(--reading-scale));
   min-height: 1.5em;
   color: var(--ink);
   margin-top: 0.5rem;
@@ -888,10 +898,10 @@ button.ghost:hover {
   color: var(--ink);
   letter-spacing: 0.02em;
 }
-.interp-body h1 { font-size: 1.25rem; }
-.interp-body h2 { font-size: 1.1rem; color: var(--accent); }
-.interp-body h3 { font-size: 1rem; }
-.interp-body h4 { font-size: 0.95rem; color: var(--ink-soft); }
+.interp-body h1 { font-size: calc(1.25rem * var(--reading-scale)); }
+.interp-body h2 { font-size: calc(1.1rem * var(--reading-scale)); color: var(--accent); }
+.interp-body h3 { font-size: calc(1rem * var(--reading-scale)); }
+.interp-body h4 { font-size: calc(0.95rem * var(--reading-scale)); color: var(--ink-soft); }
 .interp-body p { margin: 0 0 0.7rem; }
 .interp-body ul, .interp-body ol { margin: 0.3rem 0 0.7rem 1.5rem; padding: 0; }
 .interp-body li { margin-bottom: 0.25rem; }
@@ -1243,6 +1253,8 @@ button.ghost:hover {
 .settings-form .row {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   margin-top: 0.5rem;
 }
 
