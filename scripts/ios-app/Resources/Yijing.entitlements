@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Extra memory headroom for the resident on-device model + WebKit. Boolean,
+	     no Apple pre-approval needed; grants no guaranteed amount. Gate the model
+	     choice on os_proc_available_memory regardless (see ModelLocator). -->
+	<key>com.apple.developer.kernel.increased-memory-limit</key>
+	<true/>
+</dict>
+</plist>

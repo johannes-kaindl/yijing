@@ -7,6 +7,14 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **iOS app scaffold** (`scripts/ios-app/`) — the start of the native iOS/iPadOS
+  App Store build (roadmap #6). A UIKit WKWebView shell that bundles the web app
+  over a loopback server (ported from the macOS app) plus an on-device LLM exposed
+  as a loopback OpenAI endpoint, so `web/llm.js` is consumed unchanged. Ships a
+  runnable web-shell + mock-AI path; the real llama.cpp engine + model integration
+  is a documented skeleton for on-device wiring. Not yet built/shipped — see the
+  scaffold README and the design spec. Engine = llama.cpp (not Apple Foundation
+  Models: 4096-token window + divination guardrails); model = Qwen3-4B (Apache-2.0).
 - **Discoverable AI-interpretation setup on devices without a local LLM.** When
   no endpoint is configured (a phone, the hosted https site), the interpretation
   section now shows a subtle, purely informational setup card — a short
