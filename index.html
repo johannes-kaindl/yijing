@@ -37,6 +37,11 @@
         lang = (navigator.language || "de").toLowerCase().indexOf("en") === 0 ? "en" : "de";
       }
       document.documentElement.lang = lang;
+      // Schriftgröße der Lese-Ansicht früh setzen (analog Theme) — vermeidet
+      // einen sichtbaren Sprung beim ersten Rendern.
+      var fs = localStorage.getItem("yijing-font-size-v1");
+      document.documentElement.dataset.fontSize =
+        (fs === "sm" || fs === "lg" || fs === "xl") ? fs : "md";
     })();
   </script>
 
@@ -259,6 +264,20 @@
       </details>
 
       <details class="settings-section">
+        <summary data-i18n="settings.fontSize">Schriftgröße</summary>
+        <p class="hint" data-i18n="settings.fontSize.hint">Skaliert die Lese-Texte — Hexagramm-Texte und KI-Deutung.</p>
+        <label class="row-inline">
+          <span data-i18n="settings.fontSize.label">Größe:</span>
+          <select id="fontSizeSelect">
+            <option value="sm" data-i18n="settings.fontSize.sm">Klein</option>
+            <option value="md" data-i18n="settings.fontSize.md">Normal</option>
+            <option value="lg" data-i18n="settings.fontSize.lg">Groß</option>
+            <option value="xl" data-i18n="settings.fontSize.xl">Sehr groß</option>
+          </select>
+        </label>
+      </details>
+
+      <details class="settings-section">
         <summary data-i18n="settings.endpoints">LLM-Endpunkte</summary>
         <p class="hint" data-i18n-html="settings.endpoints.hint">
           Lokale Modelle via <strong>Ollama</strong> (Standardport <code>11434</code>) oder
@@ -313,8 +332,15 @@
       <details class="settings-section">
         <summary data-i18n="settings.systemPrompt">Beratungs-Prompt</summary>
         <p class="hint" data-i18n="settings.systemPrompt.hint">System-Prompt für die KI-Interpretation. Default folgt der Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige Beratungsstruktur).</p>
+        <p class="hint" data-i18n="settings.presets.hint">Fertige Stile als Startpunkt — frei editierbar. „Literarischer Kommentar“ senkt Verweigerungen zensierter Modelle (z. B. Apple Intelligence).</p>
+        <label class="row-inline">
+          <span data-i18n="settings.presets.label">Vorlage:</span>
+          <select id="promptPresetSelect"></select>
+        </label>
         <textarea id="systemPromptInput" rows="8"></textarea>
         <div class="row">
+          <button type="button" id="deletePromptPreset" class="ghost danger" hidden data-i18n="settings.presets.delete">Vorlage löschen</button>
+          <button type="button" id="savePromptPreset" class="ghost" data-i18n="settings.presets.save">Als Vorlage speichern</button>
           <button type="button" id="resetSystemPrompt" class="ghost" data-i18n="settings.systemPrompt.reset">Default wiederherstellen</button>
         </div>
       </details>

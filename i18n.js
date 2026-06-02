@@ -166,6 +166,20 @@ const STRINGS = {
     "settings.systemPrompt.hint":
       "System-Prompt für die KI-Interpretation. Default folgt der Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige Beratungsstruktur).",
     "settings.systemPrompt.reset": "Default wiederherstellen",
+    "settings.presets.label": "Vorlage:",
+    "settings.presets.hint":
+      "Fertige Stile als Startpunkt — frei editierbar. „Literarischer Kommentar“ senkt Verweigerungen zensierter Modelle (z. B. Apple Intelligence).",
+    "settings.presets.custom": "— eigener Text —",
+    "settings.presets.builtinGroup": "Vorlagen",
+    "settings.presets.userGroup": "Eigene",
+    "settings.presets.default": "Orakel (Wilhelm-Tradition)",
+    "settings.presets.literary": "Literarischer Kommentar",
+    "settings.presets.psychological": "Tiefenpsychologisch (Jung)",
+    "settings.presets.concise": "Knapp & sachlich",
+    "settings.presets.save": "Als Vorlage speichern",
+    "settings.presets.delete": "Vorlage löschen",
+    "settings.presets.namePrompt": "Name der Vorlage:",
+    "settings.presets.removeConfirm": "Vorlage „{name}“ löschen?",
     "settings.about": "Über",
     "settings.about.copyright":
       '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) · <a href="https://codeberg.org/jkaindl/Yijing">Quellcode</a>',
@@ -182,6 +196,15 @@ const STRINGS = {
       "Standardmäßig geschlechtsneutral. Schalte auf die historische Fassung, um Wilhelms Wortlaut von 1924 wörtlich zu lesen.",
     "settings.register.neutral": "Geschlechtsneutral",
     "settings.register.historical": "Historisch (Wilhelm 1924)",
+
+    "settings.fontSize": "Schriftgröße",
+    "settings.fontSize.hint":
+      "Skaliert die Lese-Texte — Hexagramm-Texte und KI-Deutung.",
+    "settings.fontSize.label": "Größe:",
+    "settings.fontSize.sm": "Klein",
+    "settings.fontSize.md": "Normal",
+    "settings.fontSize.lg": "Groß",
+    "settings.fontSize.xl": "Sehr groß",
 
     // ——— Theme-Knopf (Tooltip beschreibt die Klick-Aktion) ———
     "theme.toLight": "Zu hellem Design wechseln",
@@ -388,6 +411,20 @@ const STRINGS = {
     "settings.systemPrompt.hint":
       "System prompt for the AI interpretation. Default follows the Wilhelm tradition (dignity, compassion, five-part counsel structure).",
     "settings.systemPrompt.reset": "Restore default",
+    "settings.presets.label": "Template:",
+    "settings.presets.hint":
+      "Ready-made styles as a starting point — freely editable. “Literary commentary” lowers refusals from censored models (e.g. Apple Intelligence).",
+    "settings.presets.custom": "— custom text —",
+    "settings.presets.builtinGroup": "Templates",
+    "settings.presets.userGroup": "Your own",
+    "settings.presets.default": "Oracle (Wilhelm tradition)",
+    "settings.presets.literary": "Literary commentary",
+    "settings.presets.psychological": "Depth-psychological (Jung)",
+    "settings.presets.concise": "Concise & plain",
+    "settings.presets.save": "Save as template",
+    "settings.presets.delete": "Delete template",
+    "settings.presets.namePrompt": "Template name:",
+    "settings.presets.removeConfirm": "Delete template “{name}”?",
     "settings.about": "About",
     "settings.about.copyright":
       '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (docs) · <a href="https://codeberg.org/jkaindl/Yijing">Source</a>',
@@ -404,6 +441,15 @@ const STRINGS = {
       "Gender-neutral by default. Switch to the historical wording to read Wilhelm's 1924 text verbatim.",
     "settings.register.neutral": "Gender-neutral",
     "settings.register.historical": "Historical (Wilhelm 1924)",
+
+    "settings.fontSize": "Font size",
+    "settings.fontSize.hint":
+      "Scales the reading text — hexagram texts and AI interpretation.",
+    "settings.fontSize.label": "Size:",
+    "settings.fontSize.sm": "Small",
+    "settings.fontSize.md": "Normal",
+    "settings.fontSize.lg": "Large",
+    "settings.fontSize.xl": "Extra large",
 
     // ——— Theme button (tooltip describes the click action) ———
     "theme.toLight": "Switch to light mode",
