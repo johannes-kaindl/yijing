@@ -18,12 +18,21 @@ loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
 >
 > **Default engine = Apple Foundation Models ("Apple Intelligence"), and it runs
 > in the iOS 26.5 Simulator** — real on-device inference produced good structured
-> German hexagram interpretations. Measured guardrail-refusal rate with the real
-> app prompt: ~12% (1/8; dark hexagrams 23/29/36/47 passed, "Konflikt" (6) was
-> refused) — handled gracefully (clean error → user can switch to a remote
-> endpoint). Foundation Models needs no bundled model and no ~2.4 GB download.
+> German hexagram interpretations, no ~2.4 GB download, no bundled model.
+>
+> **Guardrails (measured on-device):** an "oracle / fortune-telling" framing
+> refused ~17% of a 12-hexagram risky set; reframing as literary commentary on a
+> historical wisdom text (now built into `FoundationModelsEngine`, DE/EN) dropped
+> that to 0/12 in a controlled run and rescued e.g. Hex 6 (Streit). BUT the
+> guardrail is finicky/content-sensitive, not a guarantee: a few of the heaviest
+> texts (e.g. Hex 49 Umwälzung/Revolution — overthrow, weapons) refuse *consistently*
+> (3/3) even reframed. Refusals are handled gracefully (clean error → switch to a
+> remote endpoint). So Apple FM covers most readings incl. most dark hexagrams; a
+> small residual of the heaviest ones needs the fallback.
+>
 > `llama.cpp` + a bundled GGUF (`LlamaCppEngine`, the gated skeleton) remains the
-> documented FALLBACK for broader device reach / zero refusals.
+> documented FALLBACK for users who want 100% on-device coverage / no guardrails
+> (at the cost of the ~2.4 GB download).
 >
 > Four real bugs were found + fixed via this testing: nested-struct-in-protocol,
 > missing `CFBundleExecutable`, an SSE `done()` race, and an ARC `[weak self]` drop
