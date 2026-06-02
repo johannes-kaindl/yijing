@@ -24,13 +24,9 @@ enum ModelLocator {
     private static let primary = (name: "qwen3-4b", file: "qwen3-4b-q4_k_m", minAvail: 4.0)
     private static let small   = (name: "qwen3-1.7b", file: "qwen3-1.7b-q4_k_m", minAvail: 2.0)
 
+    /// Resolves the bundled/asset GGUF for the llama.cpp path (device only; the
+    /// Simulator and the Apple-Foundation-Models path don't use this).
     static func selectModel() -> Model? {
-        #if targetEnvironment(simulator)
-        // The Simulator has no Metal GPU (→ MockEngine) and no bundled weights, but
-        // we still want the full web→shim→SSE→UI path exercisable. Return a synthetic
-        // model so a MockEngine-backed /v1 endpoint is served and injected.
-        return Model(name: "mock-on-device", url: URL(fileURLWithPath: "/dev/null"))
-        #else
         let availableGB = Double(os_proc_available_memory()) / 1_073_741_824.0
 
         if availableGB >= primary.minAvail, let url = resolve(primary.file) {
@@ -39,8 +35,7 @@ enum ModelLocator {
         if availableGB >= small.minAvail, let url = resolve(small.file) {
             return Model(name: small.name, url: url)
         }
-        return nil   // ineligible → graceful degradation (web #1 setup card / BYO)
-        #endif
+        return nil   // no usable GGUF found
     }
 
     /// Resolves a GGUF by basename. Checks the main bundle first, then the

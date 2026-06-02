@@ -18,12 +18,12 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0.10, green: 0.094, blue: 0.078, alpha: 1) // --bg dark
 
-        // 1. Decide on-device AI availability (memory gating + model presence) and
-        //    build the OpenAI shim service. On ineligible devices the service is
-        //    nil → no /v1 endpoint is injected → the web layer's #1 setup card
-        //    shows and BYO-endpoint / plain oracle still work.
-        let model = ModelLocator.selectModel()              // nil when ineligible / no model
-        let llmService = model.map { LLMService(engine: makeEngine(for: $0), modelName: $0.name) }
+        // 1. Pick the on-device engine (Apple Foundation Models → llama.cpp → mock)
+        //    and build the OpenAI shim service. On ineligible devices this is nil →
+        //    no /v1 endpoint is injected → the web layer's #1 setup card shows and
+        //    BYO-endpoint / plain oracle still work.
+        let selection = EngineSelector.select()             // nil when no on-device engine
+        let llmService = selection.map { LLMService(engine: $0.engine, modelName: $0.name) }
 
         // 2. Start the loopback server (file serving + optional /v1 shim).
         guard let resourceRoot = Bundle.main.resourceURL else {
@@ -38,9 +38,9 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         //    into localStorage BEFORE app.js runs, so it is auto-selected.
         let config = WKWebViewConfiguration()
         config.userContentController.add(self, name: "yijing")
-        if let model = model {
+        if let selection = selection {
             config.userContentController.addUserScript(
-                endpointInjectionScript(port: server.port, model: model))
+                endpointInjectionScript(port: server.port, modelName: selection.name))
         }
         let wv = WKWebView(frame: view.bounds, configuration: config)
         wv.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -59,15 +59,15 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
     /// localStorage at document start, so web/llm.js auto-selects it without
     /// relying on the localhost auto-discovery probes. Same port as the page
     /// origin → same-origin fetches, no CORS, ATS satisfied by http://localhost.
-    private func endpointInjectionScript(port: Int, model: ModelLocator.Model) -> WKUserScript {
+    private func endpointInjectionScript(port: Int, modelName: String) -> WKUserScript {
         // Keep the schema in sync with web/llm.js Endpoints (yijing-endpoints-v1).
         let endpoint: [String: Any] = [
             "id": "on-device",
-            "name": "On-Device (\(model.name))",
+            "name": "On-Device (\(modelName))",
             "type": "openai",
             "baseUrl": "http://localhost:\(port)/v1",
             "apiKey": "",
-            "defaultModel": model.name,
+            "defaultModel": modelName,
         ]
         let json = (try? JSONSerialization.data(withJSONObject: [endpoint]))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
@@ -155,17 +155,6 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
     }
 
     // MARK: - Helpers
-
-    /// Picks the real on-device engine when the llama.cpp framework is linked,
-    /// otherwise a deterministic mock so the app runs in the Simulator / before
-    /// the engine is integrated. See LlamaEngine.swift.
-    private func makeEngine(for model: ModelLocator.Model) -> LLMEngine {
-        #if canImport(llama) && !targetEnvironment(simulator)
-        return LlamaCppEngine(modelURL: model.url, contextLength: 8192)
-        #else
-        return MockEngine()
-        #endif
-    }
 
     private func fail(_ message: String) {
         let alert = UIAlertController(title: "Yijing Orakel", message: message, preferredStyle: .alert)
