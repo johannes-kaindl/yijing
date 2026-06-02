@@ -1579,8 +1579,13 @@ els.promptPresetSelect?.addEventListener("change", () => {
 els.savePromptPresetBtn?.addEventListener("click", () => {
   const body = els.systemPromptInput.value.trim();
   if (!body) return;
-  const name = (prompt(t("settings.presets.namePrompt")) || "").trim();
-  if (!name) return;
+  const raw = prompt(t("settings.presets.namePrompt"));
+  if (raw === null) return; // abgebrochen → still, kein Hinweis nötig
+  const name = raw.trim();
+  if (!name) {
+    alert(t("settings.presets.nameRequired")); // leer bestätigt → wie beim Endpoint-Add melden
+    return;
+  }
   PromptPresets.add({ name, body });
   renderPromptPresets(); // matcht die frisch gespeicherte Vorlage automatisch
 });

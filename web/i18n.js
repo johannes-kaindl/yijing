@@ -179,6 +179,7 @@ const STRINGS = {
     "settings.presets.save": "Als Vorlage speichern",
     "settings.presets.delete": "Vorlage löschen",
     "settings.presets.namePrompt": "Name der Vorlage:",
+    "settings.presets.nameRequired": "Bitte einen Namen für die Vorlage angeben.",
     "settings.presets.removeConfirm": "Vorlage „{name}“ löschen?",
     "settings.about": "Über",
     "settings.about.copyright":
@@ -424,6 +425,7 @@ const STRINGS = {
     "settings.presets.save": "Save as template",
     "settings.presets.delete": "Delete template",
     "settings.presets.namePrompt": "Template name:",
+    "settings.presets.nameRequired": "Please enter a name for the template.",
     "settings.presets.removeConfirm": "Delete template “{name}”?",
     "settings.about": "About",
     "settings.about.copyright":

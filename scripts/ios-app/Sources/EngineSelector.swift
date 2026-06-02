@@ -7,7 +7,8 @@
 //   1. Apple Foundation Models ("Apple Intelligence") — built-in, 0 GB, free,
 //      private. Preferred when available (eligible device + AI enabled).
 //   2. llama.cpp + bundled GGUF — broader device reach, but ~2.4 GB. Only when
-//      the `llama` module is linked (not in the Simulator).
+//      the `llama` module is linked — so NOT in the Simulator, and NOT in current
+//      Mac Catalyst builds either (no llama package is linked there yet).
 //   3. MockEngine — Simulator / pre-integration, so the full path is exercisable.
 //
 // All three conform to LLMEngine, so the loopback OpenAI shim + web/llm.js are
