@@ -120,7 +120,7 @@ const els = {
   castBtn: document.getElementById("cast"),
   resetBtn: document.getElementById("reset"),
   exportMdBtn: document.getElementById("exportMd"),
-  pdfMenu: document.getElementById("pdfMenu"),
+  exportMenu: document.getElementById("exportMenu"),
   pdfBwBtn: document.getElementById("pdfBw"),
   pdfGlossyBtn: document.getElementById("pdfGlossy"),
   reading: document.getElementById("reading"),
@@ -157,7 +157,6 @@ const els = {
   interpStatus: document.getElementById("interpStatus"),
   interpThinkingDetails: document.getElementById("interpThinkingDetails"),
   interpThinking: document.getElementById("interpThinking"),
-  thinkingSelect: document.getElementById("thinkingSelect"),
   defaultThinking: document.getElementById("defaultThinking"),
   // Settings
   openSettingsBtn: document.getElementById("openSettings"),
@@ -479,8 +478,7 @@ function showReading(question, lines, options = {}) {
 
   els.reading.hidden = false;
   els.resetBtn.hidden = false;
-  els.exportMdBtn.hidden = false;
-  els.pdfMenu.hidden = false;
+  els.exportMenu.hidden = false;
   els.castBtn.disabled = true;
 
   els.interpBody.innerHTML = "";
@@ -1058,11 +1056,11 @@ async function runInterpretation() {
   els.interpretBtn.hidden = true;
   els.stopInterpretBtn.hidden = false;
 
-  // Thinking-Modus: UI-Override > Endpoint-Default > globaler Default
-  const uiChoice = els.thinkingSelect.value;
+  // Thinking-Modus: Endpoint-Default > globaler Reasoning-Default (Settings).
+  // Der frühere per-Lesung-Override (thinkingSelect) ist entfallen.
   const epDefault = ep.thinking && ep.thinking !== "default" ? ep.thinking : null;
   const globalDefault = localStorage.getItem("yijing-default-thinking") || "default";
-  const choice = uiChoice !== "default" ? uiChoice : epDefault || globalDefault;
+  const choice = epDefault || globalDefault;
   const thinkingParam = choice === "on" ? true : choice === "off" ? false : null;
 
   interpretAbortCtrl = new AbortController();
@@ -1353,8 +1351,7 @@ els.castBtn.addEventListener("click", () => {
 els.resetBtn.addEventListener("click", () => {
   els.reading.hidden = true;
   els.resetBtn.hidden = true;
-  els.exportMdBtn.hidden = true;
-  els.pdfMenu.hidden = true;
+  els.exportMenu.hidden = true;
   els.castBtn.disabled = false;
   els.question.value = "";
   els.question.focus();
@@ -1377,6 +1374,7 @@ function exportFilename(ext) {
 
 els.exportMdBtn.addEventListener("click", () => {
   if (!CURRENT_READING) return;
+  if (els.exportMenu) els.exportMenu.open = false;
   const md = buildMarkdownExport(CURRENT_READING, els.interpBody.textContent || "");
   const filename = exportFilename("md");
   if (nativeBridge) {
@@ -1414,7 +1412,7 @@ window.__yijingAfterPrint = () => {
 
 function exportPdf(mode) {
   if (!CURRENT_READING) return;
-  if (els.pdfMenu) els.pdfMenu.open = false;
+  if (els.exportMenu) els.exportMenu.open = false;
   if (nativeBridge) {
     preparePrint(mode, true);   // Screen-Export-Stil → Swift erfasst per createPDF
     nativeBridge.postMessage({ action: "savePdf", mode, filename: exportFilename("pdf") });
