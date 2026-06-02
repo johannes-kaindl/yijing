@@ -9,19 +9,29 @@ Native iOS/iPadOS shell for the App Store. Bundles the existing web app and adds
 **on-device AI interpretation** via an in-process `llama.cpp` engine exposed as a
 loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
 
-> **Status: builds + runs in the iOS Simulator; on-device AI plumbing verified.**
-> Verified on 2026-06-02 against the iOS 26.5 SDK / iPhone 17 Pro simulator:
-> the whole scaffold type-checks, `build-ios-app.sh` produces a valid `Yijing.app`,
-> it installs + launches, the bundled web app renders (full oracle UI served by
-> `LocalServer`→`WKWebView`), and the loopback OpenAI shim streams correctly —
-> `GET /v1/models` and a `POST /v1/chat/completions` SSE round-trip both work end
-> to end with the `MockEngine`. (Two real bugs were found+fixed this way: a
-> nested-struct-in-protocol type error and a missing `CFBundleExecutable`.)
+> **Status: builds + runs + real on-device AI verified in the iOS 26.5 Simulator.**
+> Verified on 2026-06-02: the whole scaffold type-checks against the iOS 26.5 SDK,
+> `build-ios-app.sh` produces a valid `Yijing.app`, it installs + launches, the
+> bundled web app renders (full oracle UI via `LocalServer`→`WKWebView`), and the
+> loopback OpenAI shim (`GET /v1/models`, `POST /v1/chat/completions` SSE) works
+> end to end.
 >
-> **Still needs a physical iPhone:** the real `llama.cpp` engine (the gated
-> skeleton throws until wired), the bundled GGUF model, and actual on-device
-> inference + prose quality. The Simulator has no Metal GPU, so it always runs the
-> `MockEngine`.
+> **Default engine = Apple Foundation Models ("Apple Intelligence"), and it runs
+> in the iOS 26.5 Simulator** — real on-device inference produced good structured
+> German hexagram interpretations. Measured guardrail-refusal rate with the real
+> app prompt: ~12% (1/8; dark hexagrams 23/29/36/47 passed, "Konflikt" (6) was
+> refused) — handled gracefully (clean error → user can switch to a remote
+> endpoint). Foundation Models needs no bundled model and no ~2.4 GB download.
+> `llama.cpp` + a bundled GGUF (`LlamaCppEngine`, the gated skeleton) remains the
+> documented FALLBACK for broader device reach / zero refusals.
+>
+> Four real bugs were found + fixed via this testing: nested-struct-in-protocol,
+> missing `CFBundleExecutable`, an SSE `done()` race, and an ARC `[weak self]` drop
+> in `SSEResponder` (trailing `[DONE]` + close were dropped → web spinner hung).
+>
+> **Still needs a physical iPhone** only for: the `llama.cpp` fallback path, and a
+> final on-device confirmation on real hardware (the Simulator runs the real
+> Foundation Models model here, but production testing on-device is still prudent).
 
 Design rationale (engine/model choice, App-Review strategy, device gating) lives
 in `.claude/specs/2026-06-02-ios-app-ondevice-llm-design.md`.
