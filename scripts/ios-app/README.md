@@ -9,11 +9,19 @@ Native iOS/iPadOS shell for the App Store. Bundles the existing web app and adds
 **on-device AI interpretation** via an in-process `llama.cpp` engine exposed as a
 loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
 
-> ⚠️ **Status: unverified scaffold.** None of the Swift here has been compiled
-> against the iOS SDK or run on a device — it was authored without Xcode. Treat
-> it as a high-confidence starting structure (shell + server ported from the
-> working macOS app) plus a documented integration guide for the parts that need
-> your Mac + iPhone. Expect to fix a few things in Xcode.
+> **Status: builds + runs in the iOS Simulator; on-device AI plumbing verified.**
+> Verified on 2026-06-02 against the iOS 26.5 SDK / iPhone 17 Pro simulator:
+> the whole scaffold type-checks, `build-ios-app.sh` produces a valid `Yijing.app`,
+> it installs + launches, the bundled web app renders (full oracle UI served by
+> `LocalServer`→`WKWebView`), and the loopback OpenAI shim streams correctly —
+> `GET /v1/models` and a `POST /v1/chat/completions` SSE round-trip both work end
+> to end with the `MockEngine`. (Two real bugs were found+fixed this way: a
+> nested-struct-in-protocol type error and a missing `CFBundleExecutable`.)
+>
+> **Still needs a physical iPhone:** the real `llama.cpp` engine (the gated
+> skeleton throws until wired), the bundled GGUF model, and actual on-device
+> inference + prose quality. The Simulator has no Metal GPU, so it always runs the
+> `MockEngine`.
 
 Design rationale (engine/model choice, App-Review strategy, device gating) lives
 in `.claude/specs/2026-06-02-ios-app-ondevice-llm-design.md`.
@@ -95,8 +103,11 @@ panel streams a **mock** interpretation (real inference needs Metal → a device
 
 ## On-device verification checklist
 
-- [ ] Simulator: web shell loads, oracle + reader work, mock AI streams.
-- [ ] `/v1/models` + `/v1/chat/completions` SSE reach `web/llm.js` (mock).
+- [x] Simulator: app builds, installs, launches; web shell loads (full oracle UI).
+- [x] `/v1/models` + `/v1/chat/completions` SSE serve correctly (verified by probing
+      the running app's loopback port; `MockEngine` streams OpenAI-shaped chunks).
+- [ ] In-app UI round-trip: tap Cast → Interpret → streamed text in the WKWebView
+      (needs a UI tap; the server side above is proven).
 - [ ] Real inference on device: a full DE + EN reading completes; **judge prose
       quality** (Qwen3-4B vs Gemma 4 E4B) — the key open question.
 - [ ] Worst-case prompt (Hex 1, all 6 changing lines + resulting) fits `n_ctx=8192`.

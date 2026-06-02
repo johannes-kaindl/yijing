@@ -6,6 +6,12 @@
 	<string>Yijing</string>
 	<key>CFBundleDisplayName</key>
 	<string>Yijing Orakel</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
 	<key>CFBundleIdentifier</key>
 	<string>page.codeberg.jkaindl.Yijing</string>
 	<key>CFBundleShortVersionString</key>
