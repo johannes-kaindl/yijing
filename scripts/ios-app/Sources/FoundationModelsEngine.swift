@@ -23,7 +23,7 @@
 import Foundation
 import FoundationModels
 
-@available(iOS 26.0, *)
+@available(iOS 26.0, macCatalyst 26.0, *)
 final class FoundationModelsEngine: LLMEngine {
     /// True when the built-in model is usable right now (eligible device, Apple
     /// Intelligence enabled, model downloaded). Checked before selecting this engine.

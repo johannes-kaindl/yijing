@@ -18,7 +18,7 @@ import Foundation
 enum EngineSelector {
     static func select() -> (engine: LLMEngine, name: String)? {
         #if canImport(FoundationModels)
-        if #available(iOS 26.0, *), FoundationModelsEngine.isAvailable {
+        if #available(iOS 26.0, macCatalyst 26.0, *), FoundationModelsEngine.isAvailable {
             return (FoundationModelsEngine(), "apple-on-device")
         }
         #endif

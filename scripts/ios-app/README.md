@@ -5,9 +5,10 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 # Yijing Orakel — iOS app (scaffold)
 
-Native iOS/iPadOS shell for the App Store. Bundles the existing web app and adds
-**on-device AI interpretation** via an in-process `llama.cpp` engine exposed as a
-loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
+Native iOS/iPadOS **and Mac (via Mac Catalyst)** shell for the App Store — one
+universal target. Bundles the existing web app and adds **on-device AI
+interpretation** via an in-process engine (Apple Foundation Models by default)
+exposed as a loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
 
 > **Status: builds + runs + real on-device AI verified in the iOS 26.5 Simulator.**
 > Verified on 2026-06-02: the whole scaffold type-checks against the iOS 26.5 SDK,
@@ -41,6 +42,19 @@ loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
 > **Still needs a physical iPhone** only for: the `llama.cpp` fallback path, and a
 > final on-device confirmation on real hardware (the Simulator runs the real
 > Foundation Models model here, but production testing on-device is still prudent).
+
+> **Mac Catalyst verified (2026-06-02, macOS 26.5).** The single target now lists
+> `supportedDestinations: [iOS, macCatalyst]`, so the same app builds as a native
+> Mac app. Verified end to end: `build-ios-app.sh catalyst` builds clean against
+> the macOS 26.5 SDK (and the iOS Simulator build still passes — no regression);
+> the launched `.app` runs natively (arm64), its `LocalServer` serves the web UI on
+> the loopback port, **`/v1/models` reports `apple-on-device`** (Apple Foundation
+> Models is available under Catalyst on macOS 26 — the open question answered), and
+> a real `/v1/chat/completions` inference streamed a fluent German Hexagram-1
+> reading. The same finicky guardrail behaviour as on iOS shows here too (some
+> readings refuse; refusals are surfaced cleanly). `LSRequiresIPhoneOS` was removed
+> from `Info.plist` (Catalyst forbids it; one universal plist). Long-term this Mac
+> build supersedes the legacy AppKit app in `scripts/macos-app/`.
 
 Design rationale (engine/model choice, App-Review strategy, device gating) lives
 in `.claude/specs/2026-06-02-ios-app-ondevice-llm-design.md`.
@@ -93,8 +107,9 @@ WKWebView  ──http──►  LocalServer (NWListener, loopback)
 ```bash
 brew install xcodegen
 git commit -am "…"                      # build embeds the COMMITTED web/ + data/
-scripts/ios-app/build-ios-app.sh        # stage + xcodegen + Simulator build
-open scripts/ios-app/Yijing.xcodeproj   # run on a Simulator
+scripts/ios-app/build-ios-app.sh          # stage + xcodegen + Simulator build
+scripts/ios-app/build-ios-app.sh catalyst # …or a native Mac (Catalyst) build
+open scripts/ios-app/Yijing.xcodeproj     # run on a Simulator / as "My Mac (Mac Catalyst)"
 ```
 
 In the Simulator you get the full offline oracle + reference reader, and the AI

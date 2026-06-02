@@ -9,6 +9,7 @@
 #
 # Usage:
 #   scripts/ios-app/build-ios-app.sh                 # stage + generate + build for SIMULATOR (no signing)
+#   scripts/ios-app/build-ios-app.sh catalyst        # stage + generate + build for Mac Catalyst (no signing)
 #   YIJING_TEAM_ID=ABCDE12345 \
 #     scripts/ios-app/build-ios-app.sh archive       # stage + generate + ARCHIVE for device (App Store)
 #
@@ -46,6 +47,18 @@ case "$MODE" in
     echo "✓ Simulator-Build fertig. In Xcode öffnen + auf einem Simulator starten:"
     echo "    open $APPDIR/Yijing.xcodeproj"
     ;;
+  catalyst)
+    echo "→ Build für Mac Catalyst (macOS; kein Signing)…"
+    # On macOS 26 + Apple-Intelligence hardware this build can use Apple
+    # Foundation Models natively (FoundationModels.framework is in the macOS
+    # SDK); otherwise it degrades to BYO endpoint, same as ineligible iPhones.
+    xcodebuild -project "$APPDIR/Yijing.xcodeproj" -scheme Yijing \
+      -configuration Release \
+      -destination 'platform=macOS,variant=Mac Catalyst' \
+      CODE_SIGNING_ALLOWED=NO build
+    echo "✓ Mac-Catalyst-Build fertig. In Xcode öffnen + als „My Mac (Mac Catalyst)“ starten:"
+    echo "    open $APPDIR/Yijing.xcodeproj"
+    ;;
   archive)
     : "${YIJING_TEAM_ID:?YIJING_TEAM_ID muss gesetzt sein (Apple Developer Team ID)}"
     echo "→ Archive für Gerät (Team $YIJING_TEAM_ID)…"
@@ -59,5 +72,5 @@ case "$MODE" in
     echo "    xcodebuild -exportArchive -archivePath … -exportOptionsPlist … -exportPath …"
     ;;
   *)
-    echo "Unbekannter Modus: $MODE (erlaubt: simulator | archive)" >&2; exit 1 ;;
+    echo "Unbekannter Modus: $MODE (erlaubt: simulator | catalyst | archive)" >&2; exit 1 ;;
 esac

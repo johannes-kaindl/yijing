@@ -20,8 +20,9 @@
 	<string>1</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
+	<!-- No LSRequiresIPhoneOS: Mac Catalyst builds must not declare it, and this
+	     is one universal Info.plist for iOS + Catalyst. (When the iOS App Store
+	     submission lands, Xcode injects it for the iOS destination as needed.) -->
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
