@@ -122,6 +122,27 @@
 
       <!-- KI-Interpretation -->
       <section class="interpretation" id="interpretation" hidden>
+        <!-- Dezenter Einrichtungs-Hinweis: erscheint statt der Controls, wenn
+             noch kein LLM-Endpoint konfiguriert ist (z. B. am Handy / HTTPS-Web).
+             Rein informativ — kein aktiver Deuten-Button → sauber degradiert. -->
+        <div class="interp-setup" id="interpSetup" hidden>
+          <svg class="interp-setup-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+            <path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+          </svg>
+          <h2 class="section-title" data-i18n="llm.setup.title">KI-Interpretation</h2>
+          <p class="interp-setup-text" data-i18n="llm.setup.explain">Die KI-Interpretation braucht einen eigenen LLM-Endpoint.</p>
+          <div class="interp-setup-actions">
+            <button type="button" id="interpSetupConfigure" data-i18n="llm.setup.configure">In Einstellungen einrichten</button>
+            <a id="interpSetupGuide" class="ghost-link"
+               href="https://codeberg.org/jkaindl/Yijing/src/branch/main/docs/LLM.md"
+               target="_blank" rel="noopener noreferrer"
+               data-i18n="llm.setup.guide">Anleitung</a>
+          </div>
+        </div>
+        <div id="interpActive">
         <div class="interp-controls">
           <h2 class="section-title" data-i18n="llm.heading">KI-Interpretation</h2>
           <div class="interp-picker">
@@ -149,6 +170,7 @@
         </details>
         <div class="interp-body" id="interpBody"></div>
         <div class="interp-status" id="interpStatus"></div>
+        </div><!-- /#interpActive -->
       </section>
 
       <!-- Wilhelm-Texte -->
@@ -275,6 +297,7 @@
             <label><span data-i18n="settings.endpoints.apiKey">API-Key (optional)</span> <input type="text" id="newEpKey" autocomplete="off" /></label>
           </div>
           <button type="button" id="addEndpointBtn" data-i18n="settings.endpoints.addBtn">Hinzufügen</button>
+          <p class="ep-warn" id="newEpWarn" hidden></p>
         </details>
       </fieldset>
 

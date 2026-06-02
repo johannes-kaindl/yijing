@@ -757,6 +757,71 @@ button.ghost:hover {
   margin-bottom: 0.8rem;
 }
 
+/* Dezenter Einrichtungs-Hinweis (0 Endpoints) — informativ, kein toter Button */
+.interp-setup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* display:flex oben würde sonst das [hidden]-Attribut aushebeln (Author-Style
+   schlägt das UA-display:none) — explizit zurücksetzen. */
+.interp-setup[hidden] {
+  display: none;
+}
+
+.interp-setup-icon {
+  color: var(--accent);
+}
+
+.interp-setup .section-title {
+  margin: 0;
+}
+
+.interp-setup-text {
+  margin: 0;
+  color: var(--ink-faint);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.interp-setup-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.2rem;
+}
+
+.interp-setup-actions button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.ghost-link {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-soft);
+  font-size: 0.9rem;
+}
+
+.ghost-link:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* Mixed-Content-Warnung im Endpoint-Formular */
+.ep-warn {
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-left: 3px solid var(--accent);
+  background: rgba(199, 154, 74, 0.1);
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border-radius: var(--radius);
+}
+
 .interp-controls .section-title {
   margin: 0;
 }

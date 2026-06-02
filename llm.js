@@ -310,6 +310,11 @@ export const Endpoints = {
    * und legt erreichbare automatisch an, sofern noch nicht vorhanden.
    */
   async autoDiscover() {
+    // Localhost-Probes nur auf http-Origins (macOS-App-Loopback, Dev-Server,
+    // später iOS-On-Device-Shim als http://localhost:<port>/v1). Auf HTTPS
+    // (Codeberg Pages) wären sie Mixed-Content/blockiert und sinnlos — und
+    // würden nur Konsolen-Fehler erzeugen.
+    if (typeof location !== "undefined" && location.protocol !== "http:") return;
     const probes = [
       { type: "ollama", name: t("discover.ollama"), baseUrl: "http://localhost:11434" },
       { type: "openai", name: t("discover.mlx"), baseUrl: "http://localhost:8080/v1" },
