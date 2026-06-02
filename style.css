@@ -53,6 +53,8 @@ body {
 header {
   text-align: center;
   padding: 2.5rem 1rem 1rem;
+  /* Clear the notch / Dynamic Island on iOS (viewport-fit=cover). 0 on desktop. */
+  padding-top: max(2.5rem, calc(env(safe-area-inset-top) + 0.6rem));
 }
 
 header h1 {
@@ -84,6 +86,10 @@ main {
   max-width: var(--max);
   margin: 0 auto;
   padding: 1.5rem 1.25rem 3rem;
+  /* Respect the home indicator + landscape notch (0 on desktop). */
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+  padding-bottom: max(3rem, calc(env(safe-area-inset-bottom) + 1.5rem));
 }
 
 footer {
@@ -1040,19 +1046,39 @@ button.ghost:hover {
   letter-spacing: 0.05em;
 }
 
-.settings-form fieldset {
+/* Collapsible settings sections (details/summary), collapsed by default. */
+.settings-form details.settings-section {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 1rem;
-  margin-bottom: 1.2rem;
+  padding: 0 1rem;
+  margin-bottom: 0.7rem;
 }
 
-.settings-form legend {
-  padding: 0 0.4rem;
+.settings-form details.settings-section[open] {
+  padding-bottom: 1rem;
+}
+
+.settings-form details.settings-section > summary {
+  cursor: pointer;
+  padding: 0.85rem 0;
   color: var(--accent);
   font-weight: 500;
   letter-spacing: 0.05em;
+  list-style: none;
+  user-select: none;
 }
+
+.settings-form details.settings-section > summary::-webkit-details-marker { display: none; }
+.settings-form details.settings-section > summary::before {
+  content: "+ ";
+  font-weight: 600;
+}
+.settings-form details.settings-section[open] > summary::before { content: "− "; }
+
+.about-copyright {
+  font-size: 0.78rem;
+}
+.about-copyright a { color: var(--accent); }
 
 .settings-form .hint {
   color: var(--ink-faint);
@@ -1148,6 +1174,7 @@ button.ghost:hover {
 .ep-actions {
   display: flex;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .ep-actions button {

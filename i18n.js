@@ -163,6 +163,9 @@ const STRINGS = {
     "settings.systemPrompt.hint":
       "System-Prompt für die KI-Interpretation. Default folgt der Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige Beratungsstruktur).",
     "settings.systemPrompt.reset": "Default wiederherstellen",
+    "settings.about": "Über",
+    "settings.about.copyright":
+      '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) · <a href="https://codeberg.org/jkaindl/Yijing">Quellcode</a>',
 
     "settings.language": "Sprache / Language",
     "settings.language.label": "Sprache:",
@@ -379,6 +382,9 @@ const STRINGS = {
     "settings.systemPrompt.hint":
       "System prompt for the AI interpretation. Default follows the Wilhelm tradition (dignity, compassion, five-part counsel structure).",
     "settings.systemPrompt.reset": "Restore default",
+    "settings.about": "About",
+    "settings.about.copyright":
+      '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (docs) · <a href="https://codeberg.org/jkaindl/Yijing">Source</a>',
 
     "settings.language": "Sprache / Language",
     "settings.language.label": "Language:",
