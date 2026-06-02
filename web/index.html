@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title data-i18n="doc.title">Yijing Orakel</title>
   <meta name="description" data-i18n-content="doc.description" content="I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und optionaler KI-Deutung über lokale LLM-Server (Ollama / MLX / LM Studio). Vanilla JS, offline-fähig, mit nativer macOS-App." />
 
@@ -251,8 +251,8 @@
     <form method="dialog" class="settings-form">
       <h2 data-i18n="settings.heading">Einstellungen</h2>
 
-      <fieldset>
-        <legend data-i18n="settings.language">Sprache / Language</legend>
+      <details class="settings-section">
+        <summary data-i18n="settings.language">Sprache / Language</summary>
         <p class="hint" data-i18n="settings.language.hint">Wirkt sofort auf die UI und auf den Beratungs-Prompt-Default. Lädt beim Wechsel die passenden Hexagramm-Texte nach.</p>
         <label class="row-inline">
           <span data-i18n="settings.language.label">Sprache:</span>
@@ -261,10 +261,10 @@
             <option value="en" data-i18n="settings.language.en">English (Wilhelm — translated)</option>
           </select>
         </label>
-      </fieldset>
+      </details>
 
-      <fieldset>
-        <legend data-i18n="settings.register">Fassung / Wording</legend>
+      <details class="settings-section">
+        <summary data-i18n="settings.register">Fassung / Wording</summary>
         <p class="hint" data-i18n="settings.register.hint">Standardmäßig geschlechtsneutral. Schalte auf die historische Fassung, um Wilhelms Wortlaut von 1924 wörtlich zu lesen.</p>
         <label class="row-inline">
           <span data-i18n="settings.register.label">Fassung:</span>
@@ -273,10 +273,10 @@
             <option value="historical" data-i18n="settings.register.historical">Historisch (Wilhelm 1924)</option>
           </select>
         </label>
-      </fieldset>
+      </details>
 
-      <fieldset>
-        <legend data-i18n="settings.endpoints">LLM-Endpunkte</legend>
+      <details class="settings-section">
+        <summary data-i18n="settings.endpoints">LLM-Endpunkte</summary>
         <p class="hint" data-i18n-html="settings.endpoints.hint">
           Lokale Modelle via <strong>Ollama</strong> (Standardport <code>11434</code>) oder
           <strong>OpenAI-kompatibel</strong> (MLX, LM Studio …). CORS auf dem Server muss erlaubt sein —
@@ -299,10 +299,10 @@
           <button type="button" id="addEndpointBtn" data-i18n="settings.endpoints.addBtn">Hinzufügen</button>
           <p class="ep-warn" id="newEpWarn" hidden></p>
         </details>
-      </fieldset>
+      </details>
 
-      <fieldset>
-        <legend data-i18n="settings.thinkingDefault">Reasoning-Default</legend>
+      <details class="settings-section">
+        <summary data-i18n="settings.thinkingDefault">Reasoning-Default</summary>
         <p class="hint" data-i18n-html="settings.thinkingDefault.hint">
           Wird pro Wurf in der UI überschrieben. „Auto" = keine Steuerung,
           Modell entscheidet selbst. „An" / „Aus" setzt für jede Anfrage
@@ -317,16 +317,30 @@
             <option value="off" data-i18n="settings.thinkingDefault.off">Aus (Reasoning unterdrücken)</option>
           </select>
         </label>
-      </fieldset>
+      </details>
 
-      <fieldset>
-        <legend data-i18n="settings.systemPrompt">Beratungs-Prompt</legend>
+      <details class="settings-section">
+        <summary data-i18n="settings.systemPrompt">Beratungs-Prompt</summary>
         <p class="hint" data-i18n="settings.systemPrompt.hint">System-Prompt für die KI-Interpretation. Default folgt der Wilhelm-Tradition (Würde, Mitgefühl, fünfteilige Beratungsstruktur).</p>
         <textarea id="systemPromptInput" rows="8"></textarea>
         <div class="row">
           <button type="button" id="resetSystemPrompt" class="ghost" data-i18n="settings.systemPrompt.reset">Default wiederherstellen</button>
         </div>
-      </fieldset>
+      </details>
+
+      <details class="settings-section">
+        <summary data-i18n="settings.about">Über</summary>
+        <p class="hint" data-i18n-html="footer.source">
+          Text: Richard Wilhelm, <em>I Ging — Das Buch der Wandlungen</em>.<br>
+          Drei-Münzen-Methode (Verteilung 1:3:3:1).
+        </p>
+        <p class="hint about-copyright" data-i18n-html="settings.about.copyright">
+          © 2026 Johannes Kaindl ·
+          <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) ·
+          <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) ·
+          <a href="https://codeberg.org/jkaindl/Yijing">Quellcode</a>
+        </p>
+      </details>
 
       <div class="settings-footer">
         <button type="button" id="closeSettings" data-i18n="settings.close">Schließen</button>
@@ -334,29 +348,6 @@
     </form>
   </dialog>
 
-  <footer>
-    <p class="footer-lang">
-      <a href="#" id="langSwitch" data-i18n="footer.langSwitch">English version</a>
-    </p>
-    <p data-i18n-html="footer.source">
-      Text: Richard Wilhelm, <em>I Ging — Das Buch der Wandlungen</em>.<br>
-      Drei-Münzen-Methode (Verteilung 1:3:3:1).
-    </p>
-    <p class="footer-mac" id="macFooterLink" hidden>
-      <span data-i18n="footer.mac.also">Auch als</span>
-      <a href="https://codeberg.org/jkaindl/Yijing/releases/download/v1.5.0/Yijing.dmg" data-i18n="footer.mac.app">macOS-App</a>
-      <span data-i18n="footer.mac.available">verfügbar</span> ·
-      <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/docs/MACOS-APP.md" data-i18n="footer.mac.install">Installations-Hinweis</a>
-    </p>
-    <p class="copyright">
-      © 2026 Johannes Kaindl ·
-      <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a>
-      <span data-i18n="footer.copyright.code">(code)</span> ·
-      <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a>
-      <span data-i18n="footer.copyright.docs">(docs)</span> ·
-      <a href="https://codeberg.org/jkaindl/Yijing" data-i18n="footer.copyright.source">Source</a>
-    </p>
-  </footer>
 
   <script src="app.js" type="module"></script>
 </body>
