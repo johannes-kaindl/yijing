@@ -301,7 +301,9 @@ email.
 - **Commercial license:** the AGPL's copyleft does not fit every use (e.g. a
   closed-source product, or an Apple App Store build, which is incompatible
   with the AGPL). A separate commercial license is available — see
-  [`LICENSING.md`](LICENSING.md). Contributions are covered by the
+  [`LICENSING.md`](LICENSING.md). *(The maintainer's own official App Store
+  builds are distributed under such a separate license; the full source stays
+  AGPL here.)* Contributions are covered by the
   [Contributor License Agreement](CLA.md), which keeps this dual-licensing
   option open.
 

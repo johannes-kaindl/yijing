@@ -43,6 +43,16 @@ with support.
 **To enquire:** email **Johannes Kaindl** at `code@jkaindl.de` with a short
 description of your intended use.
 
+## 3. The project's own App Store builds
+
+As the sole copyright holder, the maintainer distributes the official Yijing
+Oracle builds in app stores (for example, Apple's App Store) under such a
+separate license — the store's terms, which are incompatible with the AGPL,
+govern that binary, not the AGPL. The complete corresponding source for every
+release remains available under the AGPL-3.0-or-later in this repository. The
+open-source version you run yourself — the web app / PWA, or a build from
+source — is always governed by the AGPL.
+
 ## Why this is possible
 
 Yijing Oracle is authored by a single copyright holder (Johannes Kaindl).

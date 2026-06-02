@@ -302,7 +302,9 @@ posten**. Stattdessen siehe [`SECURITY.md`](SECURITY.md) — kurzer Weg
 - **Kommerzielle Lizenz:** Das Copyleft der AGPL passt nicht zu jedem Einsatz
   (z.B. ein Closed-Source-Produkt oder ein Apple-App-Store-Build, der mit der
   AGPL unvereinbar ist). Dafür gibt es eine separate kommerzielle Lizenz —
-  siehe [`LICENSING.md`](LICENSING.md). Beiträge sind durch das
+  siehe [`LICENSING.md`](LICENSING.md). *(Die offiziellen App-Store-Builds des
+  Maintainers werden unter einer solchen separaten Lizenz vertrieben; der
+  vollständige Quellcode bleibt hier AGPL.)* Beiträge sind durch das
   [Contributor License Agreement](CLA.md) abgedeckt, das diese
   Dual-License-Option offen hält.
 
