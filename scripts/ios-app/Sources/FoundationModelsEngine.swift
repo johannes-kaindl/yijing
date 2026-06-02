@@ -37,11 +37,20 @@ final class FoundationModelsEngine: LLMEngine {
     func generate(messages: [LLMMessage],
                   isCancelled: @escaping () -> Bool,
                   onToken: @escaping (String) -> Void) throws {
-        let system = messages.first(where: { $0.role == "system" })?.content ?? ""
+        let incomingSystem = messages.first(where: { $0.role == "system" })?.content ?? ""
         let user = messages.filter { $0.role != "system" }
             .map { $0.content }.joined(separator: "\n\n")
 
-        let session = LanguageModelSession(instructions: system)
+        // Apple's content guardrails refuse some "oracle / fortune-telling" framings
+        // (~17% of dark hexagrams in testing). Reframing the task as literary
+        // commentary on a historical wisdom text dropped that to ~0% (and tamed
+        // runaway output length). So for THIS engine we substitute a guardrail-safe
+        // framing instead of the app's oracle system prompt. Other backends
+        // (Ollama / MLX / remote) keep the app's own prompt unchanged — they have
+        // no such guardrails.
+        let isEnglish = incomingSystem.range(of: "You are", options: .caseInsensitive) != nil
+        let instructions = isEnglish ? Self.guardrailSafeEN : Self.guardrailSafeDE
+        let session = LanguageModelSession(instructions: instructions)
 
         // Bridge the async response stream onto this synchronous (background-queue)
         // call. streamResponse emits cumulative snapshots → emit only the suffix.
@@ -73,6 +82,33 @@ final class FoundationModelsEngine: LLMEngine {
 
         if let error = thrown { throw mapError(error) }
     }
+
+    // Guardrail-safe framings (measured ~0% refusal on dark hexagrams vs ~17% for
+    // an oracle framing). Keep the structured output the UI expects + the reading's
+    // language. These REPLACE the app's system prompt for Apple Foundation Models only.
+    private static let guardrailSafeDE = """
+    Du bist ein gelehrter Kommentator des I Ging (Buch der Wandlungen), eines über \
+    3000 Jahre alten chinesischen Weisheitsklassikers der Weltliteratur. Deute die \
+    Hexagramm-Symbolik literarisch und reflektierend: übersetze die alten Bilder in \
+    allgemeine Lebensthemen wie Wachstum, Geduld, Wandel und Selbstreflexion. Behandle \
+    schwierige Bilder (Gefahr, Streit, Niedergang) als Metaphern für innere und äußere \
+    Entwicklungsphasen, konstruktiv und ermutigend. Dies ist eine reflektierende, \
+    philosophische Betrachtung eines historischen Textes — keine Vorhersage und kein \
+    Rat zu Gesundheit, Recht oder Finanzen. Strukturiere die Deutung (gegenwärtige \
+    Situation, Wandlungsprozess, praktische Integration) und schließe mit einer \
+    ermutigenden Kernbotschaft. Antworte auf Deutsch.
+    """
+    private static let guardrailSafeEN = """
+    You are a learned commentator on the I Ching (Book of Changes), a 3000-year-old \
+    Chinese classic of world wisdom literature. Interpret the hexagram symbolism in a \
+    literary, reflective way: translate the ancient images into general life themes such \
+    as growth, patience, change, and self-reflection. Treat difficult imagery (danger, \
+    conflict, decline) as metaphors for inner and outer phases of development, \
+    constructively and encouragingly. This is a reflective, philosophical reading of a \
+    historical text — not a prediction, and not advice on health, legal, or financial \
+    matters. Structure the interpretation (present situation, process of change, \
+    practical integration) and close with an encouraging key message. Answer in English.
+    """
 
     /// Turn Foundation Models' internal errors into clean, user-facing messages so
     /// web/llm.js shows something helpful (and the user can switch to a remote
