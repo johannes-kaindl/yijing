@@ -4,7 +4,7 @@
 Quellen:
   - _archiv/Yijing_6 → Wilhelm-Texte (Urteil, Bild, Bedeutung, Linientexte)
   - _archiv/yijing_5 → chinesisches Schriftzeichen, Pinyin, lateinischer Name
-  - _archiv/yijing_3 → Bild-Assoziationen (Prompt-Strings aus Dateinamen)
+  - IMAGE_SEEDS (unten) → kuratierte Bild-Seeds für das Meditationsbild
 
 Trigramme werden aus der Binärdarstellung abgeleitet und mit reichen Stammdaten
 (Familie, Natur, Jahreszeit, Himmelsrichtung) verknüpft.
@@ -15,7 +15,6 @@ from __future__ import annotations
 import csv
 import json
 import re
-from collections import defaultdict
 from pathlib import Path
 
 HEXAGRAM_COUNT = 64
@@ -25,7 +24,6 @@ ARCHIV = ROOT / "_archiv"
 SRC_HEX_JSON = ARCHIV / "Yijing_6" / "yijing" / "resources" / "hexagram_json"
 SRC_HEX_CSV = ARCHIV / "yijing_5" / "data" / "processed" / "hexagram_df.csv"
 SRC_TRIGRAM_CSV = ARCHIV / "yijing_5" / "data" / "processed" / "trigram_df.csv"
-SRC_IMAGES = ARCHIV / "yijing_3"
 SRC_GUTENBERG = ROOT / "scripts" / "sources" / "gutenberg_iging.json"
 OUT_HEX = ROOT / "data" / "hexagrams.json"
 OUT_TRIGRAMS = ROOT / "data" / "trigrams.json"
@@ -68,11 +66,82 @@ GAP_FILL = {
     ),
 }
 
-# Bild-Assoziationen aus yijing_3 waren bei diesen Hexagrammen im Dateinamen
-# mitten im Wort abgeschnitten (Dateisystem-Limit) — nicht rekonstruierbar und
-# nicht Wilhelm-Text, sondern eigene Bild-Prompts. Statt kaputte Fragmente zu
-# zeigen oder Text zu erfinden: leeren. Können später neu generiert werden.
-IMAGE_ASSOC_DROP = {2, 3, 4, 5, 6, 7, 11, 27, 28, 56, 57, 58, 59, 60, 61, 62, 63}
+# Bild-Seeds für das On-Device-Meditationsbild (Apple Image Playground). KEIN
+# Nutzertext und nicht in der UI sichtbar — ein interner englischer Prompt-Seed je
+# Hexagramm, aus dem die native Schicht per On-Device-LLM EIN konkretes Naturmotiv
+# destilliert. Aus Trigramm-Natur (oben/unten) + Wilhelm-„Bild" kuratiert; jede
+# Zeile trägt eine Yin/Yang-Spannung der Gegensätze (hoch/tief, hell/dunkel,
+# Ruhe/Bewegung). Filter-sicher gehalten: nur gegenständliche Naturmotive, keine
+# harten Trigger (Donner→„stir/motion", kein storm/war/blood/weapon), keine
+# abstrakten Stimmungswörter (calm/serene), keine Menschen, kein Text.
+# Single source of truth: scripts/sync_image_seeds_to_en.py spiegelt diese Werte
+# nach data/hexagrams.en.json (der Seed ist sprach-unabhängig).
+IMAGE_SEEDS = {
+    1:  "Endless clear blue sky, sunrise, powerful rising energy, vast horizons, soaring birds, golden rays",
+    2:  "Vast open plains under a wide sky, deep fertile soil, soft rolling fields, long quiet shadows, a receptive horizon",
+    3:  "Dark rain clouds over young green reeds, a swollen stream pressing through stones, first sprouts in tangled grass, struggle before order",
+    4:  "A clear spring welling at the foot of a still mountain, water finding its first path downhill, mist on a young slope, stillness above and motion below",
+    5:  "High drifting clouds in a bright open sky, smooth water waiting below, soft light held back, patience before the rain",
+    6:  "Open sky pulling upward while deep water sinks below, two currents drawing apart, a cold stream against bright heavens, distance and opposition",
+    7:  "A deep hidden spring beneath broad fields, dark water gathered under the open earth, quiet strength held below the surface",
+    8:  "Still water spreading over level ground, many streams flowing into one lake, reflections joining on the earth, gathering and union",
+    9:  "A soft wind brushing across a wide bright sky, thin clouds gathering but no rain, tall grass bending lightly, small restraint over great force",
+    10: "A bright open sky mirrored in a still lake below, high light and low water facing each other, careful steps along a quiet shore",
+    11: "Warm earth rising to meet a clear sky, fields and heavens mingling, light flowing down and soil breathing up, fertile exchange",
+    12: "A high sky drawing away from the heavy earth below, light and soil parting, a still pause between heaven and ground, standstill",
+    13: "Warm firelight rising into an open sky, a glow climbing toward the heavens, shared light gathering, fellowship under one sun",
+    14: "A bright sun high in a clear sky, light pouring over a wide land, golden radiance at the zenith, great abundance",
+    15: "A quiet mountain resting low within broad fields, a high peak hidden beneath level earth, greatness held under the surface, modesty",
+    16: "A bright stir rising from the open earth, the ground awakening with first movement, birds lifting over wide fields, gathering enthusiasm",
+    17: "A gentle stir beneath a still lake, quiet water above moving depths, ripples following the first motion, evening rest after action",
+    18: "A low wind winding beneath a still mountain, stale air stirring among old roots, a worn slope under slow weather, repair of decay",
+    19: "Broad earth resting above a clear lake, high ground meeting still water, a fertile bank drawing near the shore, approach",
+    20: "A wide wind sweeping over open fields, long grass rippling across the plain, a high view over the broad land, contemplation",
+    21: "A sudden flash of light over restless dark ground, sharp glow above moving shadow, brightness meeting motion, biting through",
+    22: "Warm firelight glowing at the foot of a still mountain, soft light gracing dark stone, a quiet peak above a gentle glow, grace",
+    23: "A worn mountain resting on flat earth, loose stones slipping down a bare slope, a high peak crumbling toward the ground, splitting apart",
+    24: "A first faint stir deep within the still earth, a single green shoot under cold soil, light returning at the turning point, renewal",
+    25: "Open sky above a fresh stir in the fields, clouds moving over new growth, natural rain on innocent ground, spontaneity",
+    26: "A vast sky held within a great mountain, bright heavens contained by still stone, immense force gathered and stored, taming power",
+    27: "A quiet mountain above a stirring valley, still heights over moving roots, an open hollow between stone and motion, nourishment",
+    28: "A swollen lake rising over slender trees, water pressing above bending wood, a heavy pool over thin reeds, a beam under strain",
+    29: "Deep dark water flowing on without pause, a steady stream pressing through a narrow gorge, depth upon depth, the abyss repeated",
+    30: "Bright light rising twice over the land, clinging radiance and clear glow, brightness doubled at dawn and dusk, clarity",
+    31: "A still lake resting on a quiet mountaintop, water cupped in high stone, a soft pool above firm rock, mutual influence",
+    32: "A long wind and rolling motion moving together over the hills, steady gusts across an open ridge, enduring movement, duration",
+    33: "A high sky withdrawing above a still mountain, light retreating beyond the peak, cool air rising from firm stone, retreat",
+    34: "A great stir high in a bright sky, powerful motion rolling through open heavens, strong wind over the summit, the power of the great",
+    35: "The sun climbing over a broad horizon, growing light spreading across open fields, dawn rising on level earth, progress",
+    36: "A dimmed light sinking beneath the earth, a faint glow buried under dark soil, a hidden ember below the surface, darkening of the light",
+    37: "A warm wind rising from gentle firelight, glow and breeze moving outward from a hearth, light spreading within sheltered stone walls, the family",
+    38: "Bright light above and still water below turning away from each other, warm light rising while a lake sinks, two opposites side by side, divergence",
+    39: "Cold water gathered on a steep mountain, a stream blocked by high stone, deep pools before a hard slope, obstruction",
+    40: "Fresh rain and clearing clouds rising over a mountain, water loosening from stone, a stream breaking free downhill, release and deliverance",
+    41: "A still lake lying low beneath a great mountain, water drawn down below firm stone, a deep pool emptying upward, decrease",
+    42: "A strong wind and a quick stir moving together over the fields, gusts and motion lifting new growth, swelling life, increase",
+    43: "A full lake risen high against an open sky, water swelling toward the heavens, a brimming pool at the edge of breaking through, resolution",
+    44: "A wide bright sky meeting a soft wind from below, light air rising into open heavens, an unexpected breeze beneath clear light, coming to meet",
+    45: "A broad lake gathered above level earth, many waters collecting on the open plain, a full pool over fertile ground, gathering together",
+    46: "Slender wood pushing up through soft earth, a young tree rising within the open ground, growth lifting toward light, pushing upward",
+    47: "A dry lakebed above sunken water, a pool drained below cracked stone, water fallen away from the shore, exhaustion",
+    48: "Clear water drawn up over deep wood, a cool spring rising through the roots, a steady well between stone and reed, the well",
+    49: "Warm light glowing beneath a still lake, a warm glow within deep water, heat rising against a cool pool, change and renewal",
+    50: "Steady firelight rising over slender wood, a warm glow above gathered reeds, a quiet light nourished from below, the vessel",
+    51: "A doubled stir rolling through the dark hills, wave upon wave of sudden motion, the ground quickening twice, the arousing shock",
+    52: "Two still mountains standing one behind the other, deep silence among high stone, motionless peaks at rest, keeping still",
+    53: "A slender tree growing slowly on a still mountain, wood rising step by step over firm stone, patient height above quiet rock, gradual development",
+    54: "A quick stir above a still lake, motion rippling over quiet water, a sudden movement at the water's edge, the marrying maiden",
+    55: "Bright light and rolling motion meeting at their height, a flash above a glowing field, fullness of noon over moving shadow, abundance",
+    56: "A small firelight on a great mountainside, a lone ember on cold high stone, brief light against an enduring peak, the wanderer",
+    57: "Soft winds following one upon another over open ground, long grass bending in steady gusts, gentle air everywhere, the penetrating wind",
+    58: "Two still lakes resting side by side, joined pools reflecting an open sky, water meeting water at a quiet rim, the joyous",
+    59: "A steady wind moving over deep water, ripples scattering across a broad stream, mist dissolving above the current, dispersion",
+    60: "Clear water held above a still lake, a measured stream filling a quiet pool, a banked shore between depth and surface, limitation",
+    61: "A soft wind passing over a still lake, breath moving above quiet water, a gentle ripple from within, inner truth",
+    62: "A small stir above a great still mountain, faint motion over firm stone, a low flight of birds past a high peak, small exceeding",
+    63: "Cool water resting above warm light, a stream over a steady glow, wet and dry held in balance, after completion",
+    64: "Warm light poised above cool dark water, a glow not yet meeting the stream below, bright above and deep below, the moment before completion",
+}
 
 
 def clean_text(s: str) -> str:
@@ -236,37 +305,8 @@ def trigrams_for(binary: str, trigrams: dict[str, dict]) -> dict:
     }
 
 
-# ---------- Bild-Assoziationen aus yijing_3 ------------------------------
-
-def load_image_prompts() -> dict[int, str]:
-    out: dict[int, set[str]] = defaultdict(set)
-    if not SRC_IMAGES.exists():
-        return {}
-    for d in SRC_IMAGES.iterdir():
-        if not d.is_dir():
-            continue
-        m = re.match(r"hexagram_(\d+)$", d.name)
-        if not m:
-            continue
-        n = int(m.group(1))
-        for f in d.iterdir():
-            if f.suffix.lower() not in (".jpg", ".jpeg", ".png", ".webp"):
-                continue
-            name = f.stem
-            if re.match(r"^IMG_\d+$", name, re.IGNORECASE):
-                continue
-            # Strip a trailing " p"/"p-N" marker AND a bare "-N" filename-number.
-            cleaned = re.sub(r"\s*p(-\d+)?\s*$", "", name, flags=re.IGNORECASE)
-            cleaned = re.sub(r"-\d+\s*$", "", cleaned).strip()
-            if cleaned and not re.match(r"^IMG_", cleaned, re.IGNORECASE):
-                cleaned = cleaned[0].upper() + cleaned[1:]
-                out[n].add(cleaned)
-
-    def pick(cands: set[str]) -> str:
-        # Prefer a candidate without a leftover "-N" suffix; tie-break by length.
-        return sorted(cands, key=lambda c: (bool(re.search(r"-\d+$", c)), -len(c)))[0]
-
-    return {n: pick(prompts) for n, prompts in out.items() if prompts}
+# Bild-Seeds werden nicht mehr aus yijing_3-Dateinamen abgeleitet, sondern
+# kuratiert oben in IMAGE_SEEDS gepflegt (siehe dortigen Kommentar).
 
 
 # ---------- Zusammenführen -----------------------------------------------
@@ -277,7 +317,6 @@ def build() -> None:
 
     chinese = load_chinese_names()
     trigrams_db = load_trigrams()
-    image_prompts = load_image_prompts()
     gutenberg = load_gutenberg()
 
     hexagrams = []
@@ -305,7 +344,7 @@ def build() -> None:
         if not g["image"] and (n, "image") in GAP_FILL:
             print(f"   GAP_FILL: Hexagramm {n} 'image' aus kanonischem Wilhelm (REVIEW)")
 
-        image_assoc = "" if n in IMAGE_ASSOC_DROP else image_prompts.get(n, "")
+        image_assoc = IMAGE_SEEDS.get(n, "")
 
         hexagrams.append({
             "number": n,

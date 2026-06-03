@@ -130,12 +130,13 @@ if (hexEnJson) {
     check(eh.binary === dh.binary,
       `hexagrams.en.json Hex ${eh.number}: binary "${eh.binary}" weicht von DE "${dh.binary}" ab.`);
     // Field-Symmetrie: wenn DE einen Wert hat, muss EN den parallelen _en-Wert haben.
+    // image_association ist NICHT dabei: es ist ein sprach-unabhängiger interner
+    // Bild-Seed (kein Nutzertext, kein _en-Pendant) — in beiden Dateien derselbe Wert.
     const fldPairs = [
       ["name_de", "name_en"],
       ["meaning", "meaning_en"],
       ["judgment", "judgment_en"],
       ["image", "image_en"],
-      ["image_association", "image_association_en"],
     ];
     for (const [de, en] of fldPairs) {
       const deHas = !!(dh[de] && String(dh[de]).trim());
