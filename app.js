@@ -133,8 +133,6 @@ const els = {
   judgmentText: document.getElementById("judgmentText"),
   imageText: document.getElementById("imageText"),
   meaningText: document.getElementById("meaningText"),
-  associationDetails: document.getElementById("associationDetails"),
-  associationText: document.getElementById("associationText"),
   notesDetails: document.getElementById("notesDetails"),
   notesText: document.getElementById("notesText"),
   trigramDetails: document.getElementById("trigramDetails"),
@@ -347,7 +345,6 @@ function hexTextFieldsForLang(hex) {
     judgment: fieldFor(hex, "judgment"),
     image: fieldFor(hex, "image"),
     meaning: fieldFor(hex, "meaning"),
-    image_association: fieldFor(hex, "image_association"),
   };
 }
 
@@ -462,13 +459,6 @@ function showReading(question, lines, options = {}) {
   els.judgmentText.innerHTML = renderParagraphs(primaryTexts.judgment);
   els.imageText.innerHTML = renderParagraphs(primaryTexts.image);
   els.meaningText.innerHTML = renderParagraphs(primaryTexts.meaning);
-
-  if (primaryTexts.image_association) {
-    els.associationDetails.hidden = false;
-    els.associationText.textContent = primaryTexts.image_association;
-  } else {
-    els.associationDetails.hidden = true;
-  }
 
   renderTrigramDetails(primaryHex);
   renderNotes(primaryHex);
@@ -595,7 +585,6 @@ function tossAnimated(question) {
   els.changingSection.hidden = true;
   els.resulting.hidden = true;
   els.resultingSection.hidden = true;
-  els.associationDetails.hidden = true;
   els.notesDetails.hidden = true;
   els.interpretation.hidden = true;
   els.interpBody.innerHTML = "";
@@ -747,10 +736,6 @@ function buildMarkdownExport(reading, interpretation) {
       })
     );
   }
-  if (pText.image_association) {
-    lines.push("");
-    lines.push(t("export.association", { text: pText.image_association }));
-  }
   lines.push("");
   lines.push(t("export.h3.judgment"));
   lines.push("");
@@ -882,9 +867,6 @@ function renderReaderTexts(hex) {
   html += details("reading.judgment", renderParagraphs(tx.judgment), true);
   html += details("reading.image", renderParagraphs(tx.image), false);
   html += details("reading.meaning", renderParagraphs(tx.meaning), false);
-  if (tx.image_association) {
-    html += details("reading.association", `<p>${escapeHTML(tx.image_association)}</p>`, false);
-  }
   // Trigramm-HTML enthält strukturelle Zeilenumbrüche — Container auf normal
   // stellen (wie #trigramText im Orakel), sonst rendert pre-wrap große Lücken.
   html += details("reading.trigrams", trigramDetailsHTML(hex), false, "reader-trigrams");
@@ -1842,29 +1824,16 @@ window.__yijingOnServerResume = (baseUrl) => {
 // Gerät verfügbar ist, und feuert „yijing:imagegen". Im Web/auf nicht-fähigen
 // Geräten bleibt die Sektion verborgen (kein Web-API für on-device-Bilder).
 
-// Bildmotive je Trigramm (über das Unicode-Symbol) — einfache, robuste Prompts;
-// elaborierte Prompts lösen bei ImageCreator gelegentlich „creationFailed" aus.
-// Konkrete Naturmotive je Trigramm. Wichtig: nur gegenständliche Subjekte —
-// abstrakte Stimmungswörter ("calm"/"serene") rendert ImageCreator als TEXT auf
-// Schildern, und spannungsgeladene Begriffe (Donner/Sturm) lassen den
-// Inhaltsfilter „creationFailed" werfen. Die native Seite hat zudem Fallback-Prompts.
-const TRIGRAM_IMAGERY = {
-  "☰": "an open sky",
-  "☷": "quiet fields",
-  "☵": "a stream",
-  "☲": "a low sun",
-  "☶": "a mountain",
-  "☱": "a still lake",
-  "☳": "a quiet valley",
-  "☴": "tall grass",
-};
-
-function buildImagePrompt(hex) {
-  const tri = (hex && hex.trigrams) || {};
-  const above = tri.above && TRIGRAM_IMAGERY[tri.above.symbol];
-  const below = tri.below && TRIGRAM_IMAGERY[tri.below.symbol];
-  const scene = above && below ? `${above} and ${below}` : (above || below || "mountains");
-  return `${scene} in mist, ink-wash painting`;
+// Bild-Anfrage an die native Schicht: das rohe Bild-Seed (image_association des
+// Hexagramms — ein sprach-unabhängiger englischer Prompt-Seed mit Yin/Yang-Motiven)
+// plus die Frage des Ratsuchenden. Die native Seite destilliert daraus per
+// On-Device-LLM EIN konkretes Naturmotiv (Spannung der Gegensätze) und erzeugt das
+// Bild. Kein Prompt-Bau mehr hier — nur das Seed + die Frage weiterreichen.
+function buildImageRequest(hex, question) {
+  return {
+    seed: (hex && hex.image_association) || "misty mountains, a still lake, paired opposites",
+    question: (question || "").trim() || null,
+  };
 }
 
 function refreshMeditationVisibility() {
@@ -1891,9 +1860,11 @@ function requestMeditationImage() {
   pendingImageRequest = requestId;
   els.genImageBtn.disabled = true;
   els.genImageStatus.textContent = t("image.generating");
+  const req = buildImageRequest(CURRENT_READING.primaryHex, CURRENT_READING.question);
   nativeBridge.postMessage({
     action: "generateImage",
-    prompt: buildImagePrompt(CURRENT_READING.primaryHex),
+    seed: req.seed,
+    question: req.question,
     requestId,
   });
 }
