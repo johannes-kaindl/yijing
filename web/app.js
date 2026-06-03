@@ -255,7 +255,7 @@ function hexNameForLang(hexData) {
   return getLang() === "en" ? (hexData.name_en || hexData.name_de) : hexData.name_de;
 }
 
-function renderHexCard(card, hexData, lines, changingMask) {
+function renderHexCard(card, hexData, lines, changingMask, linkable = false) {
   card.querySelector(".hex-name").textContent = hexNameForLang(hexData);
   const chinese = card.querySelector(".hex-chinese");
   chinese.innerHTML = `
@@ -276,6 +276,29 @@ function renderHexCard(card, hexData, lines, changingMask) {
     tri.textContent = "";
   }
   renderHexFigure(card.querySelector(".hex-figure"), lines, changingMask);
+
+  // Klickbar → öffnet dieses Hexagramm im Nachschlagewerk. Nur für die
+  // Lesungskarten (Ursprungs-/Zielbild); die Reader-Karte selbst bleibt inert.
+  // Navigation läuft über den Hash (#h=<n>), damit ein History-Eintrag entsteht
+  // und man per Wisch/Tab jederzeit zur Lesung zurückkommt. (Punkt 7)
+  if (linkable && hexData?.number) {
+    card.classList.add("hex-card-link");
+    card.setAttribute("role", "link");
+    card.setAttribute("tabindex", "0");
+    card.onclick = () => { window.location.hash = "#h=" + hexData.number; };
+    card.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        window.location.hash = "#h=" + hexData.number;
+      }
+    };
+  } else {
+    card.classList.remove("hex-card-link");
+    card.onclick = null;
+    card.onkeydown = null;
+    card.removeAttribute("role");
+    card.removeAttribute("tabindex");
+  }
 }
 
 // ——— Register (geschlechtsneutral / historisch) ———
@@ -428,7 +451,7 @@ function showReading(question, lines, options = {}) {
     .filter((i) => i >= 0);
   const changingMask = lines.map((l) => lineState(l.value).changing);
 
-  renderHexCard(els.primary, primaryHex, lines, changingMask);
+  renderHexCard(els.primary, primaryHex, lines, changingMask, true);
 
   const primaryTexts = hexTextFieldsForLang(primaryHex);
   els.judgmentText.innerHTML = renderParagraphs(primaryTexts.judgment);
@@ -462,7 +485,7 @@ function showReading(question, lines, options = {}) {
       const st = lineState(l.value);
       return { value: st.target === 1 ? 7 : 8 };
     });
-    renderHexCard(els.resulting, resultingHex, targetLines, targetLines.map(() => false));
+    renderHexCard(els.resulting, resultingHex, targetLines, targetLines.map(() => false), true);
     els.resulting.hidden = false;
     els.resultingSection.hidden = false;
     els.resultingSummary.textContent = t("reading.resultingJudgmentOf", {
@@ -936,6 +959,7 @@ function refreshInterpretationVisibility() {
   els.interpretation.hidden = !hasReading;
   if (els.interpSetup) els.interpSetup.hidden = hasEndpoint;
   if (els.interpActive) els.interpActive.hidden = !hasEndpoint;
+  setInterpPlaceholder(); // Hinweis-Text an Endpunkt-Anzahl anpassen (Punkt 4)
 }
 
 /**
@@ -1451,6 +1475,14 @@ els.resetBtn.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
+// Wird die Frage geändert, während eine Lesung angezeigt wird, gilt der nächste
+// „Orakel befragen"-Klick als neue Frage: den Button wieder freigeben, statt erst
+// „Neue Frage" zu verlangen (tossAnimated baut die Lesung ohnehin frisch). (Punkt 8)
+els.question.addEventListener("input", () => {
+  if (els.reading.hidden || !CURRENT_READING) return;
+  els.castBtn.disabled = els.question.value.trim() === (CURRENT_READING.question || "");
+});
+
 // ——— Export — native Bridge in der macOS-App (WKWebView kann kein
 // window.print() / <a download>), Browser-Fallback sonst ———
 const nativeBridge = window.webkit?.messageHandlers?.yijing || null;
@@ -1732,10 +1764,32 @@ function applyTheme(mode) {
 // CSS rendert `.interp-body:empty::before { content: attr(data-placeholder) }`;
 // der Text kommt sprachabhängig aus i18n und folgt jedem Sprachwechsel.
 function setInterpPlaceholder() {
-  if (els.interpBody) els.interpBody.dataset.placeholder = t("llm.bodyPlaceholder");
+  if (!els.interpBody) return;
+  // Bei nur einem Endpoint (z. B. ausschließlich Apple On-Device im iOS-Build)
+  // gibt es keine echte Endpunkt-/Modell-Wahl → schlichterer Hinweis statt
+  // „Wähle Endpunkt + Modell …", der dort fehl am Platz wäre.
+  const hasChoice = Endpoints.list().length > 1;
+  els.interpBody.dataset.placeholder =
+    t(hasChoice ? "llm.bodyPlaceholder" : "llm.bodyPlaceholderSimple");
 }
 document.addEventListener("i18n:changed", setInterpPlaceholder);
 setInterpPlaceholder();
+
+// ——— iOS-Bridge: Server-Resume nach App-Reaktivierung ———
+// Die native iOS-Shell bindet ihren loopback-Server bei jeder Rückkehr aus dem
+// Hintergrund neu (iOS beendet die Sockets bei Suspension). Sie ruft danach
+// diese Funktion mit der aktuellen baseUrl auf, damit der On-Device-Endpoint den
+// (evtl. neuen) Port übernimmt und die Modell-Liste neu geladen wird — sonst
+// bliebe ein „nicht erreichbar" stehen, obwohl der Server längst wieder lebt.
+window.__yijingOnServerResume = (baseUrl) => {
+  try {
+    if (baseUrl) {
+      const ep = Endpoints.list().find((e) => e.id === "on-device");
+      if (ep && ep.baseUrl !== baseUrl) Endpoints.update("on-device", { baseUrl });
+    }
+  } catch (e) { /* defensiv — ein Resume darf die App nie kippen */ }
+  refreshEndpointSelect(); // lädt Endpoint- + Modell-Liste neu (re-probt /v1/models)
+};
 
 // ——— Init ———
 
@@ -1757,7 +1811,9 @@ setInterpPlaceholder();
     applyHashIfAny();
     window.addEventListener("hashchange", () => {
       if (!applyHashIfAny()) {
-        // leerer/unbekannter Hash → optional zurück auf Frische
+        // Leerer/unbekannter Hash bei offenem Reader (z. B. Wisch/Back nach einem
+        // Hexagramm-Link aus der Lesung) → zurück zur vorigen Ansicht. (Punkt 7)
+        if (!els.reader.hidden) closeReader();
       }
     });
   } catch (e) {

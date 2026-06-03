@@ -46,11 +46,34 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         wv.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         wv.navigationDelegate = self
         wv.scrollView.contentInsetAdjustmentBehavior = .never
+        // Edge-swipe back/forward: lets the user wipe back out of a hexagram the
+        // reading linked into the reference reader (web-side Punkt 7 navigation).
+        wv.allowsBackForwardNavigationGestures = true
         self.webView = wv
         view.addSubview(wv)
 
         let url = URL(string: "http://localhost:\(server.port)/web/index.html")!
         wv.load(URLRequest(url: url))
+
+        // Re-bind the loopback server on every return to the foreground: iOS tears
+        // its sockets down while suspended, which left the web layer stuck on
+        // „nicht erreichbar". (Skip the very first activation — the server was just
+        // started above in this same method.)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(appDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    private var didInitialActivation = false
+
+    @objc private func appDidBecomeActive() {
+        guard didInitialActivation else { didInitialActivation = true; return }
+        guard let port = server?.restart() else { return }
+        // Tell the web layer the server is live again (and on which port) so it
+        // re-probes /v1/models and clears any stale „nicht erreichbar".
+        webView?.evaluateJavaScript(
+            "window.__yijingOnServerResume && window.__yijingOnServerResume('http://localhost:\(port)/v1')",
+            completionHandler: nil)
     }
 
     // MARK: - On-device endpoint injection

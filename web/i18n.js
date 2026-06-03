@@ -36,7 +36,7 @@ const STRINGS = {
     // ——— Ask / Reading ———
     "ask.label": "Deine Frage",
     "ask.placeholder": "Worum geht es? (optional – aber Konzentration hilft)",
-    "ask.cast": "Münzen werfen",
+    "ask.cast": "Orakel befragen",
     "ask.reset": "Neue Frage",
     "ask.exportMd": "Markdown",
     "ask.exportMd.title": "Als Markdown exportieren",
@@ -82,6 +82,7 @@ const STRINGS = {
     "llm.stop": "Abbrechen",
     "llm.thinkingDetails": "Denkprozess",
     "llm.bodyPlaceholder": "Wähle Endpunkt + Modell und klick „Interpretieren“.",
+    "llm.bodyPlaceholderSimple": "Klick auf „Interpretieren“ für eine KI-Deutung.",
 
     "llm.setup.title": "KI-Interpretation",
     "llm.setup.explain":
@@ -282,7 +283,7 @@ const STRINGS = {
     // ——— Ask / Reading ———
     "ask.label": "Your question",
     "ask.placeholder": "What's on your mind? (optional — but focus helps)",
-    "ask.cast": "Cast coins",
+    "ask.cast": "Consult the oracle",
     "ask.reset": "New question",
     "ask.exportMd": "Markdown",
     "ask.exportMd.title": "Export as Markdown",
@@ -328,6 +329,7 @@ const STRINGS = {
     "llm.stop": "Stop",
     "llm.thinkingDetails": "Thinking trace",
     "llm.bodyPlaceholder": "Pick an endpoint and model, then click “Interpret”.",
+    "llm.bodyPlaceholderSimple": "Click “Interpret” for an AI reading.",
 
     "llm.setup.title": "AI interpretation",
     "llm.setup.explain":

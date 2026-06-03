@@ -40,7 +40,15 @@ final class LocalServer {
     // MARK: - Lifecycle (verbatim from StaticServer)
 
     func start() -> Bool {
-        for candidate in 8765...8775 {
+        // Prefer the previously-bound port so the endpoint URL injected into the
+        // web layer stays valid across a background→foreground re-bind; then the
+        // rest of the range. allowLocalEndpointReuse lets us re-grab it even if a
+        // just-cancelled listener hasn't fully released the socket yet.
+        let preferred = port
+        let ports = (8765...8775).contains(preferred)
+            ? [preferred] + (8765...8775).filter { $0 != preferred }
+            : Array(8765...8775)
+        for candidate in ports {
             guard let nwPort = NWEndpoint.Port(rawValue: UInt16(candidate)) else { continue }
             let params = NWParameters.tcp
             params.allowLocalEndpointReuse = true
@@ -67,6 +75,16 @@ final class LocalServer {
     }
 
     func stop() { listener?.cancel(); listener = nil }
+
+    /// Re-bind after the app returns from suspension (iOS tears down the loopback
+    /// sockets while backgrounded, leaving the web layer with a dead endpoint →
+    /// „nicht erreichbar"). Reuses the same port when possible. Returns the bound
+    /// port, or nil if no port in the range was free.
+    @discardableResult
+    func restart() -> Int? {
+        stop()
+        return start() ? port : nil
+    }
 
     // MARK: - Connection handling
 
