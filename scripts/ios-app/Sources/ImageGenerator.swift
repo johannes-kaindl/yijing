@@ -21,6 +21,9 @@ import ImagePlayground
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
+#if canImport(FoundationModels)
+import FoundationModels
+#endif
 
 enum ImageGenError: Error { case unavailable, noImage, encodeFailed }
 
@@ -33,25 +36,58 @@ enum ImageGenerator {
         catch { return false }
     }
 
-    /// Generate one sketch-style image from `prompt`, returned as JPEG data (small
-    /// enough to hand to the web layer as a data: URL; a 1536px PNG would be ~4 MB).
-    /// ImageCreator is finicky: some imagery trips its content filter
-    /// (creationFailed). Try the hexagram prompt, then progressively safer,
-    /// well-tested fallbacks, so a tap reliably yields an image.
-    static func generateJPEG(prompt: String) async throws -> Data {
-        // Concrete nature motifs only — abstract mood words ("calm", "serene") get
-        // rendered as literal TEXT on signs; concrete subjects yield clean ink-wash.
-        let attempts = [
-            prompt,
-            "a mountain in mist, ink-wash painting",
-            "misty hills and a stream, ink-wash painting",
-        ]
-        var lastError: Error = ImageGenError.noImage
-        for p in attempts {
-            do { return try await once(prompt: p) }
-            catch { lastError = error }
+    /// Distill ONE concrete ink-wash motif from the hexagram's image essence and the
+    /// querent's question via a dedicated FoundationModels session. NOT the loopback
+    /// /v1 engine — that one forces the interpretation framing and would return a
+    /// reading, not a motif. Returns nil on any failure (caller falls back).
+    static func distill(seed: String, question: String?) async -> String? {
+        #if canImport(FoundationModels)
+        // LanguageModelSession needs iOS/Catalyst 26 (Apple Intelligence) — a higher
+        // bar than ImageCreator's 18.4. On 18.4–25 distillation is skipped and the
+        // pipeline falls back to the raw seed.
+        guard #available(iOS 26.0, macCatalyst 26.0, *) else { return nil }
+        let instructions = """
+        You distill a single concrete nature scene for an ink-wash painting. Given a \
+        hexagram's image essence and the querent's question, name ONE quiet, concrete \
+        natural scene (6 to 12 words) that weaves the essence together with the \
+        question's theme and shows the tension of opposites (stillness and motion, \
+        light and shadow). Only concrete natural subjects — no abstract mood words, \
+        no people, no text, nothing violent or stormy. Reply with the scene only, no \
+        preamble, no punctuation at the end.
+        """
+        var input = "Essence: \(seed)"
+        if let q = question?.trimmingCharacters(in: .whitespacesAndNewlines), !q.isEmpty {
+            input += "\nQuestion: \(q)"
         }
-        throw lastError
+        do {
+            let session = LanguageModelSession(instructions: instructions)
+            let motif = try await session.respond(to: input)
+                .content.trimmingCharacters(in: .whitespacesAndNewlines)
+            return motif.isEmpty ? nil : motif
+        } catch {
+            return nil
+        }
+        #else
+        return nil
+        #endif
+    }
+
+    /// Full meditation-image pipeline: distill a motif (with the question, then
+    /// without), fall back to the raw seed, then a guaranteed standard motif. Each
+    /// stage runs ImageCreator once; the first JPEG wins. Concrete nature motifs only
+    /// — abstract mood words ("calm") get rendered as literal TEXT, concrete subjects
+    /// yield clean ink-wash.
+    static func generateMeditationImage(seed: String, question: String?) async throws -> Data {
+        // 1. distilled with the question
+        if let m = await distill(seed: seed, question: question),
+           let img = try? await once(prompt: "\(m), ink-wash painting") { return img }
+        // 2. distilled without the question
+        if let m = await distill(seed: seed, question: nil),
+           let img = try? await once(prompt: "\(m), ink-wash painting") { return img }
+        // 3. the raw curated seed
+        if let img = try? await once(prompt: "\(seed), ink-wash painting") { return img }
+        // 4. guaranteed-ish standard motif
+        return try await once(prompt: "a mountain in mist, ink-wash painting")
     }
 
     private static func once(prompt: String) async throws -> Data {
