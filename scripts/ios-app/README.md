@@ -10,7 +10,8 @@ universal target. Bundles the existing web app and adds **on-device AI
 interpretation** via an in-process engine (Apple Foundation Models by default)
 exposed as a loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
 
-> **Status: builds + runs + real on-device AI verified in the iOS 26.5 Simulator.**
+> **Status: builds + runs + real on-device AI verified in the iOS 26.5 Simulator
+> AND on a physical iPhone 16 Plus (iOS 26.5).**
 > Verified on 2026-06-02: the whole scaffold type-checks against the iOS 26.5 SDK,
 > `build-ios-app.sh` produces a valid `Yijing.app`, it installs + launches, the
 > bundled web app renders (full oracle UI via `LocalServer`→`WKWebView`), and the
@@ -39,9 +40,26 @@ exposed as a loopback OpenAI endpoint — so `web/llm.js` is consumed **unchange
 > missing `CFBundleExecutable`, an SSE `done()` race, and an ARC `[weak self]` drop
 > in `SSEResponder` (trailing `[DONE]` + close were dropped → web spinner hung).
 >
-> **Still needs a physical iPhone** only for: the `llama.cpp` fallback path, and a
-> final on-device confirmation on real hardware (the Simulator runs the real
-> Foundation Models model here, but production testing on-device is still prudent).
+> **Physical-device confirmation (2026-06-03, iPhone 16 Plus, iOS 26.5, A18).**
+> `build-ios-app.sh device` ran end to end on real hardware: Development build,
+> the **first** iOS signing (minting the "Apple Development" cert + profile and
+> auto-registering the device), install + launch — all via CLI. The loopback
+> `/v1/models` reports **`apple-on-device`** (Apple Foundation Models, i.e. Apple
+> Intelligence is enabled and the model is resident), and `/v1/chat/completions`
+> streamed fluent, structured **German** interpretations. Guardrails on real
+> hardware matched the Simulator finding: across 7 runs over dark hexagrams
+> (36 Verfinsterung, 23 Zersplitterung, 29 Abgründiges, 47 Bedrängnis ×4) **6/7
+> were interpreted constructively**; one Hex-47 run refused mid-stream (then 3/3
+> clean on retry) — a small, *sporadic* residual, surfaced cleanly. Two real
+> build-script bugs were found + fixed here: a missing
+> `-allowProvisioningDeviceRegistration` (plain `-allowProvisioningUpdates` won't
+> register a brand-new device) and an unbraced `${YIJING_DEVICE_ID}` before a
+> multibyte `…` (tripped `set -u`).
+>
+> **Still needs a physical iPhone** only for: the `llama.cpp` fallback path, an
+> in-app UI round-trip judged by eye (Cast→Interpret tap inside the WKWebView, vs.
+> the loopback path proven above), and the deeper on-device checks (worst-case
+> context, cancel-mid-stream, jetsam, background/foreground) — see the checklist.
 
 > **Mac Catalyst verified (2026-06-02, macOS 26.5).** The single target now lists
 > `supportedDestinations: [iOS, macCatalyst]`, so the same app builds as a native
@@ -92,7 +110,7 @@ WKWebView  ──http──►  LocalServer (NWListener, loopback)
 | `Sources/LlamaCppEngine.swift` | **documented skeleton** (throws until wired) | guide only |
 | `Sources/ModelLocator.swift` | memory-gated model selection | medium (tune thresholds) |
 | `Resources/Info.plist`, `Yijing.entitlements` | ATS, increased-memory | verify on device |
-| `project.yml`, `build-ios-app.sh` | XcodeGen + build | unrun |
+| `project.yml`, `build-ios-app.sh` | XcodeGen + build (simulator/catalyst/archive/device) | verified (sim + Catalyst + physical device) |
 
 ## Prerequisites
 
@@ -130,7 +148,15 @@ panel streams a **mock** interpretation (real inference needs Metal → a device
    resources, or (recommended) deliver via an **Apple-Hosted Background Asset**
    (iOS 26+) and resolve the path in `ModelLocator.resolve`. Fill in
    `Resources/Acknowledgements.md` and surface it in-app.
-4. **Build to a physical iPhone** (A17 Pro+ / 8 GB):
+4. **Build to a physical iPhone** (A17 Pro+ / 8 GB). For a Development build that
+   signs, installs and launches on a connected device in one shot (the first run
+   mints the iOS "Apple Development" cert + profile and registers the device):
+   ```bash
+   # UDID from: xcrun devicectl list devices
+   YIJING_TEAM_ID=<your-team-id> YIJING_DEVICE_ID=<UDID> \
+     scripts/ios-app/build-ios-app.sh device
+   ```
+   …or build an App Store archive (Release, no install):
    ```bash
    YIJING_TEAM_ID=<your-team-id> scripts/ios-app/build-ios-app.sh archive
    ```
@@ -138,17 +164,25 @@ panel streams a **mock** interpretation (real inference needs Metal → a device
 ## On-device verification checklist
 
 - [x] Simulator: app builds, installs, launches; web shell loads (full oracle UI).
+- [x] **Physical device: app builds (first iOS signing + auto device registration),
+      installs + launches** on an iPhone 16 Plus (iOS 26.5) via `… device`.
 - [x] `/v1/models` + `/v1/chat/completions` SSE serve correctly (verified by probing
-      the running app's loopback port; `MockEngine` streams OpenAI-shaped chunks).
-- [ ] In-app UI round-trip: tap Cast → Interpret → streamed text in the WKWebView
-      (needs a UI tap; the server side above is proven).
-- [ ] Real inference on device: a full DE + EN reading completes; **judge prose
-      quality** (Qwen3-4B vs Gemma 4 E4B) — the key open question.
-- [ ] Worst-case prompt (Hex 1, all 6 changing lines + resulting) fits `n_ctx=8192`.
+      the running app's loopback port over an `iproxy` USB tunnel — in the Simulator
+      against `MockEngine`, on device against the real `apple-on-device` engine).
+- [x] **Real Apple-FM inference on device:** full **German** readings complete with
+      fluent, structured prose (multiple hexagrams incl. dark ones, streamed).
+- [x] **Guardrails on device:** 6/7 dark-hexagram runs interpreted constructively;
+      1 sporadic mid-stream refusal (Hex 47, then 3/3 clean) — surfaced cleanly.
+- [ ] In-app UI round-trip: tap Cast → Interpret → streamed text **in the WKWebView**
+      (the loopback path above is proven; this just confirms the UI wiring/ATS).
+- [ ] English reading prose quality judged on device (only DE exercised so far).
+- [ ] Worst-case prompt (Hex 1, all 6 changing lines + resulting) vs. Apple FM's
+      ~4096-token window (overflow is caught + surfaced; confirm the boundary).
 - [ ] Cancel mid-stream (reset/new reading) actually stops inference.
-- [ ] Memory: no jetsam kill under WebKit + resident model; 1.7B fallback path.
-- [ ] Background/foreground transitions don't wedge the listener socket.
-- [ ] ATS: the WKWebView reaches `http://localhost:<port>` on the target iOS.
+- [ ] Memory: no jetsam kill under WebKit + resident model; background/foreground
+      transitions don't wedge the listener socket.
+- [ ] `llama.cpp` fallback path (Qwen3-4B GGUF) — still unwired; the above is all
+      the Apple-FM path.
 
 ## App Review (don't treat as pre-cleared)
 
