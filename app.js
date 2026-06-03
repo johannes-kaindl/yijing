@@ -1523,10 +1523,14 @@ function exportFilename(ext) {
   const d = new Date();
   const p = (n) => String(n).padStart(2, "0");
   const stamp = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
-  const slug = (CURRENT_READING.primaryHex.name_latin || t("export.filenameSlug"))
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  const slugify = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  // Beide Hexagramme aufnehmen, wenn die Lesung wandelt (Ursprungs- → Zielbild).
+  const slug =
+    [CURRENT_READING.primaryHex, CURRENT_READING.resultingHex]
+      .filter(Boolean)
+      .map((h) => slugify(h.name_latin))
+      .filter(Boolean)
+      .join("-") || slugify(t("export.filenameSlug"));
   return `yijing-${stamp}-${slug}.${ext}`;
 }
 
