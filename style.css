@@ -52,6 +52,9 @@ html, body {
   font-family: "Iowan Old Style", "Georgia", "Palatino", serif;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  /* Kein horizontales Scrollen — überbreite Elemente werden geclippt statt
+     den Inhalt seitlich aus dem Frame zu schieben (reine Fehlbedienung). */
+  overflow-x: hidden;
 }
 
 body {
@@ -251,6 +254,18 @@ button.ghost:hover {
   flex: 1 1 240px;
   max-width: 320px;
   text-align: center;
+}
+
+/* Anklickbare Lesungskarte → öffnet das Hexagramm im Nachschlagewerk. */
+.hex-card-link {
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.08s ease;
+}
+.hex-card-link:hover { border-color: var(--accent-soft); }
+.hex-card-link:active { transform: translateY(1px); }
+.hex-card-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .hex-title {
@@ -476,8 +491,10 @@ button.ghost:hover {
 
 .mode-btn .icon { width: 18px; height: 18px; }
 .mode-btn:hover { background: rgba(199, 154, 74, 0.1); color: var(--accent); }
+/* Aktiver Tab nutzt --btn (das in beiden Themes gleiche leuchtende Gold des
+   Primär-Buttons), nicht --accent — sonst wirkt er im Light-Theme zu dunkel. */
 .mode-btn.active,
-.mode-btn.active:hover { background: var(--accent); color: #1a1814; }
+.mode-btn.active:hover { background: var(--btn); color: #1a1814; }
 
 /* ——— Nachschlagewerk / Reader ——— */
 .reader {
@@ -847,6 +864,7 @@ button.ghost:hover {
   gap: 0.5rem;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
 }
 
 .interp-picker select {
@@ -1040,11 +1058,23 @@ button.ghost:hover {
   max-width: min(640px, 95vw);
   width: 100%;
   box-shadow: var(--shadow);
+  /* Langer Inhalt muss IM Modal scrollen, nicht den Hintergrund (auf iOS
+     scrollte sonst die App dahinter). dvh = dynamische Viewport-Höhe (Mobile-
+     Adressleiste); overscroll-behavior unterbindet Scroll-Chaining zum Body. */
+  max-height: 90dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .settings-modal::backdrop {
   background: rgba(0, 0, 0, 0.6);
 }
+
+/* Body-Scroll sperren, solange das Modal offen ist — Gürtel-und-Hosenträger
+   zusätzlich zu overscroll-behavior, weil iOS-WKWebView den Hintergrund sonst
+   per Touch trotzdem mitscrollt. */
+html:has(.settings-modal[open]) { overflow: hidden; }
 
 .settings-form {
   padding: 1.5rem;
