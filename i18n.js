@@ -90,6 +90,14 @@ const STRINGS = {
     "llm.setup.configure": "In Einstellungen einrichten",
     "llm.setup.guide": "Anleitung",
 
+    "image.heading": "Meditationsbild",
+    "image.hint": "Ein stimmungsvolles Bild zur Weissagung, on-device erzeugt — zum Betrachten und Meditieren.",
+    "image.generate": "Bild erzeugen",
+    "image.regenerate": "Neues Bild",
+    "image.generating": "Bild wird erzeugt … (das kann einen Moment dauern)",
+    "image.error": "Das Bild konnte nicht erzeugt werden. Versuch es noch einmal.",
+    "image.alt": "Meditationsbild zur Weissagung",
+
     "llm.status.thinking": "… denke nach",
     "llm.status.aborted": "Abgebrochen.",
     "llm.status.error": "Fehler: {message}",
@@ -336,6 +344,14 @@ const STRINGS = {
       "AI interpretation needs its own LLM endpoint — local on the desktop (Ollama/MLX) or reachable as a remote endpoint. Casting and the reference reader work without it.",
     "llm.setup.configure": "Set up in settings",
     "llm.setup.guide": "Guide",
+
+    "image.heading": "Meditation image",
+    "image.hint": "An evocative image for the reading, generated on-device — to look at and meditate on.",
+    "image.generate": "Create image",
+    "image.regenerate": "New image",
+    "image.generating": "Creating image … (this can take a moment)",
+    "image.error": "The image could not be created. Please try again.",
+    "image.alt": "Meditation image for the reading",
 
     "llm.status.thinking": "… thinking",
     "llm.status.aborted": "Aborted.",
