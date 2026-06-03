@@ -54,7 +54,6 @@ const STRINGS = {
     "reading.judgment": "Das Urteil",
     "reading.image": "Das Bild",
     "reading.meaning": "Bedeutung",
-    "reading.association": "Bildmeditation",
     "reading.trigrams": "Trigramme",
     "reading.notes": "Anmerkungen",
     "reading.trigramAbove": "oben",
@@ -251,7 +250,6 @@ const STRINGS = {
     "export.h3.meaning": "### Bedeutung",
     "export.trigramAbove": "- Oberes Trigramm: {symbol} {name} ({pinyin}) — {family}, {nature}",
     "export.trigramBelow": "- Unteres Trigramm: {symbol} {name} ({pinyin}) — {family}, {nature}",
-    "export.association": "*Bildmeditation:* {text}",
     "export.attribution": "*Text: Richard Wilhelm — I Ging, Das Buch der Wandlungen.*",
     "export.filenameSlug": "yijing", // fallback when latin name missing
 
@@ -309,7 +307,6 @@ const STRINGS = {
     "reading.judgment": "The Judgment",
     "reading.image": "The Image",
     "reading.meaning": "Meaning",
-    "reading.association": "Image meditation",
     "reading.trigrams": "Trigrams",
     "reading.notes": "Notes",
     "reading.trigramAbove": "above",
@@ -506,7 +503,6 @@ const STRINGS = {
     "export.h3.meaning": "### Meaning",
     "export.trigramAbove": "- Upper trigram: {symbol} {name} ({pinyin}) — {family}, {nature}",
     "export.trigramBelow": "- Lower trigram: {symbol} {name} ({pinyin}) — {family}, {nature}",
-    "export.association": "*Image meditation:* {text}",
     "export.attribution":
       "*Text: Richard Wilhelm — I Ching, The Book of Changes (translated from the German edition).*",
     "export.filenameSlug": "yijing",
