@@ -62,9 +62,22 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         NotificationCenter.default.addObserver(
             self, selector: #selector(appDidBecomeActive),
             name: UIApplication.didBecomeActiveNotification, object: nil)
+
+        // Probe on-device image generation (Image Playground) once. If available,
+        // tell the web layer so it can offer the optional „Meditationsbild" button.
+        if #available(iOS 18.4, macCatalyst 18.4, *) {
+            #if canImport(ImagePlayground)
+            Task {
+                let ok = await ImageGenerator.available()
+                await MainActor.run { self.imageGenAvailable = ok; self.injectImageGenFlag() }
+            }
+            #endif
+        }
     }
 
     private var didInitialActivation = false
+    private var imageGenAvailable = false
+    private var imageGenFlagInjected = false
 
     @objc private func appDidBecomeActive() {
         guard didInitialActivation else { didInitialActivation = true; return }
@@ -74,6 +87,56 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         webView?.evaluateJavaScript(
             "window.__yijingOnServerResume && window.__yijingOnServerResume('http://localhost:\(port)/v1')",
             completionHandler: nil)
+    }
+
+    // MARK: - On-device image generation (Image Playground) bridge
+
+    /// Set window.__yijingImageGen once the page is loaded AND the probe finished,
+    /// from whichever happens last. Idempotent.
+    private func injectImageGenFlag() {
+        guard imageGenAvailable, !imageGenFlagInjected, webView != nil else { return }
+        imageGenFlagInjected = true
+        webView?.evaluateJavaScript(
+            "window.__yijingImageGen = true; window.dispatchEvent(new Event('yijing:imagegen'))",
+            completionHandler: nil)
+    }
+
+    private func handleGenerateImage(prompt: String, requestId: String) {
+        guard #available(iOS 18.4, macCatalyst 18.4, *) else {
+            sendImageError(requestId, "Bildgenerierung wird auf diesem Gerät nicht unterstützt."); return
+        }
+        #if canImport(ImagePlayground)
+        Task {
+            do {
+                let jpeg = try await ImageGenerator.generateJPEG(prompt: prompt)
+                let url = "data:image/jpeg;base64," + jpeg.base64EncodedString()
+                await MainActor.run { self.sendImageResult(requestId, url) }
+            } catch {
+                await MainActor.run {
+                    self.sendImageError(requestId, "Das Bild konnte nicht erzeugt werden. Versuch es noch einmal.")
+                }
+            }
+        }
+        #else
+        sendImageError(requestId, "Bildgenerierung nicht verfügbar.")
+        #endif
+    }
+
+    private func sendImageResult(_ requestId: String, _ dataURL: String) {
+        webView?.evaluateJavaScript(
+            "window.__yijingImageResult && window.__yijingImageResult(\(jsLiteral(requestId)), \(jsLiteral(dataURL)))",
+            completionHandler: nil)
+    }
+    private func sendImageError(_ requestId: String, _ message: String) {
+        webView?.evaluateJavaScript(
+            "window.__yijingImageError && window.__yijingImageError(\(jsLiteral(requestId)), \(jsLiteral(message)))",
+            completionHandler: nil)
+    }
+    /// JSON-encode a string as a safe JS string literal (handles quotes/newlines).
+    private func jsLiteral(_ s: String) -> String {
+        guard let d = try? JSONSerialization.data(withJSONObject: [s]),
+              let j = String(data: d, encoding: .utf8) else { return "\"\"" }
+        return String(j.dropFirst().dropLast()) // strip the surrounding [ ]
     }
 
     // MARK: - On-device endpoint injection
@@ -123,9 +186,18 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
                           filename: body["filename"] as? String ?? "yijing.md")
         case "savePdf":
             sharePdf(filename: body["filename"] as? String ?? "yijing.pdf")
+        case "generateImage":
+            handleGenerateImage(prompt: body["prompt"] as? String ?? "",
+                                requestId: body["requestId"] as? String ?? "")
         default:
             break
         }
+    }
+
+    // The page may finish loading before the image-gen probe completes (or after);
+    // inject the flag from whichever is last.
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        injectImageGenFlag()
     }
 
     private func shareMarkdown(content: String, filename: String) {

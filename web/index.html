@@ -160,6 +160,20 @@
         </div><!-- /#interpActive -->
       </section>
 
+      <!-- Meditationsbild — nur in der nativen App mit Apple Image Playground.
+           Bleibt im Web/auf nicht-fähigen Geräten verborgen (kein Web-API). -->
+      <section class="meditation" id="meditation" hidden>
+        <h2 class="section-title" data-i18n="image.heading">Meditationsbild</h2>
+        <p class="meditation-hint" data-i18n="image.hint">Ein stimmungsvolles Bild zur Weissagung, on-device erzeugt — zum Betrachten und Meditieren.</p>
+        <div class="meditation-controls">
+          <button id="genImageBtn" type="button" data-i18n="image.generate">Bild erzeugen</button>
+        </div>
+        <div class="meditation-status" id="genImageStatus" aria-live="polite"></div>
+        <figure class="meditation-figure" id="genImageFigure" hidden>
+          <img id="genImageImg" alt="" />
+        </figure>
+      </section>
+
       <!-- Wilhelm-Texte -->
       <section class="texts">
         <details open>

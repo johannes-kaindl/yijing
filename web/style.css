@@ -953,6 +953,41 @@ button.ghost:hover {
   line-height: 1.5;
 }
 .interp-body strong { color: var(--ink); font-weight: 600; }
+
+/* Meditationsbild (nur native App mit Apple Image Playground) */
+.meditation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+/* display:flex oben hebelt sonst [hidden] aus — explizit zurücksetzen. */
+.meditation[hidden] { display: none; }
+.meditation .section-title { margin: 0; }
+.meditation-hint {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.meditation-controls { display: flex; justify-content: center; }
+.meditation-status {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
+.meditation-figure { margin: 0; }
+.meditation-figure[hidden] { display: none; }
+.meditation-figure img {
+  width: 100%;
+  max-width: 512px;
+  margin: 0 auto;
+  display: block;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
 .interp-body em { color: var(--ink); }
 .interp-body hr {
   border: none;

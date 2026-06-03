@@ -160,6 +160,11 @@ const els = {
   interpStatus: document.getElementById("interpStatus"),
   interpThinkingDetails: document.getElementById("interpThinkingDetails"),
   interpThinking: document.getElementById("interpThinking"),
+  meditation: document.getElementById("meditation"),
+  genImageBtn: document.getElementById("genImageBtn"),
+  genImageStatus: document.getElementById("genImageStatus"),
+  genImageFigure: document.getElementById("genImageFigure"),
+  genImageImg: document.getElementById("genImageImg"),
   defaultThinking: document.getElementById("defaultThinking"),
   // Settings
   openSettingsBtn: document.getElementById("openSettings"),
@@ -522,6 +527,9 @@ function showReading(question, lines, options = {}) {
   };
   // LLM-Sektion: volle UI bei ≥1 Endpoint, sonst dezenter Einrichtungs-Hinweis
   refreshInterpretationVisibility();
+  // Meditationsbild zurücksetzen + Sichtbarkeit (nur native App mit Image Playground)
+  resetMeditation();
+  refreshMeditationVisibility();
 
   let activeEntryId = entryId;
   if (save) {
@@ -1828,6 +1836,83 @@ window.__yijingOnServerResume = (baseUrl) => {
   } catch (e) { /* defensiv — ein Resume darf die App nie kippen */ }
   refreshEndpointSelect(); // lädt Endpoint- + Modell-Liste neu (re-probt /v1/models)
 };
+
+// ——— Meditationsbild (Apple Image Playground, nur native iOS-App) ———
+// Die native Shell setzt window.__yijingImageGen = true, wenn ImageCreator auf dem
+// Gerät verfügbar ist, und feuert „yijing:imagegen". Im Web/auf nicht-fähigen
+// Geräten bleibt die Sektion verborgen (kein Web-API für on-device-Bilder).
+
+// Bildmotive je Trigramm (über das Unicode-Symbol) — einfache, robuste Prompts;
+// elaborierte Prompts lösen bei ImageCreator gelegentlich „creationFailed" aus.
+const TRIGRAM_IMAGERY = {
+  "☰": "an open sky with drifting clouds",
+  "☷": "a wide quiet plain",
+  "☵": "flowing water and a stream",
+  "☲": "warm light and a low sun",
+  "☶": "a still mountain",
+  "☱": "a calm lake",
+  "☳": "distant thunder and moving clouds",
+  "☴": "gentle wind through bamboo",
+};
+
+function buildImagePrompt(hex) {
+  const tri = (hex && hex.trigrams) || {};
+  const above = tri.above && TRIGRAM_IMAGERY[tri.above.symbol];
+  const below = tri.below && TRIGRAM_IMAGERY[tri.below.symbol];
+  const scene = above && below ? `${above} above ${below}` : (above || below || "a tranquil landscape");
+  return `A serene ink-wash landscape in classical East Asian style: ${scene}. Misty, calm, contemplative, minimal, no text.`;
+}
+
+function refreshMeditationVisibility() {
+  if (!els.meditation) return;
+  els.meditation.hidden = !(window.__yijingImageGen && CURRENT_READING !== null);
+}
+
+/** Setzt die Bild-Sektion auf den Ausgangszustand (bei neuer Lesung). */
+function resetMeditation() {
+  pendingImageRequest = null;
+  if (els.genImageFigure) els.genImageFigure.hidden = true;
+  if (els.genImageImg) els.genImageImg.removeAttribute("src");
+  if (els.genImageStatus) els.genImageStatus.textContent = "";
+  if (els.genImageBtn) {
+    els.genImageBtn.disabled = false;
+    els.genImageBtn.textContent = t("image.generate");
+  }
+}
+
+let pendingImageRequest = null;
+function requestMeditationImage() {
+  if (!CURRENT_READING || !nativeBridge) return;
+  const requestId = crypto.randomUUID();
+  pendingImageRequest = requestId;
+  els.genImageBtn.disabled = true;
+  els.genImageStatus.textContent = t("image.generating");
+  nativeBridge.postMessage({
+    action: "generateImage",
+    prompt: buildImagePrompt(CURRENT_READING.primaryHex),
+    requestId,
+  });
+}
+
+window.__yijingImageResult = (requestId, dataURL) => {
+  if (requestId !== pendingImageRequest) return;
+  pendingImageRequest = null;
+  els.genImageImg.src = dataURL;
+  els.genImageImg.alt = t("image.alt");
+  els.genImageFigure.hidden = false;
+  els.genImageStatus.textContent = "";
+  els.genImageBtn.disabled = false;
+  els.genImageBtn.textContent = t("image.regenerate");
+};
+window.__yijingImageError = (requestId, message) => {
+  if (requestId !== pendingImageRequest) return;
+  pendingImageRequest = null;
+  els.genImageStatus.textContent = message || t("image.error");
+  els.genImageBtn.disabled = false;
+};
+
+if (els.genImageBtn) els.genImageBtn.addEventListener("click", requestMeditationImage);
+window.addEventListener("yijing:imagegen", refreshMeditationVisibility);
 
 // ——— Init ———
 
