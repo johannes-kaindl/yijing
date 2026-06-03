@@ -1844,23 +1844,27 @@ window.__yijingOnServerResume = (baseUrl) => {
 
 // Bildmotive je Trigramm (über das Unicode-Symbol) — einfache, robuste Prompts;
 // elaborierte Prompts lösen bei ImageCreator gelegentlich „creationFailed" aus.
+// Konkrete Naturmotive je Trigramm. Wichtig: nur gegenständliche Subjekte —
+// abstrakte Stimmungswörter ("calm"/"serene") rendert ImageCreator als TEXT auf
+// Schildern, und spannungsgeladene Begriffe (Donner/Sturm) lassen den
+// Inhaltsfilter „creationFailed" werfen. Die native Seite hat zudem Fallback-Prompts.
 const TRIGRAM_IMAGERY = {
-  "☰": "an open sky with drifting clouds",
-  "☷": "a wide quiet plain",
-  "☵": "flowing water and a stream",
-  "☲": "warm light and a low sun",
-  "☶": "a still mountain",
-  "☱": "a calm lake",
-  "☳": "distant thunder and moving clouds",
-  "☴": "gentle wind through bamboo",
+  "☰": "an open sky",
+  "☷": "quiet fields",
+  "☵": "a stream",
+  "☲": "a low sun",
+  "☶": "a mountain",
+  "☱": "a still lake",
+  "☳": "a quiet valley",
+  "☴": "tall grass",
 };
 
 function buildImagePrompt(hex) {
   const tri = (hex && hex.trigrams) || {};
   const above = tri.above && TRIGRAM_IMAGERY[tri.above.symbol];
   const below = tri.below && TRIGRAM_IMAGERY[tri.below.symbol];
-  const scene = above && below ? `${above} above ${below}` : (above || below || "a tranquil landscape");
-  return `A serene ink-wash landscape in classical East Asian style: ${scene}. Misty, calm, contemplative, minimal, no text.`;
+  const scene = above && below ? `${above} and ${below}` : (above || below || "mountains");
+  return `${scene} in mist, ink-wash painting`;
 }
 
 function refreshMeditationVisibility() {
