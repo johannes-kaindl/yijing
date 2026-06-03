@@ -539,6 +539,7 @@ function showReading(question, lines, options = {}) {
     });
   }
   renderHistory(activeEntryId);
+  CURRENT_READING.id = activeEntryId; // Zuordnung für die später gespeicherte KI-Deutung
 
   if (activeEntryId) {
     // URL-Hash setzen, ohne Scroll-Sprung
@@ -557,6 +558,15 @@ function showReadingFromEntry(entry) {
   if (!entry || !Array.isArray(entry.lines)) return;
   const lines = entry.lines.map((v) => ({ value: v }));
   showReading(entry.question || "", lines, { save: false, entryId: entry.id });
+  // Gespeicherte KI-Deutung wiederherstellen — showReading hat interpBody geleert.
+  // Auch ohne aktiven Endpoint anzeigen, damit eine alte Deutung sichtbar bleibt.
+  if (entry.interpretation) {
+    els.interpretation.hidden = false;
+    if (els.interpSetup) els.interpSetup.hidden = true;
+    if (els.interpActive) els.interpActive.hidden = false;
+    els.interpBody.innerHTML = renderMarkdown(entry.interpretation);
+    els.interpStatus.textContent = "";
+  }
 }
 
 function tossAnimated(question) {
@@ -632,6 +642,21 @@ function saveHistory(entry) {
   } catch {
     // QuotaExceededError o.ä. — Verlauf ist nicht kritisch, lieber stumm
     // schlucken als den ganzen Init zu kippen.
+  }
+}
+
+/** Patcht einen vorhandenen Verlaufseintrag (z. B. die fertige KI-Deutung
+ *  nachtragen), ohne seine Position zu verändern. */
+function updateHistoryEntry(id, patch) {
+  if (!id) return;
+  const h = loadHistory();
+  const i = h.findIndex((e) => e.id === id);
+  if (i === -1) return;
+  h[i] = { ...h[i], ...patch };
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+  } catch {
+    /* Verlauf ist nicht kritisch — Quota-Fehler still schlucken. */
   }
 }
 
@@ -1135,6 +1160,11 @@ async function runInterpretation() {
       model,
       think: thMark,
     });
+    // Fertige Deutung am Verlaufseintrag sichern, damit sie beim Wiederaufrufen
+    // aus dem Verlauf erhalten bleibt (sonst ging sie verloren).
+    if (CURRENT_READING?.id && buffer.trim()) {
+      updateHistoryEntry(CURRENT_READING.id, { interpretation: buffer });
+    }
   } catch (e) {
     if (e?.name === "AbortError") {
       els.interpStatus.textContent = t("llm.status.aborted");
@@ -1488,12 +1518,16 @@ els.question.addEventListener("input", () => {
 const nativeBridge = window.webkit?.messageHandlers?.yijing || null;
 
 function exportFilename(ext) {
-  const dateStr = new Date().toISOString().slice(0, 10);
+  // Lokaler Zeitstempel YYYY-MM-DD-HHMMSS → eindeutige, chronologisch sortierbare
+  // Namen (UTC-toISOString würde die Uhrzeit gegenüber der Lesung verschieben).
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  const stamp = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
   const slug = (CURRENT_READING.primaryHex.name_latin || t("export.filenameSlug"))
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  return `yijing-${dateStr}-${slug}.${ext}`;
+  return `yijing-${stamp}-${slug}.${ext}`;
 }
 
 els.exportMdBtn.addEventListener("click", () => {
