@@ -65,21 +65,20 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
 
         // Probe on-device image generation (Image Playground) once. If available,
         // tell the web layer so it can offer the optional „Meditationsbild" button.
-        if #available(iOS 18.4, macCatalyst 18.4, *) {
-            #if canImport(ImagePlayground)
-            Task {
-                let ok = await ImageGenerator.available()
-                await MainActor.run { self.imageGenAvailable = ok; self.injectImageGenFlag() }
-            }
-            #endif
-        }
+        // NOTE: the Image Playground probe runs in appDidBecomeActive, NOT here —
+        // ImageCreator() throws backgroundCreationForbidden if the app isn't active
+        // yet, which it isn't during viewDidLoad on iOS.
     }
 
     private var didInitialActivation = false
     private var imageGenAvailable = false
-    private var imageGenFlagInjected = false
 
     @objc private func appDidBecomeActive() {
+        // The app is now guaranteed active → safe to probe Image Playground
+        // (ImageCreator throws backgroundCreationForbidden when inactive). Retries
+        // on each activation until it reports available.
+        probeImageGen()
+
         guard didInitialActivation else { didInitialActivation = true; return }
         guard let port = server?.restart() else { return }
         // Tell the web layer the server is live again (and on which port) so it
@@ -89,13 +88,26 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
             completionHandler: nil)
     }
 
+    private func probeImageGen() {
+        guard !imageGenAvailable else { return } // already available — done
+        if #available(iOS 18.4, macCatalyst 18.4, *) {
+            #if canImport(ImagePlayground)
+            Task {
+                let ok = await ImageGenerator.available()
+                await MainActor.run {
+                    if ok { self.imageGenAvailable = true; self.injectImageGenFlag() }
+                }
+            }
+            #endif
+        }
+    }
+
     // MARK: - On-device image generation (Image Playground) bridge
 
-    /// Set window.__yijingImageGen once the page is loaded AND the probe finished,
-    /// from whichever happens last. Idempotent.
+    /// Set window.__yijingImageGen + fire the event. Called from both the probe and
+    /// didFinish (page load), in any order — idempotent, so re-firing is harmless.
     private func injectImageGenFlag() {
-        guard imageGenAvailable, !imageGenFlagInjected, webView != nil else { return }
-        imageGenFlagInjected = true
+        guard imageGenAvailable, webView != nil else { return }
         webView?.evaluateJavaScript(
             "window.__yijingImageGen = true; window.dispatchEvent(new Event('yijing:imagegen'))",
             completionHandler: nil)
