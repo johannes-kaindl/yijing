@@ -35,11 +35,23 @@ enum ImageGenerator {
 
     /// Generate one sketch-style image from `prompt`, returned as JPEG data (small
     /// enough to hand to the web layer as a data: URL; a 1536px PNG would be ~4 MB).
-    /// Retries once — a first attempt can fail while the model warms up or on a
-    /// transient `creationFailed`.
+    /// ImageCreator is finicky: some imagery trips its content filter
+    /// (creationFailed). Try the hexagram prompt, then progressively safer,
+    /// well-tested fallbacks, so a tap reliably yields an image.
     static func generateJPEG(prompt: String) async throws -> Data {
-        do { return try await once(prompt: prompt) }
-        catch { return try await once(prompt: prompt) }
+        // Concrete nature motifs only — abstract mood words ("calm", "serene") get
+        // rendered as literal TEXT on signs; concrete subjects yield clean ink-wash.
+        let attempts = [
+            prompt,
+            "a mountain in mist, ink-wash painting",
+            "misty hills and a stream, ink-wash painting",
+        ]
+        var lastError: Error = ImageGenError.noImage
+        for p in attempts {
+            do { return try await once(prompt: p) }
+            catch { lastError = error }
+        }
+        throw lastError
     }
 
     private static func once(prompt: String) async throws -> Data {
