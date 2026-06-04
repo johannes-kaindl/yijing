@@ -1,12 +1,18 @@
-// Service Worker — network-first für same-origin GET-Requests.
-// Hält die App offline-fähig ohne Cache-Versionierung: online wird stets
-// frisch geladen, der Cache dient als Offline-Reserve.
-const CACHE = "yijing-runtime";
+// Service Worker — network-first für same-origin GET-Requests, der Cache dient nur
+// als Offline-Reserve. CACHE trägt eine Versionsmarke: bei jedem Update fallen alte
+// Caches weg, und skipWaiting + clients.claim sorgen dafür, dass der neue Worker
+// sofort übernimmt (app.js lädt bei controllerchange einmal frisch nach). Das
+// verhindert, dass WKWebView veraltete app.js/Daten festhält.
+const CACHE = "yijing-v2";
 
 self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener("fetch", (event) => {
