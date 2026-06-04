@@ -135,7 +135,7 @@ IMAGE_SEEDS = {
     56:  "a single lantern on a mountain path",
     57:  "wind rippling through tall grass",
     58:  "two otters playing in a lake",
-    59:  "drifting mist over a broad river",
+    59:  "dry leaves scattering on the wind over water",
     60:  "a stream divided by stepping stones",
     61:  "a crane beside still water",
     62:  "a small bird above a great mountain",
