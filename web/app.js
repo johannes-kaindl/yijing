@@ -1824,16 +1824,42 @@ window.__yijingOnServerResume = (baseUrl) => {
 // Gerät verfügbar ist, und feuert „yijing:imagegen". Im Web/auf nicht-fähigen
 // Geräten bleibt die Sektion verborgen (kein Web-API für on-device-Bilder).
 
-// Bild-Anfrage an die native Schicht: das rohe Bild-Seed (image_association des
-// Hexagramms — ein sprach-unabhängiger englischer Prompt-Seed mit Yin/Yang-Motiven)
-// plus die Frage des Ratsuchenden. Die native Seite destilliert daraus per
-// On-Device-LLM EIN konkretes Naturmotiv (Spannung der Gegensätze) und erzeugt das
-// Bild. Kein Prompt-Bau mehr hier — nur das Seed + die Frage weiterreichen.
+// Bild-Anfrage an die native Schicht: das Kern-Motiv des Hexagramms (image_association,
+// ein kurzes englisches Bildsubjekt) + ein Frage-abhängiger Modifikator. Apple FM ist
+// bewusst RAUS (zu unzuverlässig + ignorierte die Frage); ImageCreator nutzt die Frage
+// selbst nicht — darum erzwingen wir die Variation hier: derselbe Wurf sieht je Frage
+// anders aus (Tageszeit/Jahreszeit/Wetter), die Frage wirkt als „Random Seed".
+const IMAGE_MODIFIERS = [
+  "at dawn",
+  "at dusk",
+  "under a starry night sky",
+  "in morning mist",
+  "in autumn colors",
+  "under falling snow",
+  "in spring bloom",
+  "in lush summer green",
+  "in gentle rain",
+  "under a clear blue sky",
+  "in warm golden light",
+  "under drifting clouds",
+];
+
+// Kleiner stabiler String-Hash (djb2) → deterministischer Modifikator je Frage:
+// gleiche Frage → gleiches Bild-Setting, andere Frage → meist anderes.
+function hashString(s) {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
 function buildImageRequest(hex, question) {
-  return {
-    seed: (hex && hex.image_association) || "misty mountains, a still lake, paired opposites",
-    question: (question || "").trim() || null,
-  };
+  const motif = (hex && hex.image_association) || "a still mountain lake";
+  const q = (question || "").trim();
+  // Mit Frage: Hash → Modifikator. Ohne Frage: ein neutraler, immer schöner Default.
+  const modifier = q
+    ? IMAGE_MODIFIERS[hashString(q) % IMAGE_MODIFIERS.length]
+    : "in soft daylight";
+  return { motif, modifier };
 }
 
 function refreshMeditationVisibility() {
@@ -1863,8 +1889,8 @@ function requestMeditationImage() {
   const req = buildImageRequest(CURRENT_READING.primaryHex, CURRENT_READING.question);
   nativeBridge.postMessage({
     action: "generateImage",
-    seed: req.seed,
-    question: req.question,
+    motif: req.motif,
+    modifier: req.modifier,
     requestId,
   });
 }

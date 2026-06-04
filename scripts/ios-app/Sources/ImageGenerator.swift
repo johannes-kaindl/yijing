@@ -3,8 +3,8 @@
 //
 // ImageGenerator — an optional "meditation image" for a reading, generated fully
 // on-device with Apple's Image Playground (ImageCreator). Zero cost, private,
-// offline; no bundled model. Sketch style (delicate ink-wash look) fits the
-// reflective I-Ching mood best.
+// offline; no bundled model. Sketch style (a soft colored-pencil look — Image
+// Playground has no true ink-wash style) fits the reflective I-Ching mood best.
 //
 // Availability: iOS/iPadOS 18.4+ and Mac Catalyst 18.4+, Apple-Intelligence
 // hardware only. Everything is gated — on ineligible devices `isAvailable`
@@ -21,9 +21,6 @@ import ImagePlayground
 import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
-#if canImport(FoundationModels)
-import FoundationModels
-#endif
 
 enum ImageGenError: Error { case unavailable, noImage, encodeFailed }
 
@@ -36,58 +33,20 @@ enum ImageGenerator {
         catch { return false }
     }
 
-    /// Distill ONE concrete ink-wash motif from the hexagram's image essence and the
-    /// querent's question via a dedicated FoundationModels session. NOT the loopback
-    /// /v1 engine — that one forces the interpretation framing and would return a
-    /// reading, not a motif. Returns nil on any failure (caller falls back).
-    static func distill(seed: String, question: String?) async -> String? {
-        #if canImport(FoundationModels)
-        // LanguageModelSession needs iOS/Catalyst 26 (Apple Intelligence) — a higher
-        // bar than ImageCreator's 18.4. On 18.4–25 distillation is skipped and the
-        // pipeline falls back to the raw seed.
-        guard #available(iOS 26.0, macCatalyst 26.0, *) else { return nil }
-        let instructions = """
-        You distill a single concrete nature scene for an ink-wash painting. Given a \
-        hexagram's image essence and the querent's question, name ONE quiet, concrete \
-        natural scene (6 to 12 words) that weaves the essence together with the \
-        question's theme and shows the tension of opposites (stillness and motion, \
-        light and shadow). Only concrete natural subjects — no abstract mood words, \
-        no people, no text, nothing violent or stormy. Reply with the scene only, no \
-        preamble, no punctuation at the end.
-        """
-        var input = "Essence: \(seed)"
-        if let q = question?.trimmingCharacters(in: .whitespacesAndNewlines), !q.isEmpty {
-            input += "\nQuestion: \(q)"
-        }
-        do {
-            let session = LanguageModelSession(instructions: instructions)
-            let motif = try await session.respond(to: input)
-                .content.trimmingCharacters(in: .whitespacesAndNewlines)
-            return motif.isEmpty ? nil : motif
-        } catch {
-            return nil
-        }
-        #else
-        return nil
-        #endif
-    }
-
-    /// Full meditation-image pipeline: distill a motif (with the question, then
-    /// without), fall back to the raw seed, then a guaranteed standard motif. Each
-    /// stage runs ImageCreator once; the first JPEG wins. Concrete nature motifs only
-    /// — abstract mood words ("calm") get rendered as literal TEXT, concrete subjects
-    /// yield clean ink-wash.
-    static func generateMeditationImage(seed: String, question: String?) async throws -> Data {
-        // 1. distilled with the question
-        if let m = await distill(seed: seed, question: question),
-           let img = try? await once(prompt: "\(m), ink-wash painting") { return img }
-        // 2. distilled without the question
-        if let m = await distill(seed: seed, question: nil),
-           let img = try? await once(prompt: "\(m), ink-wash painting") { return img }
-        // 3. the raw curated seed
-        if let img = try? await once(prompt: "\(seed), ink-wash painting") { return img }
-        // 4. guaranteed-ish standard motif
-        return try await once(prompt: "a mountain in mist, ink-wash painting")
+    /// Build "<motif>, <modifier>" and render it; on failure fall back to the bare
+    /// motif, then a neutral standard scene. NO Apple FM (on-device distillation was
+    /// unreliable — frequent guardrail refusals — and ignored the question anyway) and
+    /// NO "ink-wash" suffix (it only pulled every image toward generic mountain-water).
+    /// The hexagram supplies the motif; the query-derived `modifier` (day-time / season,
+    /// chosen web-side) is what makes the same hexagram look different per question.
+    static func generateMeditationImage(motif: String, modifier: String) async throws -> Data {
+        let mod = modifier.trimmingCharacters(in: .whitespacesAndNewlines)
+        // 1. motif + modifier
+        if !mod.isEmpty, let img = try? await once(prompt: "\(motif), \(mod)") { return img }
+        // 2. bare motif
+        if let img = try? await once(prompt: motif) { return img }
+        // 3. guaranteed-ish neutral scene
+        return try await once(prompt: "a quiet meadow under a wide sky")
     }
 
     private static func once(prompt: String) async throws -> Data {
