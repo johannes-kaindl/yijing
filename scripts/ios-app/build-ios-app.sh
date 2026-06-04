@@ -43,11 +43,17 @@ git -C "$REPO" archive HEAD web data sw.js | tar -x -C "$STAGE"
 [ -f "$STAGE/web/index.html" ] || { echo "FEHLER: web/index.html nicht gestaged." >&2; exit 1; }
 [ -d "$STAGE/data" ] || { echo "FEHLER: data/ nicht gestaged." >&2; exit 1; }
 
-# Build-Kennung (Commit + Zeit) in die gestagte app.js einsetzen, damit die App
-# sichtbar zeigt, welche Web-Version läuft (Diagnose gegen WKWebView-Cache-Hänger).
-BUILD_TAG="$(git -C "$REPO" rev-parse --short HEAD)·$(git -C "$REPO" log -1 --format=%cd --date=format:%d.%m.\ %H:%M)"
-sed -i '' "s|__BUILD__|$BUILD_TAG|" "$STAGE/web/app.js"
-echo "→ Build-Kennung gesetzt: $BUILD_TAG"
+# Build-Kennung (Commit + Zeit) NUR in Dev-Builds in die gestagte app.js setzen —
+# sie aktiviert das Dev-Tooling (Build-Badge, Bild-Signatur, Test-Verlauf). Im
+# archive-Build (App Store) bleibt der __BUILD__-Platzhalter → DEV_MODE = false,
+# das Dev-Tooling ist aus.
+if [ "$MODE" != "archive" ]; then
+  BUILD_TAG="$(git -C "$REPO" rev-parse --short HEAD)·$(git -C "$REPO" log -1 --format=%cd --date=format:%d.%m.\ %H:%M)"
+  sed -i '' "s|__BUILD__|$BUILD_TAG|" "$STAGE/web/app.js"
+  echo "→ Build-Kennung gesetzt (Dev): $BUILD_TAG"
+else
+  echo "→ archive-Build: keine Build-Kennung (Dev-Tooling aus)"
+fi
 
 echo "→ Xcode-Projekt generieren (xcodegen)…"
 ( cd "$APPDIR" && xcodegen generate )
