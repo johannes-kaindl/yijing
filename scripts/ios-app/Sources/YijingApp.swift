@@ -30,4 +30,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = window
         return true
     }
+
+    // Widget deep link: yijing://h/<n> → open the Nachschlagewerk on hexagram n.
+    func application(_ app: UIApplication, open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        guard url.scheme == "yijing", url.host == "h",
+              let n = url.pathComponents.last.flatMap(Int.init) else { return false }
+        (window?.rootViewController as? WebViewController)?.openHexagram(n)
+        return true
+    }
 }

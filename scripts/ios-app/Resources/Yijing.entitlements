@@ -16,5 +16,11 @@
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
+	<!-- Shared container: the app mirrors language/register here so the Widget
+	     and watchOS extensions read the user's choice. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.page.codeberg.jkaindl.Yijing</string>
+	</array>
 </dict>
 </plist>

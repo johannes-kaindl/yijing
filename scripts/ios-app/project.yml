@@ -61,15 +61,40 @@ targets:
         # Keep ONE bundle id across iOS and Mac Catalyst (don't prefix the Mac
         # build with "maccatalyst.") — it's the same product, one App Store record.
         DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
-    # llama.cpp engine — uncomment after adding the official package (or a local
-    # XCFramework binaryTarget). Until then, MockEngine is used (canImport(llama)
-    # is false) and the app builds + runs with the web shell + mock AI.
-    # dependencies:
+    dependencies:
+      - package: OracleKit
+      - target: YijingWidgets   # embedded WidgetKit extension
+    # llama.cpp engine — uncomment after adding the package; MockEngine until then.
     #   - package: llama
-    # packages are declared in the `packages:` block below.
 
-# packages:
-#   llama:
-#     url: https://github.com/ggml-org/llama.cpp
-#     # pin a tag you have validated on-device:
-#     exactVersion: "bXXXX"
+  # Daily-hexagram widget (iPhone/iPad/Mac). Shares OracleKit; bundles only the
+  # slim widget-hexagrams.json slice. Tap → app via the yijing:// deep link.
+  YijingWidgets:
+    type: app-extension
+    platform: iOS
+    supportedDestinations: [iOS, macCatalyst]
+    sources:
+      - path: Widgets/SlimData.swift
+      - path: Widgets/HexFigureView.swift
+      - path: Widgets/DailyHexWidget.swift
+      - path: Widgets/WidgetBundle.swift
+      - path: Widgets/PrivacyInfo.xcprivacy
+      # slim slice (staged into WebContent/data by build-ios-app.sh before xcodegen)
+      - path: WebContent/data/widget-hexagrams.json
+    dependencies:
+      - package: OracleKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: page.codeberg.jkaindl.Yijing.widgets
+        INFOPLIST_FILE: Widgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Widgets/Yijing.widgets.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1,2"
+        DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
+
+packages:
+  OracleKit:
+    path: OracleKit
+  # llama:
+  #   url: https://github.com/ggml-org/llama.cpp
+  #   exactVersion: "bXXXX"

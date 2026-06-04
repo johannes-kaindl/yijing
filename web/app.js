@@ -1637,6 +1637,13 @@ els.question.addEventListener("input", () => {
 // window.print() / <a download>), Browser-Fallback sonst ———
 const nativeBridge = window.webkit?.messageHandlers?.yijing || null;
 
+// Spiegelt Sprache + Fassung in die native App (→ App Group → Widgets/Watch).
+// No-op im reinen Web (kein window.webkit). Sprachwechsel feuert i18n:changed.
+function publishSettings() {
+  nativeBridge?.postMessage({ action: "settings", language: getLang(), register: getRegister() });
+}
+document.addEventListener("i18n:changed", publishSettings);
+
 function exportFilename(ext) {
   // Lokaler Zeitstempel YYYY-MM-DD-HHMMSS → eindeutige, chronologisch sortierbare
   // Namen (UTC-toISOString würde die Uhrzeit gegenüber der Lesung verschieben).
@@ -1824,6 +1831,7 @@ function changeRegister(reg) {
   if (reg !== "neutral" && reg !== "historical") return;
   if (reg === getRegister()) return;
   setRegister(reg);
+  publishSettings(); // Fassung in die native App spiegeln (Widgets/Watch)
   const m = window.location.hash.match(/^#r=([^&]+)$/);
   if (m) {
     const entry = findHistoryEntry(m[1]);
@@ -2092,6 +2100,7 @@ window.addEventListener("yijing:imagegen", refreshMeditationVisibility);
     });
     // Tiefer Link? — falls #r=<id> in der URL steht, Eintrag wiederherstellen
     applyHashIfAny();
+    publishSettings(); // initiale Spiegelung Sprache/Fassung in die native App
     window.addEventListener("hashchange", () => {
       if (!applyHashIfAny()) {
         // Leerer/unbekannter Hash bei offenem Reader (z. B. Wisch/Back nach einem

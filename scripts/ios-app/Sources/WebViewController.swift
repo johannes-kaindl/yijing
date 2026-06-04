@@ -9,6 +9,7 @@
 
 import UIKit
 import WebKit
+import WidgetKit
 
 final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
     private var server: LocalServer!
@@ -72,6 +73,8 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
 
     private var didInitialActivation = false
     private var imageGenAvailable = false
+    private var pageLoaded = false
+    private var pendingHexagram: Int?
 
     @objc private func appDidBecomeActive() {
         // The app is now guaranteed active → safe to probe Image Playground
@@ -203,6 +206,13 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
                                 motif2: body["motif2"] as? String ?? "",
                                 modifier: body["modifier"] as? String ?? "",
                                 requestId: body["requestId"] as? String ?? "")
+        case "settings":
+            // Mirror language/register into the App Group so the widget + watch
+            // reflect the user's choice; refresh widgets immediately.
+            let store = UserDefaults(suiteName: "group.page.codeberg.jkaindl.Yijing")
+            if let lang = body["language"] as? String { store?.set(lang, forKey: "language") }
+            if let reg = body["register"] as? String { store?.set(reg, forKey: "register") }
+            WidgetCenter.shared.reloadAllTimelines()
         default:
             break
         }
@@ -211,7 +221,22 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
     // The page may finish loading before the image-gen probe completes (or after);
     // inject the flag from whichever is last.
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        pageLoaded = true
         injectImageGenFlag()
+        if let n = pendingHexagram { pendingHexagram = nil; navigateToHexagram(n) }
+    }
+
+    // MARK: - Widget deep link → Nachschlagewerk
+
+    /// Open hexagram n in the reader. Deferred until the page has loaded (cold
+    /// launch from a widget tap), applied immediately otherwise.
+    func openHexagram(_ n: Int) {
+        guard (1...64).contains(n) else { return }
+        if pageLoaded { navigateToHexagram(n) } else { pendingHexagram = n }
+    }
+
+    private func navigateToHexagram(_ n: Int) {
+        webView?.evaluateJavaScript("location.hash = '#h=\(n)'", completionHandler: nil)
     }
 
     private func shareMarkdown(content: String, filename: String) {
