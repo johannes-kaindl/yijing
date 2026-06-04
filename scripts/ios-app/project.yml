@@ -74,12 +74,12 @@ targets:
     platform: iOS
     supportedDestinations: [iOS, macCatalyst]
     sources:
-      - path: Widgets/SlimData.swift
       - path: Widgets/HexFigureView.swift
       - path: Widgets/DailyHexWidget.swift
       - path: Widgets/WidgetBundle.swift
       - path: Widgets/PrivacyInfo.xcprivacy
-      # slim slice (staged into WebContent/data by build-ios-app.sh before xcodegen)
+      # slim slice (staged into WebContent/data by build-ios-app.sh before xcodegen);
+      # the SlimData loader lives in OracleKit (shared with the watch complication).
       - path: WebContent/data/widget-hexagrams.json
     dependencies:
       - package: OracleKit
@@ -91,6 +91,54 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         TARGETED_DEVICE_FAMILY: "1,2"
         DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
+
+  # Standalone watchOS app: Heute (daily hexagram) + Werfen (full cast). Bundles
+  # the full hexagram JSON. NOT embedded in the iOS app target yet — built +
+  # verified standalone; the App-Store iOS-app embedding is a device-phase step.
+  YijingWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: Watch/YijingWatchApp.swift
+      - path: Watch/TodayView.swift
+      - path: Watch/CastView.swift
+      - path: Watch/WatchHexFigure.swift
+      - path: Watch/PrivacyInfo.xcprivacy
+      # full texts for the on-wrist readings (staged into WebContent/data)
+      - path: WebContent/data/hexagrams.json
+      - path: WebContent/data/hexagrams.en.json
+    dependencies:
+      - package: OracleKit
+      - target: YijingWatchWidgets   # embed the complication
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: page.codeberg.jkaindl.Yijing.watchkitapp
+        INFOPLIST_FILE: Watch/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Watch/Yijing.watch.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "4"
+
+  # watchOS complication (daily hexagram on Apple's faces). Bundles only the slim
+  # slice; uses OracleKit.SlimData + the shared WatchHexFigure.
+  YijingWatchWidgets:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: WatchWidgets/ComplicationWidget.swift
+      - path: Watch/WatchHexFigure.swift
+      - path: WatchWidgets/PrivacyInfo.xcprivacy
+      - path: WebContent/data/widget-hexagrams.json
+    dependencies:
+      - package: OracleKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: page.codeberg.jkaindl.Yijing.watchkitapp.widgets
+        INFOPLIST_FILE: WatchWidgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: WatchWidgets/Yijing.watchwidgets.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "4"
 
 packages:
   OracleKit:

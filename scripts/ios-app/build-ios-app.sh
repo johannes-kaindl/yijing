@@ -126,6 +126,14 @@ case "$MODE" in
       echo "    xcrun devicectl device install app --device <UDID> \"$APP\""
     fi
     ;;
+  watch)
+    echo "→ Build für watchOS-Simulator (kein Signing)…"
+    xcodebuild -project "$APPDIR/Yijing.xcodeproj" -scheme YijingWatch \
+      -configuration Release -sdk watchsimulator \
+      -destination 'generic/platform=watchOS Simulator' \
+      CODE_SIGNING_ALLOWED=NO build
+    echo "✓ watchOS-Build fertig (Schema YijingWatch)."
+    ;;
   *)
-    echo "Unbekannter Modus: $MODE (erlaubt: simulator | catalyst | archive | device)" >&2; exit 1 ;;
+    echo "Unbekannter Modus: $MODE (erlaubt: simulator | catalyst | watch | archive | device)" >&2; exit 1 ;;
 esac
