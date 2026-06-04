@@ -46,24 +46,35 @@ enum ImageGenerator {
     static func generateMeditationImage(motif: String, motif2: String, modifier: String) async throws -> Data {
         let mod = modifier.trimmingCharacters(in: .whitespacesAndNewlines)
         let m2 = motif2.trimmingCharacters(in: .whitespacesAndNewlines)
-        // With a changing line: both motifs (the tension of the transition). Without: one.
-        let base = m2.isEmpty ? motif : "\(motif) and \(m2)"
-        // 1. base + modifier
-        if !mod.isEmpty, let img = try? await once(prompt: "\(base), \(mod)") { return img }
-        // 2. base (both motifs, no modifier)
-        if let img = try? await once(prompt: base) { return img }
-        // 3. primary motif only (in case the two-motif combination tripped the filter)
-        if !m2.isEmpty, let img = try? await once(prompt: motif) { return img }
-        // 4. guaranteed-ish neutral scene
-        return try await once(prompt: "a quiet meadow under a wide sky")
+        // Pass each motif + the modifier as SEPARATE concepts, not "A and B" in one
+        // sentence: ImageCreator weights distinct concepts more evenly, so a dominant
+        // motif (a big fruit tree) is less likely to swallow a small related one
+        // (a sprout). With a changing line both motifs go in — the tension of the
+        // transition; without one, just the primary.
+        func concepts(change: Bool, useMod: Bool) -> [ImagePlaygroundConcept] {
+            var c: [ImagePlaygroundConcept] = [.text(motif)]
+            if change, !m2.isEmpty { c.append(.text(m2)) }
+            if useMod, !mod.isEmpty { c.append(.text(mod)) }
+            return c
+        }
+        // 1. both motifs + modifier
+        if let img = try? await render(concepts(change: true, useMod: true)) { return img }
+        // 2. both motifs, no modifier
+        if !m2.isEmpty, let img = try? await render(concepts(change: true, useMod: false)) { return img }
+        // 3. primary motif + modifier (drop the change)
+        if let img = try? await render(concepts(change: false, useMod: true)) { return img }
+        // 4. primary motif only
+        if let img = try? await render(concepts(change: false, useMod: false)) { return img }
+        // 5. guaranteed-ish neutral scene
+        return try await render([.text("a quiet meadow under a wide sky")])
     }
 
-    private static func once(prompt: String) async throws -> Data {
+    private static func render(_ concepts: [ImagePlaygroundConcept]) async throws -> Data {
         let creator = try await ImageCreator()
         let style = creator.availableStyles.first { String(describing: $0).contains("sketch") }
             ?? creator.availableStyles.first
         guard let style else { throw ImageGenError.unavailable }
-        let images = creator.images(for: [.text(prompt)], style: style, limit: 1)
+        let images = creator.images(for: concepts, style: style, limit: 1)
         for try await image in images {
             return try encodeJPEG(image.cgImage)
         }
