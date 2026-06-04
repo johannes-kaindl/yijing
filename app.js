@@ -565,6 +565,14 @@ function showReadingFromEntry(entry) {
     els.interpBody.innerHTML = renderMarkdown(entry.interpretation);
     els.interpStatus.textContent = "";
   }
+  // Gespeichertes Meditationsbild wiederherstellen (zeigt sich nur, wo die
+  // Bild-Sektion sichtbar ist, d. h. native App mit Image Playground).
+  if (entry.image && els.genImageImg && els.genImageFigure) {
+    els.genImageImg.src = entry.image;
+    els.genImageImg.alt = t("image.alt");
+    els.genImageFigure.hidden = false;
+    if (els.genImageBtn) els.genImageBtn.textContent = t("image.regenerate");
+  }
 }
 
 function tossAnimated(question) {
@@ -631,30 +639,40 @@ function loadHistory() {
   }
 }
 
-function saveHistory(entry) {
-  const h = loadHistory();
-  h.unshift(entry);
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, 20)));
-  } catch {
-    // QuotaExceededError o.ä. — Verlauf ist nicht kritisch, lieber stumm
-    // schlucken als den ganzen Init zu kippen.
+/** Schreibt den Verlauf nach localStorage. Meditationsbilder (data-URLs) sind groß
+ *  (~0,5–1 MB) und sprengen sonst das ~5-MB-Quota. Bei QuotaExceededError fallen die
+ *  ÄLTESTEN gespeicherten Bilder nacheinander raus (der Lesungstext bleibt; das Bild
+ *  ist aus Hexagramm + Frage deterministisch reproduzierbar), bis es passt. */
+function persistHistory(h) {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+      return;
+    } catch {
+      let dropped = false;
+      for (let i = h.length - 1; i >= 0; i--) {
+        if (h[i].image) { delete h[i].image; dropped = true; break; }
+      }
+      if (!dropped) return; // nichts mehr zu verkleinern — aufgeben (still)
+    }
   }
 }
 
-/** Patcht einen vorhandenen Verlaufseintrag (z. B. die fertige KI-Deutung
- *  nachtragen), ohne seine Position zu verändern. */
+function saveHistory(entry) {
+  const h = loadHistory();
+  h.unshift(entry);
+  persistHistory(h.slice(0, 20));
+}
+
+/** Patcht einen vorhandenen Verlaufseintrag (z. B. die fertige KI-Deutung oder das
+ *  erzeugte Meditationsbild nachtragen), ohne seine Position zu verändern. */
 function updateHistoryEntry(id, patch) {
   if (!id) return;
   const h = loadHistory();
   const i = h.findIndex((e) => e.id === id);
   if (i === -1) return;
   h[i] = { ...h[i], ...patch };
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
-  } catch {
-    /* Verlauf ist nicht kritisch — Quota-Fehler still schlucken. */
-  }
+  persistHistory(h);
 }
 
 function renderHistory(activeId = null) {
@@ -1914,6 +1932,9 @@ window.__yijingImageResult = (requestId, dataURL) => {
   els.genImageStatus.textContent = "";
   els.genImageBtn.disabled = false;
   els.genImageBtn.textContent = t("image.regenerate");
+  // Im Verlaufseintrag mitsichern, damit das Bild beim erneuten Öffnen der Lesung
+  // sofort da ist (persistHistory verwirft es bei Speicherknappheit zuerst).
+  if (CURRENT_READING?.id) updateHistoryEntry(CURRENT_READING.id, { image: dataURL });
 };
 window.__yijingImageError = (requestId, message) => {
   if (requestId !== pendingImageRequest) return;

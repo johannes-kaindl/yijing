@@ -89,9 +89,7 @@ const STRINGS = {
     "llm.setup.configure": "In Einstellungen einrichten",
     "llm.setup.guide": "Anleitung",
 
-    "image.heading": "Meditationsbild",
-    "image.hint": "Ein stimmungsvolles Bild zur Weissagung, on-device erzeugt — zum Betrachten und Meditieren.",
-    "image.generate": "Bild erzeugen",
+    "image.generate": "Meditationsbild",
     "image.regenerate": "Neues Bild",
     "image.generating": "Bild wird erzeugt … (das kann einen Moment dauern)",
     "image.error": "Das Bild konnte nicht erzeugt werden. Versuch es noch einmal.",
@@ -342,9 +340,7 @@ const STRINGS = {
     "llm.setup.configure": "Set up in settings",
     "llm.setup.guide": "Guide",
 
-    "image.heading": "Meditation image",
-    "image.hint": "An evocative image for the reading, generated on-device — to look at and meditate on.",
-    "image.generate": "Create image",
+    "image.generate": "Meditation image",
     "image.regenerate": "New image",
     "image.generating": "Creating image … (this can take a moment)",
     "image.error": "The image could not be created. Please try again.",

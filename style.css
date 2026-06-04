@@ -963,13 +963,6 @@ button.ghost:hover {
 }
 /* display:flex oben hebelt sonst [hidden] aus — explizit zurücksetzen. */
 .meditation[hidden] { display: none; }
-.meditation .section-title { margin: 0; }
-.meditation-hint {
-  margin: 0;
-  color: var(--ink-faint);
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
 .meditation-controls { display: flex; justify-content: center; }
 .meditation-status {
   text-align: center;
