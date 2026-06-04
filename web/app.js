@@ -1852,14 +1852,23 @@ function hashString(s) {
   return h;
 }
 
-function buildImageRequest(hex, question) {
-  const motif = (hex && hex.image_association) || "a still mountain lake";
-  const q = (question || "").trim();
+function buildImageRequest(reading) {
+  const prim = reading.primaryHex;
+  const res = reading.resultingHex; // null, wenn keine Linie wandelt → kein Wandel
+  const motif = (prim && prim.image_association) || "a still mountain lake";
+  // Wandel: das resultierende Motiv NUR bei echter Wandlung (abweichendes Hexagramm).
+  // So zeigt das Bild die Spannung beider Zustände (primär ↔ resultierend); ohne
+  // wandelnde Linie bleibt es beim einen Motiv.
+  const motif2 =
+    res && res.number !== prim.number && res.image_association
+      ? res.image_association
+      : "";
+  const q = (reading.question || "").trim();
   // Mit Frage: Hash → Modifikator. Ohne Frage: ein neutraler, immer schöner Default.
   const modifier = q
     ? IMAGE_MODIFIERS[hashString(q) % IMAGE_MODIFIERS.length]
     : "in soft daylight";
-  return { motif, modifier };
+  return { motif, motif2, modifier };
 }
 
 function refreshMeditationVisibility() {
@@ -1886,10 +1895,11 @@ function requestMeditationImage() {
   pendingImageRequest = requestId;
   els.genImageBtn.disabled = true;
   els.genImageStatus.textContent = t("image.generating");
-  const req = buildImageRequest(CURRENT_READING.primaryHex, CURRENT_READING.question);
+  const req = buildImageRequest(CURRENT_READING);
   nativeBridge.postMessage({
     action: "generateImage",
     motif: req.motif,
+    motif2: req.motif2,
     modifier: req.modifier,
     requestId,
   });

@@ -33,19 +33,28 @@ enum ImageGenerator {
         catch { return false }
     }
 
-    /// Build "<motif>, <modifier>" and render it; on failure fall back to the bare
-    /// motif, then a neutral standard scene. NO Apple FM (on-device distillation was
-    /// unreliable — frequent guardrail refusals — and ignored the question anyway) and
-    /// NO "ink-wash" suffix (it only pulled every image toward generic mountain-water).
-    /// The hexagram supplies the motif; the query-derived `modifier` (day-time / season,
-    /// chosen web-side) is what makes the same hexagram look different per question.
-    static func generateMeditationImage(motif: String, modifier: String) async throws -> Data {
+    /// Render the reading's image. `motif` is the primary hexagram's motif; `motif2`
+    /// (empty when no line changes) is the resulting hexagram's motif — when present
+    /// we render "<motif> and <motif2>" so the image shows the TENSION of both states,
+    /// i.e. the change. `modifier` (day-time / season, chosen web-side from the
+    /// question) varies the same reading per question. On failure: drop the modifier,
+    /// then the change, then a neutral scene.
+    ///
+    /// NO Apple FM (on-device distillation refused most requests + ignored the
+    /// question) and NO "ink-wash" suffix (it only pulled images toward generic
+    /// mountain-water). All deterministic.
+    static func generateMeditationImage(motif: String, motif2: String, modifier: String) async throws -> Data {
         let mod = modifier.trimmingCharacters(in: .whitespacesAndNewlines)
-        // 1. motif + modifier
-        if !mod.isEmpty, let img = try? await once(prompt: "\(motif), \(mod)") { return img }
-        // 2. bare motif
-        if let img = try? await once(prompt: motif) { return img }
-        // 3. guaranteed-ish neutral scene
+        let m2 = motif2.trimmingCharacters(in: .whitespacesAndNewlines)
+        // With a changing line: both motifs (the tension of the transition). Without: one.
+        let base = m2.isEmpty ? motif : "\(motif) and \(m2)"
+        // 1. base + modifier
+        if !mod.isEmpty, let img = try? await once(prompt: "\(base), \(mod)") { return img }
+        // 2. base (both motifs, no modifier)
+        if let img = try? await once(prompt: base) { return img }
+        // 3. primary motif only (in case the two-motif combination tripped the filter)
+        if !m2.isEmpty, let img = try? await once(prompt: motif) { return img }
+        // 4. guaranteed-ish neutral scene
         return try await once(prompt: "a quiet meadow under a wide sky")
     }
 
