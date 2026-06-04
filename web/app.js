@@ -1994,7 +1994,27 @@ window.addEventListener("yijing:imagegen", refreshMeditationVisibility);
 // ——— Service Worker (Offline-Betrieb) ———
 
 if ("serviceWorker" in navigator) {
+  // Wenn ein neuer Worker die Kontrolle übernimmt (neuer Build), einmal frisch laden,
+  // damit nicht veraltete app.js/Daten hängen bleiben (WKWebView-Cache-Falle).
+  let swReloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (swReloaded) return;
+    swReloaded = true;
+    window.location.reload();
+  });
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("../sw.js").catch(() => {});
+    navigator.serviceWorker.register("../sw.js")
+      .then((reg) => reg.update())
+      .catch(() => {});
   });
 }
+
+// ——— Build-Kennung (dezent oben; nur wenn der Build-Schritt sie eingesetzt hat) ———
+const BUILD_ID = "__BUILD__";
+(() => {
+  const b = document.getElementById("buildBadge");
+  if (b && BUILD_ID !== "__" + "BUILD__") {
+    b.textContent = BUILD_ID;
+    b.hidden = false;
+  }
+})();

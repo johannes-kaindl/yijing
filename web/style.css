@@ -1633,3 +1633,20 @@ html.exporting.pdf-glossy body { background: var(--bg) !important; }
     color: var(--ink) !important;
   }
 }
+
+/* Build-Kennung — dezent oben rechts, nur in Dev-/Test-Builds sichtbar. */
+.build-badge {
+  position: fixed;
+  top: env(safe-area-inset-top, 0);
+  right: 0.4rem;
+  z-index: 9999;
+  font-size: 0.62rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  color: var(--ink-faint);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0 0 0.3rem 0.3rem;
+  pointer-events: none;
+  opacity: 0.75;
+}
+.build-badge[hidden] { display: none; }
