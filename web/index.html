@@ -64,7 +64,7 @@
               data-i18n-title="header.openSettings"
               data-i18n-aria="header.openSettings"
               title="Einstellungen" aria-label="Einstellungen"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button>
-      <h1>易經 <span class="subtle" data-i18n="doc.title">Yijing Orakel</span></h1>
+      <h1><span lang="zh">易經</span> <span class="subtle" data-i18n="doc.title">Yijing Orakel</span></h1>
       <button id="themeToggle" type="button" class="icon-btn"
               title="Erscheinungsbild umschalten" aria-label="Erscheinungsbild umschalten"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></button>
     </div>
@@ -102,7 +102,7 @@
       </div>
     </section>
 
-    <section class="reading" id="reading" hidden>
+    <section class="reading" id="reading" tabindex="-1" hidden>
       <div class="question-echo" id="questionEcho" hidden></div>
 
       <div class="hexagrams">
@@ -157,7 +157,7 @@
           <div class="thinking-body" id="interpThinking"></div>
         </details>
         <div class="interp-body" id="interpBody"></div>
-        <div class="interp-status" id="interpStatus"></div>
+        <div class="interp-status" id="interpStatus" role="status" aria-live="polite"></div>
         </div><!-- /#interpActive -->
       </section>
 
@@ -225,6 +225,7 @@
         <button id="readerPrev" type="button" class="ghost reader-step"
                 data-i18n-aria="reader.prev" aria-label="Vorheriges Hexagramm">←</button>
         <button id="readerIndexToggle" type="button" class="ghost reader-index-toggle"
+                data-i18n-aria="reader.index" aria-label="Übersicht aller 64 Hexagramme"
                 aria-expanded="false"><span id="readerPos" class="reader-pos">1 / 64</span></button>
         <button id="readerNext" type="button" class="ghost reader-step"
                 data-i18n-aria="reader.next" aria-label="Nächstes Hexagramm">→</button>
@@ -232,7 +233,7 @@
 
       <div class="reader-index" id="readerIndex" hidden></div>
 
-      <article class="hex-card reader-card" id="readerCard">
+      <article class="hex-card reader-card" id="readerCard" tabindex="-1">
         <div class="hex-figure"></div>
         <div class="hex-chinese"></div>
         <h2 class="hex-name"></h2>

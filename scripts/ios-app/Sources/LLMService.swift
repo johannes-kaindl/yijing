@@ -9,8 +9,10 @@
 // UNVERIFIED scaffold — not compiled here.
 
 import Foundation
+import os
 
 final class LLMService {
+    private static let log = Logger(subsystem: "page.codeberg.jkaindl.Yijing", category: "LLMService")
     private let engine: LLMEngine
     private let modelName: String
     // Single serial inference queue — the resident model serves one generation
@@ -55,11 +57,18 @@ final class LLMService {
                         responder.send(self.chunk(delta: ["content": token]))
                     })
                 responder.send(self.chunk(delta: [:], finishReason: "stop"))
+            } catch EngineError.message(let m) {
+                // Engine surfaced an already-localized, user-meaningful reason
+                // (e.g. context overflow) — show it; log keeps the full detail.
+                Self.log.error("on-device generation failed: \(m, privacy: .public)")
+                responder.send(self.errorChunk(m))
+                responder.send(self.chunk(delta: [:], finishReason: "stop"))
             } catch {
-                // Surface engine failures (e.g. context overflow, OOM/jetsam, load
-                // error) as a clean finish so web/llm.js shows an error and the
-                // user can fall back to a BYO endpoint.
-                responder.send(self.errorChunk("on-device generation failed: \(error)"))
+                // Don't leak raw framework error internals into the chat stream —
+                // show a clean message and log the real error so the user can fall
+                // back to a BYO endpoint.
+                Self.log.error("on-device generation failed: \(String(describing: error), privacy: .public)")
+                responder.send(self.errorChunk("Die Deutung konnte nicht erzeugt werden. Versuch es noch einmal oder nutze einen eigenen Endpunkt."))
                 responder.send(self.chunk(delta: [:], finishReason: "stop"))
             }
             responder.done()

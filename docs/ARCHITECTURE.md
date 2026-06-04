@@ -42,7 +42,7 @@ An overview of the structure and data flow of the Yijing oracle.
 
 ## Modules
 
-### `web/app.js` (~1000 lines)
+### `web/app.js` (~2100 lines)
 
 Main frontend module. Contains:
 

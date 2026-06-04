@@ -7,5 +7,14 @@
 	     choice on os_proc_available_memory regardless (see ModelLocator). -->
 	<key>com.apple.developer.kernel.increased-memory-limit</key>
 	<true/>
+	<!-- Mac App Store requires App Sandbox; these keys are inert on iOS. The
+	     loopback NWListener that serves the embedded web shell needs the server
+	     capability to bind; outbound (BYO endpoints, external links) needs client. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.network.server</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
 </dict>
 </plist>

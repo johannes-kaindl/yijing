@@ -266,9 +266,23 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
     // MARK: - Helpers
 
     private func fail(_ message: String) {
-        let alert = UIAlertController(title: "Yijing Orakel", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+        // fail() is called from viewDidLoad, before the view is in a window — a
+        // present() there is a silent no-op and the user sees only the dark
+        // background. Show the message inline instead, robust to lifecycle timing.
+        let label = UILabel()
+        label.text = message
+        label.textColor = UIColor(white: 0.85, alpha: 1)
+        label.font = .preferredFont(forTextStyle: .body)
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            label.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 32),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -32),
+        ])
     }
 }
 

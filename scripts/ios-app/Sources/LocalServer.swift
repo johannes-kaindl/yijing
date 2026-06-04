@@ -61,12 +61,17 @@ final class LocalServer {
                 l.stateUpdateHandler = { state in
                     switch state {
                     case .ready: ready = true; sem.signal()
-                    case .failed, .cancelled: sem.signal()
+                    // .waiting (e.g. transient bind failure) is treated as a soft
+                    // fail so the loop advances to the next port instead of parking.
+                    case .failed, .cancelled, .waiting: sem.signal()
                     default: break
                     }
                 }
                 l.start(queue: queue)
-                sem.wait()
+                // Bounded wait: an NWListener can park without ever signalling.
+                // start() runs on the main thread (from viewDidLoad), so an untimed
+                // wait is the classic 0x8badf00d watchdog hang — time it out instead.
+                if sem.wait(timeout: .now() + 2) == .timedOut { l.cancel(); continue }
                 if ready { listener = l; port = candidate; return true }
                 l.cancel()
             } catch { continue }

@@ -3,7 +3,8 @@
   --bg-card: #221f1a;
   --ink: #ece4d3;
   --ink-soft: #b8ad96;
-  --ink-faint: #847b66;
+  /* WCAG-AA: ~4.5:1 auf --bg/--bg-card (vorher #847b66 lag darunter). */
+  --ink-faint: #938974;
   --accent: #c79a4a;
   --accent-soft: #8a6a30;
   /* Primär-Button: in beiden Themes leuchtendes Gold mit dunklem Text. */
@@ -33,8 +34,9 @@
   --bg-card: #fffdf7;
   --ink: #2a2620;
   --ink-soft: #5c5444;
-  --ink-faint: #8a8068;
-  --accent: #9c7220;
+  /* WCAG-AA auf hellem --bg/--bg-card (vorher #8a8068 / #9c7220 lagen darunter). */
+  --ink-faint: #6f6852;
+  --accent: #7a5a18;
   --accent-soft: #bf9a52;
   --line: #ddd4bf;
   --danger: #c25f2a;
@@ -170,7 +172,8 @@ footer .footer-lang {
 }
 
 .ask textarea:focus {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent-soft);
 }
 
@@ -199,6 +202,21 @@ button {
 button:hover { background: #d8ae5e; }
 button:active { transform: translateY(1px); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Sichtbarer Tastatur-Fokus — einheitlich in --accent. :focus-visible greift nur
+   bei Tastatur-Navigation, nicht bei Maus/Touch (keine störenden Ringe beim Klick). */
+button:focus-visible,
+summary:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+.mode-btn:focus-visible,
+.reader-cell:focus-visible,
+[tabindex]:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 button.ghost {
   background: transparent;
@@ -1664,3 +1682,15 @@ html.exporting.pdf-glossy body { background: var(--bg) !important; }
   text-align: center;
 }
 .meditation-sig[hidden] { display: none; }
+
+/* ——— Reduce Motion ——— */
+/* Respektiert die System-Einstellung „Bewegung reduzieren": stoppt die
+   rotierenden Münzen, die Slide/Scale-Einblendungen und den dauerhaften
+   Denkprozess-Puls (vestibuläre Sicherheit, Apple-HIG-Review-Punkt). */
+@media (prefers-reduced-motion: reduce) {
+  .reading,
+  .reader,
+  .hex-line.appearing,
+  .coin { animation: none; }
+  .thinking-marker { animation: none; opacity: 1; }
+}

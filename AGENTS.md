@@ -181,8 +181,8 @@ or offer a migration.
 
 ## When you split the code
 
-`app.js` is, at ~1100 lines, at the upper end of what belongs in a single
-file. As it grows further, only split when a concrete feature
+`app.js` is, at ~2100 lines, well past the comfortable upper end of what
+belongs in a single file. As it grows further, only split when a concrete feature
 can be cleanly isolated — not prophylactically. Sensible cuts
 would be:
 

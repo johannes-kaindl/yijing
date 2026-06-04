@@ -112,7 +112,7 @@ Voraussetzung zum Bauen: Xcode Command Line Tools
 - **Chinesisches Schriftzeichen + Pīnyīn** pro Hexagramm
 - **Trigramme** mit Familie, Natur, Jahreszeit, Himmelsrichtung,
   Assoziationen
-- **Bildmeditation** (atmosphärische Stichworte) für 19 Hexagramme
+- **Bildmeditation** (atmosphärische Stichworte) für alle 64 Hexagramme
 - **KI-Interpretation** via lokalem LLM-Server (Ollama, MLX, LM Studio,
   vLLM, OpenClaw) mit Streaming, Reasoning-Steuerung und Markdown-
   Rendering

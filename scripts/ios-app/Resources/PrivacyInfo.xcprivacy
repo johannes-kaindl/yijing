@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Privacy manifest. Honest baseline: the app collects nothing, tracks
+	     nothing, and the native binary uses no required-reason APIs (verified:
+	     os_proc_available_memory is not on Apple's required-reason list).
+	     Re-audit when the llama.cpp SwiftPM package is linked, and ship a
+	     separate manifest with each future Widget / watchOS extension. -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

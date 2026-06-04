@@ -20,6 +20,11 @@
 	<string>1</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<!-- Export compliance: the app uses only exempt HTTPS/TLS, no custom or
+	     non-exempt cryptography. Declaring this once removes the manual
+	     "Does your app use encryption?" prompt on every App Store/TestFlight upload. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<!-- No LSRequiresIPhoneOS: Mac Catalyst forbids it, and this is one universal
 	     Info.plist for both iOS and Catalyst, so the key is omitted entirely (iOS
 	     accepts its absence; the App Store does not inject plist keys at submission).

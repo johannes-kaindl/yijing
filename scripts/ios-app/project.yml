@@ -46,6 +46,8 @@ targets:
         type: folder
       - path: WebContent/sw.js
       - path: Resources/Acknowledgements.md
+      # Privacy manifest — lands at the bundle resource root as PrivacyInfo.xcprivacy.
+      - path: Resources/PrivacyInfo.xcprivacy
       # App icon — single 1024px source (no alpha); Xcode derives all sizes.
       - path: Resources/Assets.xcassets
     settings:

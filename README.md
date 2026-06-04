@@ -110,7 +110,7 @@ Line Tools (`xcode-select --install`). Details:
 - **Chinese character + Pīnyīn** per hexagram
 - **Trigrams** with family, nature, season, cardinal direction,
   associations
-- **Image meditation** (atmospheric keywords) for 19 hexagrams
+- **Image meditation** (atmospheric keywords) for all 64 hexagrams
 - **AI interpretation** via a local LLM server (Ollama, MLX, LM Studio,
   vLLM, OpenClaw) with streaming, reasoning control and Markdown
   rendering
