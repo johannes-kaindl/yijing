@@ -268,9 +268,9 @@ function renderHexCard(card, hexData, lines, changingMask, linkable = false) {
   card.querySelector(".hex-name").textContent = hexNameForLang(hexData);
   const chinese = card.querySelector(".hex-chinese");
   chinese.innerHTML = `
-    <span class="ch-symbol">${escapeHTML(hexData.unicode)}</span>
-    <span class="ch-name">${escapeHTML(hexData.name_chinese)}</span>
-    <span class="ch-pinyin">${escapeHTML(hexData.pinyin)}</span>
+    <span class="ch-symbol" lang="zh">${escapeHTML(hexData.unicode)}</span>
+    <span class="ch-name" lang="zh">${escapeHTML(hexData.name_chinese)}</span>
+    <span class="ch-pinyin" lang="zh-Latn-pinyin">${escapeHTML(hexData.pinyin)}</span>
     <span class="ch-latin">· ${escapeHTML(hexData.name_latin)}</span>
   `;
   const tri = card.querySelector(".hex-trigrams");
@@ -294,6 +294,9 @@ function renderHexCard(card, hexData, lines, changingMask, linkable = false) {
     card.classList.add("hex-card-link");
     card.setAttribute("role", "link");
     card.setAttribute("tabindex", "0");
+    // Ohne aria-label verkettet role="link" alle Kind-Texte (Titel, Symbol,
+    // Pinyin, Trigramme) zu einem langen Namen — knapp den Hexagrammnamen geben.
+    card.setAttribute("aria-label", hexNameForLang(hexData));
     card.onclick = () => { window.location.hash = "#h=" + hexData.number; };
     card.onkeydown = (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -307,6 +310,7 @@ function renderHexCard(card, hexData, lines, changingMask, linkable = false) {
     card.onkeydown = null;
     card.removeAttribute("role");
     card.removeAttribute("tabindex");
+    card.removeAttribute("aria-label");
   }
 }
 
@@ -555,6 +559,9 @@ function showReading(question, lines, options = {}) {
 
   setTimeout(() => {
     els.reading.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Fokus folgt dem neuen Inhalt (Tastatur/Screen-Reader) — sonst bliebe er auf
+    // dem jetzt deaktivierten „Münzen werfen"-Button hängen (WCAG 2.4.3).
+    els.reading.focus({ preventScroll: true });
   }, 50);
 }
 
@@ -585,7 +592,12 @@ function showReadingFromEntry(entry) {
   }
 }
 
+// Generationszähler gegen Race: Wird die Frage während der Wurf-Animation
+// geändert und erneut geworfen, überholt der neue Lauf den alten — der alte
+// bricht ab, statt eine veraltete Lesung + einen Geister-Verlaufseintrag zu rendern.
+let castSeq = 0;
 function tossAnimated(question) {
+  const myCast = ++castSeq;
   els.castBtn.disabled = true;
   els.reading.hidden = false;
   els.questionEcho.hidden = !question.trim();
@@ -612,6 +624,7 @@ function tossAnimated(question) {
 
   let i = 0;
   const step = () => {
+    if (myCast !== castSeq) return; // ein neuer Wurf hat diesen überholt → abbrechen
     if (i >= 6) {
       showReading(question, lines);
       return;
@@ -1026,6 +1039,14 @@ function openReader(num = READER.current) {
   setNavActive(true);
   renderReaderIndex();
   renderReader(num);
+  // Fokus in die geöffnete Reader-Karte ziehen (Tastatur/Screen-Reader). Per rAF,
+  // damit es auch beim Kalt-Deeplink (#h=) nach dem load-Event greift (sonst setzt
+  // der Browser den Fokus nach „load" wieder auf body zurück). tabIndex neu setzen,
+  // weil renderHexCard (linkable=false) das statische tabindex-Attribut entfernt.
+  requestAnimationFrame(() => {
+    els.readerCard.tabIndex = -1;
+    els.readerCard.focus({ preventScroll: true });
+  });
 }
 
 function closeReader() {
@@ -1193,6 +1214,18 @@ async function runInterpretation() {
   interpretAbortCtrl = new AbortController();
   let buffer = "";
   let thinking = "";
+  // Render-Coalescing: das ganze Markdown-Buffer pro Token neu zu parsen ist
+  // O(n²)-DOM-Thrash. Stattdessen höchstens ein Render pro Animation-Frame.
+  let renderPending = false;
+  const flushInterp = () => {
+    renderPending = false;
+    els.interpBody.innerHTML = renderMarkdown(buffer);
+  };
+  const scheduleInterpRender = () => {
+    if (renderPending) return;
+    renderPending = true;
+    requestAnimationFrame(flushInterp);
+  };
   const t0 = performance.now();
   try {
     const client = makeClient(ep);
@@ -1206,7 +1239,7 @@ async function runInterpretation() {
       signal: interpretAbortCtrl.signal,
       onToken: (tok) => {
         buffer += tok;
-        els.interpBody.innerHTML = renderMarkdown(buffer);
+        scheduleInterpRender();
         // Status "… thinking" entfernen, sobald sichtbarer Output kommt.
         const cur = els.interpStatus.textContent;
         if (cur === t("llm.status.thinking")) {
@@ -1245,6 +1278,10 @@ async function runInterpretation() {
       console.error(e);
     }
   } finally {
+    // Einen evtl. noch ausstehenden Frame neutralisieren und final einmal rendern,
+    // damit die letzten Tokens (oder der Abbruch-Stand) garantiert sichtbar sind.
+    renderPending = false;
+    els.interpBody.innerHTML = renderMarkdown(buffer);
     interpretAbortCtrl = null;
     els.interpretBtn.hidden = false;
     els.stopInterpretBtn.hidden = true;
@@ -1425,12 +1462,24 @@ function openSettings() {
   }
 }
 
-function closeSettings() {
-  if (typeof els.settingsModal.close === "function") els.settingsModal.close();
-  else els.settingsModal.removeAttribute("open");
+// Persistenz + Refresh beim Schließen der Einstellungen. Trägt das 'close'-Event
+// des <dialog>, damit JEDER Schließweg (Button, Esc, Backdrop) speichert — sonst
+// ging z.B. der Reasoning-Default bei Esc/Backdrop verloren (Punkt 14).
+function persistSettings() {
   SystemPrompt.set(els.systemPromptInput.value);
   localStorage.setItem("yijing-default-thinking", els.defaultThinking.value);
   refreshEndpointSelect();
+  refreshInterpretationVisibility();
+}
+
+function closeSettings() {
+  if (typeof els.settingsModal.close === "function") {
+    els.settingsModal.close(); // löst 'close' aus → persistSettings() läuft dort
+  } else {
+    // Kein natives <dialog>: removeAttribute feuert kein 'close' → hier speichern.
+    els.settingsModal.removeAttribute("open");
+    persistSettings();
+  }
 }
 
 // Vorbelegung der URL passend zum Typ
@@ -1668,11 +1717,7 @@ els.clearHistoryBtn.addEventListener("click", () => {
 els.openSettingsBtn.addEventListener("click", openSettings);
 els.closeSettingsBtn.addEventListener("click", closeSettings);
 els.interpSetupConfigure?.addEventListener("click", openSettings);
-els.settingsModal.addEventListener("close", () => {
-  SystemPrompt.set(els.systemPromptInput.value);
-  refreshEndpointSelect();
-  refreshInterpretationVisibility();
-});
+els.settingsModal.addEventListener("close", persistSettings);
 els.newEpType.addEventListener("change", suggestUrlForType);
 els.newEpUrl.addEventListener("focus", suggestUrlForType);
 els.newEpUrl.addEventListener("input", updateMixedContentWarn);
