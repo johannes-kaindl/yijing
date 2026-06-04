@@ -1,0 +1,642 @@
+[
+{
+"number": 1,
+"binary": "111111",
+"name_de": "DAS SCHÖPFERISCHE",
+"name_en": "THE CREATIVE",
+"lead_de_neutral": "Das Schöpferische wirkt erhabenes Gelingen, fördernd durch Beharrlichkeit",
+"lead_de_historical": "Das Schöpferische wirkt erhabenes Gelingen, fördernd durch Beharrlichkeit",
+"lead_en_neutral": "The Creative works sublime success, furthering through perseverance",
+"lead_en_historical": "The Creative works sublime success, furthering through perseverance"
+},
+{
+"number": 2,
+"binary": "000000",
+"name_de": "DAS EMPFANGENDE",
+"name_en": "THE RECEPTIVE",
+"lead_de_neutral": "Das Empfangende wirkt erhabenes Gelingen, fördernd durch die Beharrlichkeit einer Stute.",
+"lead_de_historical": "Das Empfangende wirkt erhabenes Gelingen, fördernd durch die Beharrlichkeit einer Stute.",
+"lead_en_neutral": "The Receptive works sublime success, furthering through the perseverance of a mare.",
+"lead_en_historical": "The Receptive works sublime success, furthering through the perseverance of a mare."
+},
+{
+"number": 3,
+"binary": "100010",
+"name_de": "DIE ANFANGSSCHWIERIGKEIT",
+"name_en": "DIFFICULTY AT THE BEGINNING",
+"lead_de_neutral": "Die Anfangsschwierigkeit wirkt erhabenes Gelingen.",
+"lead_de_historical": "Die Anfangsschwierigkeit wirkt erhabenes Gelingen.",
+"lead_en_neutral": "Difficulty at the Beginning works sublime success.",
+"lead_en_historical": "Difficulty at the Beginning works sublime success."
+},
+{
+"number": 4,
+"binary": "010001",
+"name_de": "DIE JUGENDTORHEIT",
+"name_en": "YOUTHFUL FOLLY",
+"lead_de_neutral": "Jugendtorheit hat Gelingen.",
+"lead_de_historical": "Jugendtorheit hat Gelingen.",
+"lead_en_neutral": "Youthful Folly has success.",
+"lead_en_historical": "Youthful Folly has success."
+},
+{
+"number": 5,
+"binary": "111010",
+"name_de": "DAS WARTEN (DIE ERNÄHRUNG)",
+"name_en": "WAITING (NOURISHMENT)",
+"lead_de_neutral": "Das Warten.",
+"lead_de_historical": "Das Warten.",
+"lead_en_neutral": "Waiting.",
+"lead_en_historical": "Waiting."
+},
+{
+"number": 6,
+"binary": "010111",
+"name_de": "DER STREIT",
+"name_en": "CONFLICT",
+"lead_de_neutral": "Der Streit: Du bist wahrhaftig und wirst gehemmt.",
+"lead_de_historical": "Der Streit: Du bist wahrhaftig und wirst gehemmt.",
+"lead_en_neutral": "Conflict: You are truthful and are obstructed.",
+"lead_en_historical": "Conflict: You are truthful and are obstructed."
+},
+{
+"number": 7,
+"binary": "010000",
+"name_de": "DAS HEER",
+"name_en": "THE ARMY",
+"lead_de_neutral": "D as Heer braucht Beharrlichkeit und einen starken Menschen. Heil ohne Makel.",
+"lead_de_historical": "D as Heer braucht Beharrlichkeit und einen starken Mann. Heil ohne Makel.",
+"lead_en_neutral": "The Army needs perseverance and a strong person.",
+"lead_en_historical": "The Army needs perseverance and a strong man."
+},
+{
+"number": 8,
+"binary": "000010",
+"name_de": "DAS ZUSAMMENHALTEN",
+"name_en": "HOLDING TOGETHER",
+"lead_de_neutral": "Das Zusammenhalten bringt Heil.",
+"lead_de_historical": "Das Zusammenhalten bringt Heil.",
+"lead_en_neutral": "Holding Together brings good fortune.",
+"lead_en_historical": "Holding Together brings good fortune."
+},
+{
+"number": 9,
+"binary": "111011",
+"name_de": "DES KLEINEN ZÄHMUNGSKRAFT",
+"name_en": "THE TAMING POWER OF THE SMALL",
+"lead_de_neutral": "Des Kleinen Zähmungskraft hat Gelingen. Dichte Wolken, kein Regen von unserm westlichen Gebiet.",
+"lead_de_historical": "Des Kleinen Zähmungskraft hat Gelingen. Dichte Wolken, kein Regen von unserm westlichen Gebiet.",
+"lead_en_neutral": "The Taming Power of the Small has success.",
+"lead_en_historical": "The Taming Power of the Small has success."
+},
+{
+"number": 10,
+"binary": "110111",
+"name_de": "DAS AUFTRETEN",
+"name_en": "TREADING",
+"lead_de_neutral": "Auftreten auf des Tigers Schwanz. Er beißt den Menschen nicht. Gelingen.",
+"lead_de_historical": "Auftreten auf des Tigers Schwanz. Er beißt den Menschen nicht. Gelingen.",
+"lead_en_neutral": "Treading upon the tail of the tiger.",
+"lead_en_historical": "Treading upon the tail of the tiger."
+},
+{
+"number": 11,
+"binary": "111000",
+"name_de": "DER FRIEDE",
+"name_en": "PEACE",
+"lead_de_neutral": "Der Friede. Das Klein geht hin, das Große kommt her. Heil! Gelingen!",
+"lead_de_historical": "Der Friede. Das Klein geht hin, das Große kommt her. Heil! Gelingen!",
+"lead_en_neutral": "Peace.",
+"lead_en_historical": "Peace."
+},
+{
+"number": 12,
+"binary": "000111",
+"name_de": "DIE STOCKUNG",
+"name_en": "STANDSTILL",
+"lead_de_neutral": "Die Stockung. Schlechte Menschen sind nicht fördernd für die Beharrlichkeit der Edlen. Das Große geht hin, das Kleine kommt herbei.",
+"lead_de_historical": "Die Stockung. Schlechte Menschen sind nicht fördernd für die Beharrlichkeit des Edlen. Das Große geht hin, das Kleine kommt herbei.",
+"lead_en_neutral": "Standstill. Bad people are not furthering for the perseverance of the noble. The great departs, the small approaches.",
+"lead_en_historical": "Standstill."
+},
+{
+"number": 13,
+"binary": "101111",
+"name_de": "GEMEINSCHAFT MIT MENSCHEN",
+"name_en": "FELLOWSHIP WITH MEN",
+"lead_de_neutral": "Gemeinschaft mit Menschen im Freien: Gelingen.",
+"lead_de_historical": "Gemeinschaft mit Menschen im Freien: Gelingen. Fördernd ist es, das große Wasser zu durchqueren. Fördernd ist des Edlen Beharrlichkeit.",
+"lead_en_neutral": "Fellowship with people in the open: success. Furthering it is to cross the great water. Furthering is the perseverance of the noble person.",
+"lead_en_historical": "Fellowship with men in the open: success."
+},
+{
+"number": 14,
+"binary": "111101",
+"name_de": "DER BESITZ VON GROSSEM",
+"name_en": "POSSESSION IN GREAT MEASURE",
+"lead_de_neutral": "Der Besitz von Großem: Erhabenes Gelingen.",
+"lead_de_historical": "Der Besitz von Großem: Erhabenes Gelingen.",
+"lead_en_neutral": "Possession in Great Measure: Sublime Success.",
+"lead_en_historical": "Possession in Great Measure: Sublime Success."
+},
+{
+"number": 15,
+"binary": "001000",
+"name_de": "DIE BESCHEIDENHEIT",
+"name_en": "MODESTY",
+"lead_de_neutral": "Bescheidenheit schafft Gelingen. Die edle Person bringt zu Ende.",
+"lead_de_historical": "Bescheidenheit schafft Gelingen. Der Edle bringt zu Ende.",
+"lead_en_neutral": "Modesty creates success. The noble person brings to completion.",
+"lead_en_historical": "Modesty creates success."
+},
+{
+"number": 16,
+"binary": "000100",
+"name_de": "DIE BEGEISTERUNG",
+"name_en": "ENTHUSIASM",
+"lead_de_neutral": "Die Begeisterung. Fördernd ist es, Gehilfen einzusetzen und Heere marschieren zu lassen.",
+"lead_de_historical": "Die Begeisterung. Fördernd ist es, Gehilfen einzusetzen und Heere marschieren zu lassen.",
+"lead_en_neutral": "Enthusiasm. It furthers one to install helpers and to set armies marching.",
+"lead_en_historical": "Enthusiasm. It furthers one to install helpers and to set armies marching."
+},
+{
+"number": 17,
+"binary": "100110",
+"name_de": "DIE NACHFOLGE",
+"name_en": "FOLLOWING",
+"lead_de_neutral": "Die Nachfolge hat erhabenes Gelingen. Fördernd ist Beharrlichkeit. Kein Makel.",
+"lead_de_historical": "Die Nachfolge hat erhabenes Gelingen. Fördernd ist Beharrlichkeit. Kein Makel.",
+"lead_en_neutral": "Following has supreme success.",
+"lead_en_historical": "Following has supreme success."
+},
+{
+"number": 18,
+"binary": "011001",
+"name_de": "DIE ARBEIT AM VERDORBENEN",
+"name_en": "WORK ON WHAT HAS BEEN SPOILED",
+"lead_de_neutral": "Die Arbeit am Verdorbenen hat erhabenes Gelingen.",
+"lead_de_historical": "Die Arbeit am Verdorbenen hat erhabenes Gelingen.",
+"lead_en_neutral": "Work on what has been spoiled has supreme success.",
+"lead_en_historical": "Work on what has been spoiled has supreme success."
+},
+{
+"number": 19,
+"binary": "110000",
+"name_de": "DIE ANNÄHERUNG",
+"name_en": "APPROACH",
+"lead_de_neutral": "Die Annäherung hat erhabenes Gelingen. Fördernd ist Beharrlichkeit. Kommt der achte Monat, so gibt's Unheil.",
+"lead_de_historical": "Die Annäherung hat erhabenes Gelingen. Fördernd ist Beharrlichkeit. Kommt der achte Monat, so gibt's Unheil.",
+"lead_en_neutral": "Approach has supreme success.",
+"lead_en_historical": "Approach has supreme success."
+},
+{
+"number": 20,
+"binary": "000011",
+"name_de": "DIE BETRACHTUNG (DER ANBLICK)",
+"name_en": "CONTEMPLATION (VIEW)",
+"lead_de_neutral": "Die Betrachtung. Die Waschung ist geschehen, aber noch nicht die Darbringung. Vertrauensvoll blicken sie zu ihr auf.",
+"lead_de_historical": "Die Betrachtung. Die Waschung ist geschehen, aber noch nicht die Darbringung. Vertrauensvoll blicken sie zu ihm auf.",
+"lead_en_neutral": "Contemplation.",
+"lead_en_historical": "Contemplation."
+},
+{
+"number": 21,
+"binary": "100101",
+"name_de": "DAS DURCHBEIßEN",
+"name_en": "BITING THROUGH",
+"lead_de_neutral": "Das Durchbeißen hat Gelingen. Fördernd ist es, Gericht walten zu lassen.",
+"lead_de_historical": "Das Durchbeißen hat Gelingen. Fördernd ist es, Gericht walten zu lassen.",
+"lead_en_neutral": "Biting through has success.",
+"lead_en_historical": "Biting through has success."
+},
+{
+"number": 22,
+"binary": "101001",
+"name_de": "DIE ANMUT",
+"name_en": "GRACE",
+"lead_de_neutral": "Anmut hat Gelingen. Im Kleinen ist es fördernd, etwas zu unternehmen.",
+"lead_de_historical": "Anmut hat Gelingen. Im Kleinen ist es fördernd, etwas zu unternehmen.",
+"lead_en_neutral": "Grace has success.",
+"lead_en_historical": "Grace has success."
+},
+{
+"number": 23,
+"binary": "000001",
+"name_de": "DIE ZERSPLITTERUNG",
+"name_en": "SPLITTING APART",
+"lead_de_neutral": "Die Zersplitterung. Nicht fördernd ist es, wohin zu gehen.",
+"lead_de_historical": "Die Zersplitterung. Nicht fördernd ist es, wohin zu gehen.",
+"lead_en_neutral": "Splitting apart. It does not further one to go anywhere.",
+"lead_en_historical": "Splitting apart."
+},
+{
+"number": 24,
+"binary": "100000",
+"name_de": "DIE WIEDERKEHRT (DIE WENDEZEIT)",
+"name_en": "RETURN (THE TURNING POINT)",
+"lead_de_neutral": "Die Wiederkehr.",
+"lead_de_historical": "Die Wiederkehr.",
+"lead_en_neutral": "Return.",
+"lead_en_historical": "Return."
+},
+{
+"number": 25,
+"binary": "100111",
+"name_de": "DIE UNSCHULD (DAS UNERWARTETE)",
+"name_en": "INNOCENCE (THE UNEXPECTED)",
+"lead_de_neutral": "Die Unschuld.",
+"lead_de_historical": "Die Unschuld.",
+"lead_en_neutral": "Innocence.",
+"lead_en_historical": "Innocence."
+},
+{
+"number": 26,
+"binary": "111001",
+"name_de": "DES GROSSEN ZÄHMUNGSKRAFT",
+"name_en": "THE TAMING POWER OF THE GREAT",
+"lead_de_neutral": "Des Großen Zähmungskraft. Fördernd ist Beharrlichkeit. Nicht zu Hause essen bringt Heil. Fördernd ist es, das große Wasser zu durchqueren.",
+"lead_de_historical": "Des Großen Zähmungskraft. Fördernd ist Beharrlichkeit. Nicht zu Hause essen bringt Heil. Fördernd ist es, das große Wasser zu durchqueren.",
+"lead_en_neutral": "The Taming Power of the Great.",
+"lead_en_historical": "The Taming Power of the Great."
+},
+{
+"number": 27,
+"binary": "100001",
+"name_de": "DIE MUNDWINKEL (DIE ERNÄHRUNG)",
+"name_en": "THE CORNERS OF THE MOUTH (NOURISHMENT)",
+"lead_de_neutral": "Die Mundwinkel. Beharrlichkeit bringt Heil. Sieh auf die Ernährung und womit einer selbst sucht seinen Mund zu füllen.",
+"lead_de_historical": "Die Mundwinkel. Beharrlichkeit bringt Heil. Sieh auf die Ernährung und womit einer selbst sucht seinen Mund zu füllen.",
+"lead_en_neutral": "The Corners of the Mouth.",
+"lead_en_historical": "The Corners of the Mouth."
+},
+{
+"number": 28,
+"binary": "011110",
+"name_de": "DES GROSSEN ÜBERGEWICHT",
+"name_en": "PREPONDERANCE OF THE GREAT",
+"lead_de_neutral": "Des Großen Übergewicht. Der Firstbalken biegt sich durch. Fördernd ist es, zu haben, wohin man gehe. Gelingen.",
+"lead_de_historical": "Des Großen Übergewicht. Der Firstbalken biegt sich durch. Fördernd ist es, zu haben, wohin man gehe. Gelingen.",
+"lead_en_neutral": "Preponderance of the Great.",
+"lead_en_historical": "Preponderance of the Great."
+},
+{
+"number": 29,
+"binary": "010010",
+"name_de": "DAS ABGRÜNDIGE, DAS WASSER",
+"name_en": "THE ABYSMAL, WATER",
+"lead_de_neutral": "Das wiederholte Abgründige. Wenn du wahrhaftig bist, so hast du im Herzen Gelingen, und was du tust, hat Erfolg.",
+"lead_de_historical": "Das wiederholte Abgründige. Wenn du wahrhaftig bist, so hast du im Herzen Gelingen, und was du tust, hat Erfolg.",
+"lead_en_neutral": "The Abysmal repeated.",
+"lead_en_historical": "The Abysmal repeated."
+},
+{
+"number": 30,
+"binary": "101101",
+"name_de": "DAS HAFTENE, DAS FEUER",
+"name_en": "THE CLINGING, FIRE",
+"lead_de_neutral": "Das Haftende. Fördernd ist Beharrlichkeit. Sie bringt Gelingen. Pflege der Kuh bringt Heil.",
+"lead_de_historical": "Das Haftende. Fördernd ist Beharrlichkeit. Sie bringt Gelingen. Pflege der Kuh bringt Heil.",
+"lead_en_neutral": "The Clinging.",
+"lead_en_historical": "The Clinging."
+},
+{
+"number": 31,
+"binary": "001110",
+"name_de": "DIE EINWIRKUNG, DIE WERBUNG",
+"name_en": "INFLUENCE (WOOING)",
+"lead_de_neutral": "Die Einwirkung. Gelingen. Fördernd ist Beharrlichkeit. Ein Mädchen nehmen bringt Heil.",
+"lead_de_historical": "Die Einwirkung. Gelingen. Fördernd ist Beharrlichkeit. Ein Mädchen nehmen bringt Heil.",
+"lead_en_neutral": "Influence. Success. Furthering through perseverance. To take a maiden to wife brings good fortune.",
+"lead_en_historical": "Influence."
+},
+{
+"number": 32,
+"binary": "011100",
+"name_de": "DIE DAUER",
+"name_en": "DURATION",
+"lead_de_neutral": "Gelingen. Kein Makel. Fördernd ist Beharrlichkeit. Fördernd ist, zu haben, wohin man gehe.",
+"lead_de_historical": "Gelingen. Kein Makel. Fördernd ist Beharrlichkeit. Fördernd ist, zu haben, wohin man gehe.",
+"lead_en_neutral": "Success. No blame. Furthering through perseverance. It furthers one to have somewhere to go.",
+"lead_en_historical": "Success."
+},
+{
+"number": 33,
+"binary": "001111",
+"name_de": "DER RÜCKZUG",
+"name_en": "RETREAT",
+"lead_de_neutral": "Der Rückzug. Gelingen. Im Kleinen ist fördernd Beharrlichkeit.",
+"lead_de_historical": "Der Rückzug. Gelingen. Im Kleinen ist fördernd Beharrlichkeit.",
+"lead_en_neutral": "Retreat.",
+"lead_en_historical": "Retreat."
+},
+{
+"number": 34,
+"binary": "111100",
+"name_de": "DES GROSSEN MACHT",
+"name_en": "THE POWER OF THE GREAT",
+"lead_de_neutral": "Des Großen Macht. Fördernd ist Beharrlichkeit",
+"lead_de_historical": "Des Großen Macht. Fördernd ist Beharrlichkeit",
+"lead_en_neutral": "The Power of the Great.",
+"lead_en_historical": "The Power of the Great."
+},
+{
+"number": 35,
+"binary": "000101",
+"name_de": "DER FORTSCHRITT",
+"name_en": "PROGRESS",
+"lead_de_neutral": "Der Fortschritt: Der starke Fürst wird geehrt durch Pferde in großer Menge. An einem Tage wird er dreimal empfangen",
+"lead_de_historical": "Der Fortschritt: Der starke Fürst wird geehrt durch Pferde in großer Menge. An einem Tage wird er dreimal empfangen",
+"lead_en_neutral": "Progress: The powerful prince is honored with horses in great numbers.",
+"lead_en_historical": "Progress: The powerful prince is honored with horses in great numbers."
+},
+{
+"number": 36,
+"binary": "101000",
+"name_de": "DIE VERFINSTERUNG DES LICHTS",
+"name_en": "THE DARKENING OF THE LIGHT",
+"lead_de_neutral": "Die Verfinsterung des Lichts. Fördernd ist es, in der Not beharrlich zu sein.",
+"lead_de_historical": "Die Verfinsterung des Lichts. Fördernd ist es, in der Not beharrlich zu sein.",
+"lead_en_neutral": "The Darkening of the Light.",
+"lead_en_historical": "The Darkening of the Light."
+},
+{
+"number": 37,
+"binary": "101011",
+"name_de": "DIE SIPPE",
+"name_en": "THE FAMILY",
+"lead_de_neutral": "Die Sippe. Fördernd ist die Beharrlichkeit der Frau.",
+"lead_de_historical": "Die Sippe. Fördernd ist die Beharrlichkeit der Frau.",
+"lead_en_neutral": "The Family.",
+"lead_en_historical": "The Family."
+},
+{
+"number": 38,
+"binary": "110101",
+"name_de": "DER GEGENSATZ",
+"name_en": "OPPOSITION",
+"lead_de_neutral": "Der Gegensatz In kleinen Sachen Heil!",
+"lead_de_historical": "Der Gegensatz In kleinen Sachen Heil!",
+"lead_en_neutral": "Opposition.",
+"lead_en_historical": "Opposition."
+},
+{
+"number": 39,
+"binary": "010100",
+"name_de": "DAS HEMMNIS",
+"name_en": "OBSTRUCTION",
+"lead_de_neutral": "Das Hemmnis.",
+"lead_de_historical": "Das Hemmnis.",
+"lead_en_neutral": "Obstruction.",
+"lead_en_historical": "Obstruction."
+},
+{
+"number": 40,
+"binary": "001010",
+"name_de": "DIE BEFREIUNG",
+"name_en": "DELIVERANCE",
+"lead_de_neutral": "Die Befreiung.",
+"lead_de_historical": "Die Befreiung.",
+"lead_en_neutral": "Deliverance.",
+"lead_en_historical": "Deliverance."
+},
+{
+"number": 41,
+"binary": "110001",
+"name_de": "DIE MINDERUNG",
+"name_en": "DECREASE",
+"lead_de_neutral": "Minderung verbunden mit Wahrhaftigkeit wirkt erhabenes Heil ohne Makel.",
+"lead_de_historical": "Minderung verbunden mit Wahrhaftigkeit wirkt erhabenes Heil ohne Makel.",
+"lead_en_neutral": "Decrease combined with truthfulness brings sublime good fortune without blame.",
+"lead_en_historical": "Decrease combined with truthfulness brings sublime good fortune without blame."
+},
+{
+"number": 42,
+"binary": "100011",
+"name_de": "DIE MEHRUNG",
+"name_en": "INCREASE",
+"lead_de_neutral": "Die Mehrung. Fördernd ist es, etwas zu unternehmen. Fördernd ist es, das große Wasser zu durchqueren.",
+"lead_de_historical": "Die Mehrung. Fördernd ist es, etwas zu unternehmen. Fördernd ist es, das große Wasser zu durchqueren.",
+"lead_en_neutral": "Increase.",
+"lead_en_historical": "Increase."
+},
+{
+"number": 43,
+"binary": "111110",
+"name_de": "DER DURCHBRUCH (Die Entschlossenheit)",
+"name_en": "BREAK-THROUGH (Resoluteness)",
+"lead_de_neutral": "Der Durchbruch.",
+"lead_de_historical": "Der Durchbruch.",
+"lead_en_neutral": "Break-through.",
+"lead_en_historical": "Break-through."
+},
+{
+"number": 44,
+"binary": "011111",
+"name_de": "DAS ENTGEGENKOMMEN",
+"name_en": "COMING TO MEET",
+"lead_de_neutral": "Das Entgegenkommen. Das Mädchen ist mächtig. Man soll ein solches Mädchen nicht heiraten.",
+"lead_de_historical": "Das Entgegenkommen. Das Mädchen ist mächtig. Man soll ein solches Mädchen nicht heiraten.",
+"lead_en_neutral": "Coming to meet. The maiden is powerful. One should not marry such a maiden.",
+"lead_en_historical": "Coming to meet."
+},
+{
+"number": 45,
+"binary": "000110",
+"name_de": "DIE SAMMLUNG",
+"name_en": "GATHERING TOGETHER",
+"lead_de_neutral": "Die Sammlung.",
+"lead_de_historical": "Die Sammlung.",
+"lead_en_neutral": "Gathering Together.",
+"lead_en_historical": "Gathering Together."
+},
+{
+"number": 46,
+"binary": "011000",
+"name_de": "DAS EMPORDRINGEN",
+"name_en": "PUSHING UPWARD",
+"lead_de_neutral": "Das Empordringen hat erhabenes Gelingen. Man muß den großen Menschen sehen. Fürchte dich nicht! Aufbruch nach Süden bringt Heil.",
+"lead_de_historical": "Das Empordringen hat erhabenes Gelingen. Man muß den großen Mann sehen. Fürchte dich nicht! Aufbruch nach Süden bringt Heil.",
+"lead_en_neutral": "Pushing Upward has sublime success. One must see the great person. Fear not! Departure toward the south brings good fortune.",
+"lead_en_historical": "Pushing Upward has sublime success."
+},
+{
+"number": 47,
+"binary": "010110",
+"name_de": "DIE BEDRÄNGNIS (DIE ERSCHÖPFUNG)",
+"name_en": "OPPRESSION (EXHAUSTION)",
+"lead_de_neutral": "Die Bedrängnis. Gelingen. Beharrlichkeit. Der große Mensch wirkt Heil. Kein Makel. Wenn man etwas zu sagen hat, wird es nicht geglaubt.",
+"lead_de_historical": "Die Bedrängnis. Gelingen. Beharrlichkeit. Der große Mann wirkt Heil. Kein Makel. Wenn man etwas zu sagen hat, wird es nicht geglaubt.",
+"lead_en_neutral": "Oppression. Success. Perseverance. The great person works good fortune. No blame. If one has something to say, it is not believed.",
+"lead_en_historical": "Oppression."
+},
+{
+"number": 48,
+"binary": "011010",
+"name_de": "DER BRUNNEN",
+"name_en": "THE WELL",
+"lead_de_neutral": "Der Brunnen.",
+"lead_de_historical": "Der Brunnen.",
+"lead_en_neutral": "The Well.",
+"lead_en_historical": "The Well."
+},
+{
+"number": 49,
+"binary": "101110",
+"name_de": "DIE UMWÄLZUNG (DIE MAUSERUNG)",
+"name_en": "REVOLUTION (MOULTING)",
+"lead_de_neutral": "Die Umwälzung. Am eigenen Tag, da findest du Glauben. Erhabenes Gelingen, fördernd durch Beharrlichkeit. Die Reue schwindet.",
+"lead_de_historical": "Die Umwälzung. Am eigenen Tag, da findest du Glauben. Erhabenes Gelingen, fördernd durch Beharrlichkeit. Die Reue schwindet.",
+"lead_en_neutral": "Revolution.",
+"lead_en_historical": "Revolution."
+},
+{
+"number": 50,
+"binary": "011101",
+"name_de": "DER TIEGEL",
+"name_en": "THE CALDRON",
+"lead_de_neutral": "Der Tiegel. Erhabenes Heil. Gelingen.",
+"lead_de_historical": "Der Tiegel. Erhabenes Heil. Gelingen.",
+"lead_en_neutral": "The Caldron.",
+"lead_en_historical": "The Caldron."
+},
+{
+"number": 51,
+"binary": "100100",
+"name_de": "DAS ERREGENDE(DAS ERSCHÜTTERNDE, DER DONNER)",
+"name_en": "THE AROUSING (SHOCK, THUNDER)",
+"lead_de_neutral": "Das Erschüttern bringt Gelingen.",
+"lead_de_historical": "Das Erschüttern bringt Gelingen.",
+"lead_en_neutral": "Shock brings success.",
+"lead_en_historical": "Shock brings success."
+},
+{
+"number": 52,
+"binary": "001001",
+"name_de": "DAS STILLEHALTEN, DER BERG",
+"name_en": "KEEPING STILL, MOUNTAIN",
+"lead_de_neutral": "Stillehalten des Rückens, so daß man den Leib nicht mehr empfindet. Man geht in den Hof und sieht die Menschen dort nicht. Kein Makel.",
+"lead_de_historical": "Stillehalten seines Rückens, so daß er seinen Leib nicht mehr empfindet. Er geht in seinen Hof und sieht nicht seine Menschen. Kein Makel.",
+"lead_en_neutral": "Keeping still in the back, so that one no longer feels the body.",
+"lead_en_historical": "Keeping still in his back, so that he no longer feels his body."
+},
+{
+"number": 53,
+"binary": "001011",
+"name_de": "DIE ENTWICKLUNG (ALLMÄHLICHER FORTSCHRITT)",
+"name_en": "DEVELOPMENT (GRADUAL PROGRESS)",
+"lead_de_neutral": "Die Entwicklung. Das Mädchen wird verheiratet. Heil ! Fördernd ist Beharrlichkeit.",
+"lead_de_historical": "Die Entwicklung. Das Mädchen wird verheiratet. Heil ! Fördernd ist Beharrlichkeit.",
+"lead_en_neutral": "Development.",
+"lead_en_historical": "Development."
+},
+{
+"number": 54,
+"binary": "110100",
+"name_de": "DAS HEIRATENDE MÄDCHEN",
+"name_en": "THE MARRYING MAIDEN",
+"lead_de_neutral": "Das heiratende Mädchen. Unternehmungen bringen Unheil. Nichts, das fördernd wäre.",
+"lead_de_historical": "Das heiratende Mädchen. Unternehmungen bringen Unheil. Nichts, das fördernd wäre.",
+"lead_en_neutral": "The Marrying Maiden.",
+"lead_en_historical": "The Marrying Maiden."
+},
+{
+"number": 55,
+"binary": "101100",
+"name_de": "DIE FÜLLE",
+"name_en": "ABUNDANCE",
+"lead_de_neutral": "Die Fülle hat Gelingen. Der König erreicht sie. Sei nicht traurig; du mußt sein wie die Sonne am Mittag.",
+"lead_de_historical": "Die Fülle hat Gelingen. Der König erreicht sie. Sei nicht traurig; du mußt sein wie die Sonne am Mittag.",
+"lead_en_neutral": "Abundance has success.",
+"lead_en_historical": "Abundance has success."
+},
+{
+"number": 56,
+"binary": "001101",
+"name_de": "DER WANDERER",
+"name_en": "THE WANDERER",
+"lead_de_neutral": "Der Wanderer. Durch Kleinheit Gelingen. Dem Wanderer ist Beharrlichkeit von Heil.",
+"lead_de_historical": "Der Wanderer. Durch Kleinheit Gelingen. Dem Wanderer ist Beharrlichkeit von Heil.",
+"lead_en_neutral": "The Wanderer.",
+"lead_en_historical": "The Wanderer."
+},
+{
+"number": 57,
+"binary": "011011",
+"name_de": "DAS SANFTE(DAS EINDRINGLICHE, DER WIND)",
+"name_en": "THE GENTLE (THE PENETRATING, WIND)",
+"lead_de_neutral": "Das Sanfte. Durch Kleines Gelingen. Fördernd ist es, zu haben, wohin man geht. Fördernd ist es, den großen Menschen zu sehen.",
+"lead_de_historical": "Das Sanfte. Durch Kleines Gelingen. Fördernd ist es, zu haben, wohin man geht. Fördernd ist es, den großen Mann zu sehen.",
+"lead_en_neutral": "The Gentle. Success through what is small. It furthers one to have somewhere to go. It furthers one to see the great person.",
+"lead_en_historical": "The Gentle."
+},
+{
+"number": 58,
+"binary": "110110",
+"name_de": "DAS HEITERE, DER SEE",
+"name_en": "THE JOYOUS, LAKE",
+"lead_de_neutral": "Das Heitere. Gelingen. Günstig ist Beharrlichkeit.",
+"lead_de_historical": "Das Heitere. Gelingen. Günstig ist Beharrlichkeit.",
+"lead_en_neutral": "The Joyous.",
+"lead_en_historical": "The Joyous."
+},
+{
+"number": 59,
+"binary": "010011",
+"name_de": "DIE AUFLÖSUNG",
+"name_en": "DISPERSION (DISSOLUTION)",
+"lead_de_neutral": "Die Auflösung. Gelingen. Der König naht seinem Tempel. Fördernd ist es, das große Wasser zu durchqueren. Fördernd ist Beharrlichkeit.",
+"lead_de_historical": "Die Auflösung. Gelingen. Der König naht seinem Tempel. Fördernd ist es, das große Wasser zu durchqueren. Fördernd ist Beharrlichkeit.",
+"lead_en_neutral": "Dispersion.",
+"lead_en_historical": "Dispersion."
+},
+{
+"number": 60,
+"binary": "110010",
+"name_de": "DIE BESCHRÄNKUNG",
+"name_en": "LIMITATION",
+"lead_de_neutral": "Beschränkung. Gelingen. Bittere Beschränkung darf man nicht beharrlich üben.",
+"lead_de_historical": "Beschränkung. Gelingen. Bittere Beschränkung darf man nicht beharrlich üben.",
+"lead_en_neutral": "Limitation.",
+"lead_en_historical": "Limitation."
+},
+{
+"number": 61,
+"binary": "110011",
+"name_de": "INNERE WAHRHEIT",
+"name_en": "INNER TRUTH",
+"lead_de_neutral": "Innere Wahrheit. Schweine und Fische. Heil ! Fördernd ist es, das große Wasser zu durchqueren. Fördernd ist Beharrlichkeit.",
+"lead_de_historical": "Innere Wahrheit. Schweine und Fische. Heil ! Fördernd ist es, das große Wasser zu durchqueren. Fördernd ist Beharrlichkeit.",
+"lead_en_neutral": "Inner Truth.",
+"lead_en_historical": "Inner Truth."
+},
+{
+"number": 62,
+"binary": "001100",
+"name_de": "DES KLEINEN ÜBERGEWICHT",
+"name_en": "PREPONDERANCE OF THE SMALL",
+"lead_de_neutral": "Des Kleinen Übergewicht.",
+"lead_de_historical": "Des Kleinen Übergewicht.",
+"lead_en_neutral": "Preponderance of the Small.",
+"lead_en_historical": "Preponderance of the Small."
+},
+{
+"number": 63,
+"binary": "101010",
+"name_de": "NACH DER VOLLENDUNG",
+"name_en": "AFTER COMPLETION",
+"lead_de_neutral": "Gelingen im Kleinen. Fördernd ist Beharrlichkeit. Im Anfang Heil, am Ende Wirren.",
+"lead_de_historical": "Gelingen im Kleinen. Fördernd ist Beharrlichkeit. Im Anfang Heil, am Ende Wirren.",
+"lead_en_neutral": "Success in small matters.",
+"lead_en_historical": "Success in small matters."
+},
+{
+"number": 64,
+"binary": "010101",
+"name_de": "VOR DER VOLLENDUNG",
+"name_en": "BEFORE COMPLETION",
+"lead_de_neutral": "Vor der Vollendung.",
+"lead_de_historical": "Vor der Vollendung.",
+"lead_en_neutral": "Before Completion.",
+"lead_en_historical": "Before Completion."
+}
+]

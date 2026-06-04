@@ -1,0 +1,3 @@
+module OracleKit {
+    header "/Users/Shared/code/yijing/scripts/ios-app/OracleKit/.build/arm64-apple-macosx/debug/OracleKit.build/include/OracleKit-Swift.h"
+}
