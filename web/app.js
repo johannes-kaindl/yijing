@@ -1977,7 +1977,8 @@ function buildImageSignature(reading, req) {
   const res = reading.resultingHex;
   const nm = (h) => (h ? `${h.number} ${h.name_latin || h.name_de || ""}`.trim() : "?");
   const hexPart = req.motif2 ? `${nm(prim)} → ${nm(res)}` : nm(prim);
-  const motifs = req.motif2 ? `${req.motif}  +  ${req.motif2}` : req.motif;
+  // Räumliche Komposition: resultierendes Motiv vorn, primäres dahinter.
+  const motifs = req.motif2 ? `${req.motif2} ‹vorn› · ${req.motif} ‹hinten›` : req.motif;
   return `${hexPart} · ${req.modifier}\n${motifs}`;
 }
 
