@@ -15,6 +15,11 @@
  * Daten werden zur Laufzeit aus data/hexagrams[.en].json geladen.
  */
 
+// Build-Kennung — der iOS-Build-Schritt ersetzt den Platzhalter durch Commit+Zeit.
+// In der normalen Web-Fassung bleibt der Platzhalter → DEV_MODE = false.
+const BUILD_ID = "__BUILD__";
+const DEV_MODE = BUILD_ID !== "__" + "BUILD__";
+
 import {
   Endpoints,
   SystemPrompt,
@@ -163,6 +168,7 @@ const els = {
   genImageStatus: document.getElementById("genImageStatus"),
   genImageFigure: document.getElementById("genImageFigure"),
   genImageImg: document.getElementById("genImageImg"),
+  genImageSig: document.getElementById("genImageSig"),
   defaultThinking: document.getElementById("defaultThinking"),
   // Settings
   openSettingsBtn: document.getElementById("openSettings"),
@@ -572,6 +578,10 @@ function showReadingFromEntry(entry) {
     els.genImageImg.alt = t("image.alt");
     els.genImageFigure.hidden = false;
     if (els.genImageBtn) els.genImageBtn.textContent = t("image.regenerate");
+    if (els.genImageSig && entry.imageSig) {
+      els.genImageSig.textContent = entry.imageSig;
+      els.genImageSig.hidden = false;
+    }
   }
 }
 
@@ -673,6 +683,59 @@ function updateHistoryEntry(id, patch) {
   if (i === -1) return;
   h[i] = { ...h[i], ...patch };
   persistHistory(h);
+}
+
+// ——— Dev-Verlauf: kuratierte, schwierige Wandel-Kombinationen zum Durchklicken ———
+// (überschreibt den Verlauf; nur im Dev-Build per Tipp aufs Build-Badge)
+const DEV_COMBOS = [
+  { p: 42, r: 3,  q: "Wie beginne ich mein neues Projekt richtig?" },   // Baum + Setzling (Problemfall)
+  { p: 57, r: 59, q: "Wie finde ich Klarheit in dieser Lage?" },        // Wiese + Auflösung
+  { p: 40, r: 3,  q: "Wann löst sich mein langer Streit?" },            // Eis + Setzling (guter Fall)
+  { p: 1,  r: 2,  q: "Soll ich die Führung übernehmen?" },              // Adler + Feld
+  { p: 29, r: 30, q: "Wie komme ich aus dieser Krise heraus?" },        // dunkler Fluss + Laterne
+  { p: 51, r: 52, q: "Was bedeutet dieser plötzliche Schock?" },        // aufgeschreckte Vögel + Berg
+  { p: 18, r: 46, q: "Wie bringe ich die Sache wieder in Ordnung?" },   // Moos + Bambus (zwei subtile)
+  { p: 11, r: 12, q: "Hält der gute Zustand an?" },                     // Kirschbaum + kahler Baum
+  { p: 63, r: 64, q: "Bin ich schon am Ziel angekommen?" },            // Brücke + Fuchs auf Eis
+  { p: 24, r: 2,  q: "Ist die Wende endlich gekommen?" },              // Spross + Feld
+  { p: 55, r: 59, q: "Wie nutze ich diese Fülle am besten?" },         // Erntemond + wirbelnde Blätter
+  { p: 22, r: 36, q: "Was verbirgt sich hinter dem schönen Schein?" }, // Pfau + gedämpfte Laterne
+];
+
+// Linien konstruieren, die primär p in resultierend r wandeln: bits, die sich
+// unterscheiden, werden wandelnde Linien. 6=altes Yin, 7=junges Yang, 8=junges Yin,
+// 9=altes Yang (siehe lineState).
+function devLinesForTransition(p, r) {
+  const binP = HEXAGRAMS[p].binary, binR = HEXAGRAMS[r].binary;
+  const lines = [];
+  for (let i = 0; i < 6; i++) {
+    const a = binP[i], b = binR[i];
+    lines.push(a === b ? (a === "1" ? 7 : 8) : (a === "1" ? 9 : 6));
+  }
+  return lines;
+}
+
+function populateDevHistory() {
+  if (!DEV_MODE || !HEXAGRAMS) return;
+  const now = Date.now();
+  const entries = DEV_COMBOS.map((c, idx) => {
+    const lines = devLinesForTransition(c.p, c.r);
+    const prim = HEXAGRAMS[c.p], res = HEXAGRAMS[c.r];
+    const changing = lines
+      .map((v, i) => (lineState(v).changing ? i + 1 : 0))
+      .filter((n) => n > 0);
+    return {
+      id: crypto.randomUUID(),
+      ts: now - idx * 1000,
+      question: c.q,
+      primary: { n: c.p, name: hexNameForLang(prim), unicode: prim.unicode },
+      changingLines: changing,
+      resulting: { n: c.r, name: hexNameForLang(res), unicode: res.unicode },
+      lines,
+    };
+  });
+  persistHistory(entries);
+  renderHistory();
 }
 
 function renderHistory(activeId = null) {
@@ -1900,13 +1963,26 @@ function resetMeditation() {
   if (els.genImageFigure) els.genImageFigure.hidden = true;
   if (els.genImageImg) els.genImageImg.removeAttribute("src");
   if (els.genImageStatus) els.genImageStatus.textContent = "";
+  if (els.genImageSig) { els.genImageSig.textContent = ""; els.genImageSig.hidden = true; }
   if (els.genImageBtn) {
     els.genImageBtn.disabled = false;
     els.genImageBtn.textContent = t("image.generate");
   }
 }
 
+// Dev-Signatur: zeigt unter dem Bild genau, was erzeugt wurde (Hex-Kombi + Prompt),
+// damit Feedback eindeutig zuordenbar ist. Nur im Dev-Build (Build-Badge sichtbar).
+function buildImageSignature(reading, req) {
+  const prim = reading.primaryHex;
+  const res = reading.resultingHex;
+  const nm = (h) => (h ? `${h.number} ${h.name_latin || h.name_de || ""}`.trim() : "?");
+  const hexPart = req.motif2 ? `${nm(prim)} → ${nm(res)}` : nm(prim);
+  const motifs = req.motif2 ? `${req.motif}  +  ${req.motif2}` : req.motif;
+  return `${hexPart} · ${req.modifier}\n${motifs}`;
+}
+
 let pendingImageRequest = null;
+let LAST_IMAGE_SIG = "";
 function requestMeditationImage() {
   if (!CURRENT_READING || !nativeBridge) return;
   const requestId = crypto.randomUUID();
@@ -1914,6 +1990,8 @@ function requestMeditationImage() {
   els.genImageBtn.disabled = true;
   els.genImageStatus.textContent = t("image.generating");
   const req = buildImageRequest(CURRENT_READING);
+  LAST_IMAGE_SIG = DEV_MODE ? buildImageSignature(CURRENT_READING, req) : "";
+  if (LAST_IMAGE_SIG) console.log("[yijing img] " + LAST_IMAGE_SIG.replace("\n", " | "));
   nativeBridge.postMessage({
     action: "generateImage",
     motif: req.motif,
@@ -1932,9 +2010,14 @@ window.__yijingImageResult = (requestId, dataURL) => {
   els.genImageStatus.textContent = "";
   els.genImageBtn.disabled = false;
   els.genImageBtn.textContent = t("image.regenerate");
+  // Dev-Signatur unter dem Bild (Hex-Kombi + Prompt) für eindeutiges Feedback.
+  if (els.genImageSig) {
+    els.genImageSig.textContent = LAST_IMAGE_SIG;
+    els.genImageSig.hidden = !LAST_IMAGE_SIG;
+  }
   // Im Verlaufseintrag mitsichern, damit das Bild beim erneuten Öffnen der Lesung
   // sofort da ist (persistHistory verwirft es bei Speicherknappheit zuerst).
-  if (CURRENT_READING?.id) updateHistoryEntry(CURRENT_READING.id, { image: dataURL });
+  if (CURRENT_READING?.id) updateHistoryEntry(CURRENT_READING.id, { image: dataURL, imageSig: LAST_IMAGE_SIG });
 };
 window.__yijingImageError = (requestId, message) => {
   if (requestId !== pendingImageRequest) return;
@@ -2009,12 +2092,12 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// ——— Build-Kennung (dezent oben; nur wenn der Build-Schritt sie eingesetzt hat) ———
-const BUILD_ID = "__BUILD__";
+// ——— Build-Kennung (dezent oben) + Dev-Verlauf laden per Tipp aufs Badge ———
 (() => {
   const b = document.getElementById("buildBadge");
-  if (b && BUILD_ID !== "__" + "BUILD__") {
+  if (b && DEV_MODE) {
     b.textContent = BUILD_ID;
     b.hidden = false;
+    b.addEventListener("click", populateDevHistory); // Tipp → Test-Verlauf laden
   }
 })();
