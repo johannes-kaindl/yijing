@@ -46,26 +46,26 @@ enum ImageGenerator {
     static func generateMeditationImage(motif: String, motif2: String, modifier: String) async throws -> Data {
         let mod = modifier.trimmingCharacters(in: .whitespacesAndNewlines)
         let m2 = motif2.trimmingCharacters(in: .whitespacesAndNewlines)
-        // On a changing line: a SPATIAL composition — the resulting motif (where the
-        // change leads, and often the one that gets swallowed) in the foreground, the
-        // primary behind it. Giving each its own depth plane keeps a visually weaker
-        // motif present instead of being eaten by a dominant one. The modifier
-        // (day-time / season from the question) sets the mood.
-        func prompt(change: Bool, useMod: Bool) -> String {
-            var p = change && !m2.isEmpty
-                ? "\(m2) in the foreground, with \(motif) in the background"
-                : motif
-            if useMod, !mod.isEmpty { p += ", \(mod)" }
-            return p
+        // Pass each motif + the modifier as SEPARATE concepts (not "A in front of B" —
+        // a fixed depth order is often nonsensical, e.g. a stream BEHIND a mountain).
+        // Separate concepts let ImageCreator arrange them sensibly on its own (birds
+        // up, rocks below) and weight them more evenly, so a weaker motif is less
+        // likely to be swallowed. With a changing line both motifs go in — the tension
+        // of the transition; without one, just the primary.
+        func concepts(change: Bool, useMod: Bool) -> [ImagePlaygroundConcept] {
+            var c: [ImagePlaygroundConcept] = [.text(motif)]
+            if change, !m2.isEmpty { c.append(.text(m2)) }
+            if useMod, !mod.isEmpty { c.append(.text(mod)) }
+            return c
         }
-        // 1. spatial composition + modifier
-        if let img = try? await render([.text(prompt(change: true, useMod: true))]) { return img }
-        // 2. spatial composition, no modifier
-        if !m2.isEmpty, let img = try? await render([.text(prompt(change: true, useMod: false))]) { return img }
+        // 1. both motifs + modifier
+        if let img = try? await render(concepts(change: true, useMod: true)) { return img }
+        // 2. both motifs, no modifier
+        if !m2.isEmpty, let img = try? await render(concepts(change: true, useMod: false)) { return img }
         // 3. primary motif + modifier (drop the change)
-        if let img = try? await render([.text(prompt(change: false, useMod: true))]) { return img }
+        if let img = try? await render(concepts(change: false, useMod: true)) { return img }
         // 4. primary motif only
-        if let img = try? await render([.text(prompt(change: false, useMod: false))]) { return img }
+        if let img = try? await render(concepts(change: false, useMod: false)) { return img }
         // 5. guaranteed-ish neutral scene
         return try await render([.text("a quiet meadow under a wide sky")])
     }
