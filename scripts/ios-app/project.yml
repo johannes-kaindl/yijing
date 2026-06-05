@@ -64,6 +64,8 @@ targets:
     dependencies:
       - package: OracleKit
       - target: YijingWidgets   # embedded WidgetKit extension
+      - target: YijingWatch     # embedded watchOS app (installs to the paired Watch)
+        embed: true
     # llama.cpp engine — uncomment after adding the package; MockEngine until then.
     #   - package: llama
 
@@ -92,9 +94,8 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO
 
-  # Standalone watchOS app: Heute (daily hexagram) + Werfen (full cast). Bundles
-  # the full hexagram JSON. NOT embedded in the iOS app target yet — built +
-  # verified standalone; the App-Store iOS-app embedding is a device-phase step.
+  # watchOS app: Heute (daily hexagram) + Werfen (full cast). Bundles the full
+  # hexagram JSON. Embedded in the iOS app (installs to the paired Apple Watch).
   YijingWatch:
     type: application
     platform: watchOS

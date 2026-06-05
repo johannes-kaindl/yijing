@@ -61,8 +61,10 @@ echo "→ Xcode-Projekt generieren (xcodegen)…"
 case "$MODE" in
   simulator)
     echo "→ Build für iOS-Simulator (kein Signing; AI = MockEngine)…"
+    # No -sdk: -destination drives per-target platforms so the embedded watchOS
+    # app builds for watchsimulator (not iphonesimulator).
     xcodebuild -project "$APPDIR/Yijing.xcodeproj" -scheme Yijing \
-      -configuration Release -sdk iphonesimulator \
+      -configuration Release \
       -destination 'generic/platform=iOS Simulator' \
       CODE_SIGNING_ALLOWED=NO build
     echo "✓ Simulator-Build fertig. In Xcode öffnen + auf einem Simulator starten:"
@@ -83,8 +85,10 @@ case "$MODE" in
   archive)
     : "${YIJING_TEAM_ID:?YIJING_TEAM_ID muss gesetzt sein (Apple Developer Team ID)}"
     echo "→ Archive für Gerät (Team $YIJING_TEAM_ID)…"
+    # No -sdk: -destination drives per-target platforms so the embedded watchOS
+    # app archives for watchOS (not iphoneos) — required for a valid App Store archive.
     xcodebuild -project "$APPDIR/Yijing.xcodeproj" -scheme Yijing \
-      -configuration Release -sdk iphoneos \
+      -configuration Release \
       -destination 'generic/platform=iOS' \
       DEVELOPMENT_TEAM="$YIJING_TEAM_ID" \
       -archivePath "$APPDIR/build/Yijing.xcarchive" archive
@@ -104,8 +108,11 @@ case "$MODE" in
     # itself (plain -allowProvisioningUpdates does NOT — it errors out with
     # "Device isn't registered"). Debug config — this is for on-device
     # functional verification (Apple FM / llama.cpp), not a release build.
+    # No -sdk here: the embedded watchOS app must build for watchOS, not iphoneos.
+    # -destination drives per-target platforms; forcing -sdk iphoneos would build
+    # the watch app for iOS (wrong CFBundleSupportedPlatforms / UIDeviceFamily).
     xcodebuild -project "$APPDIR/Yijing.xcodeproj" -scheme Yijing \
-      -configuration Debug -sdk iphoneos \
+      -configuration Debug \
       -destination "$DEST" \
       -derivedDataPath "$DD" \
       DEVELOPMENT_TEAM="$YIJING_TEAM_ID" \

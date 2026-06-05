@@ -58,7 +58,17 @@ struct ComplicationWidget: Widget {
         }
         .configurationDisplayName("Tages-Hexagramm")
         .description("Das Hexagramm des Tages.")
-        .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline, .accessoryCorner])
+        .supportedFamilies(Self.families)
+    }
+
+    // .accessoryCorner is watchOS-only; guard it so the file also type-checks when
+    // the iOS SDK sees it during the embedded cross-platform build.
+    static var families: [WidgetFamily] {
+        var f: [WidgetFamily] = [.accessoryCircular, .accessoryRectangular, .accessoryInline]
+        #if os(watchOS)
+        f.append(.accessoryCorner)
+        #endif
+        return f
     }
 }
 
