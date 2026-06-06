@@ -19,8 +19,18 @@ and try to fix them promptly.
   service worker behavior.
 - **Code injection** via manipulated localStorage, URL hash
   (`#r=<uuid>`) or endpoint configuration.
-- **macOS app bundle topics**: plist quirks, WKWebView allowlist,
-  uncontrolled URL schemes, listener bindings not on loopback.
+- **Native app bundle topics** (macOS, iOS/iPadOS/Mac Catalyst,
+  watchOS): plist quirks, WKWebView allowlist, uncontrolled URL
+  schemes, listener bindings not on loopback.
+- **The `yijing://` custom URL scheme** and its deep-link parsing into
+  the WebView (`yijing://h/<n>` -> `#h=<n>`) — untrusted-input parsing
+  of an externally supplied scheme.
+- **The App Group shared `UserDefaults`**
+  (`group.page.codeberg.jkaindl.Yijing`) — the trust boundary between
+  app, widget and watch that all read/write it.
+- **The `WKScriptMessageHandler` web->native settings bridge**
+  (`window.webkit.messageHandlers.yijing`) — an injection surface from
+  web content into native settings.
 
 If you are not sure whether something fits: better to report it.
 
@@ -74,7 +84,10 @@ synced keys) are in scope and especially welcome.
 
 ## Known Design Decisions That Are Not Bugs
 
-- **Markdown is first escaped, then sanitized.** Links only with
+- **Markdown is first escaped, then sanitized.** `escapeHTML()`
+  escapes `<`, `>`, `&`, the double-quote and the apostrophe — so
+  untrusted LLM output cannot break out of an attribute context (e.g.
+  out of an `href` into a live event handler). Links only with
   `http(s):` / `mailto:`. Even so: reports on renderer bypasses are
   welcome.
 - **`localStorage` is not encrypted.** This is browser-standard;
@@ -83,6 +96,9 @@ synced keys) are in scope and especially welcome.
   release DMGs launch with no Gatekeeper warning. A locally built,
   un-notarized app (a contributor without a certificate) still warns on
   first launch — expected; see `docs/MACOS-APP.md`.
+- **The iOS family ships `PrivacyInfo.xcprivacy` manifests** (no
+  tracking, no collected data, no required-reason APIs) and declares
+  `ITSAppUsesNonExemptEncryption=false`.
 - **`_archiv/yijing_1/.env`** historically contains a plaintext Google
   API key. The folder is excluded via `.gitignore` and never
   committed. If you have the _archiv locally: please rotate it.

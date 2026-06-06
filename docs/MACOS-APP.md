@@ -8,6 +8,11 @@ a dedicated window with embedded WebKit. No browser tab, no
 Python, no command-line tools on the user's side — the app brings
 everything along itself.
 
+> The Mac Catalyst build of the universal iOS app
+> (`scripts/ios-app/build-ios-app.sh catalyst`) is the long-term Mac path
+> and is slated to supersede this legacy AppKit app — see
+> [iOS app](IOS-APP.md).
+
 ## Building
 
 ```bash

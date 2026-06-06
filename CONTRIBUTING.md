@@ -63,6 +63,9 @@ Requirement: Python 3.9+. For the AI interpretation you additionally need Ollama
 an OpenAI-compatible local server (see [`docs/LLM.md`](docs/LLM.md)).
 To build the macOS app: Xcode Command Line Tools (see
 [`docs/MACOS-APP.md`](docs/MACOS-APP.md)).
+To build the iOS/watchOS family: full Xcode + `brew install xcodegen`,
+then `scripts/ios-app/build-ios-app.sh` (the `watch` mode builds the
+embedded watchOS app).
 
 ## PR checklist
 
@@ -77,6 +80,10 @@ To build the macOS app: Xcode Command Line Tools (see
       characters)
 - [ ] For macOS app changes: `./scripts/build-macos-app.sh` builds
       through, app starts, shows content, exits cleanly
+- [ ] For iOS/watch/OracleKit changes: `scripts/ios-app/build-ios-app.sh`
+      builds through AND the OracleKit XCTest suite is green (`swift test`
+      — King Wen completeness + daily determinism), mirroring
+      `node scripts/test-kingwen.mjs`
 - [ ] `CHANGELOG.md` updated (`[Unreleased]` section)
 - [ ] For changes to `web/`, `sw.js` or `data/`: note briefly in the PR
       comment so that the `pages` sync is not forgotten after the merge

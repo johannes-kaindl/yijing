@@ -7,6 +7,8 @@
 [![Codeberg release](https://img.shields.io/gitea/v/release/jkaindl/Yijing?gitea_url=https%3A%2F%2Fcodeberg.org&label=codeberg&color=green&style=flat-square)](https://codeberg.org/jkaindl/Yijing/releases)
 [![Status: active](https://img.shields.io/badge/status-active-success?style=flat-square)](https://codeberg.org/jkaindl/Yijing/commits/branch/main)
 [![Platform: macOS](https://img.shields.io/badge/macOS-11%2B%20·%20Universal-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/MACOS-APP.md)
+[![Platform: iOS](https://img.shields.io/badge/iOS%20·%20iPadOS-17%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
+[![Platform: watchOS](https://img.shields.io/badge/watchOS-10%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
 [![PWA](https://img.shields.io/badge/PWA-installable-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://jkaindl.codeberg.page/Yijing/)
 [![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#why-no-build-pipeline)
 
@@ -18,6 +20,14 @@ data. **Bilingual German / English** — UI and hexagram texts switchable
 (the English is an independent translation of the Wilhelm original, kept
 in Wilhelm's style, with classic I Ching vocabulary). Vanilla JavaScript,
 no build step, no backend, offline-capable as a PWA.
+
+Beyond the static site and the legacy macOS app, there is now a **universal
+native app for iOS, iPadOS and Mac (Catalyst)** built for the App Store. It
+hosts the same web app in a WebView and adds Apple-platform extras:
+**on-device AI interpretation** (Apple Foundation Models), **on-device
+meditation-image generation** (Apple Image Playground), a **daily-hexagram
+Home- and Lock-Screen widget**, and a **standalone Apple Watch app with
+complication**.
 
 <p align="center">
   <a href="https://jkaindl.codeberg.page/Yijing/">
@@ -40,6 +50,7 @@ pipeline: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 - [Live demo](#live-demo)
 - [Quick start](#quick-start)
 - [As a macOS app](#as-a-macos-app)
+- [As an iOS / iPadOS / Mac (Catalyst) app](#as-an-ios--ipados--mac-catalyst-app)
 - [Features](#features)
 - [Language (German / English)](#language-german--english)
 - [Local LLM connection](#local-llm-connection)
@@ -95,6 +106,29 @@ window, with no terminal and no browser. Build requirement: Xcode Command
 Line Tools (`xcode-select --install`). Details:
 [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 
+## As an iOS / iPadOS / Mac (Catalyst) app
+
+The universal native family (iOS 17 / iPadOS / Mac Catalyst + watchOS 10)
+lives under `scripts/ios-app/`. It is an [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+project — the `.xcodeproj` is generated, not committed. Prerequisites: the
+full **Xcode** (not just the Command Line Tools) and `brew install xcodegen`.
+Build with:
+
+```bash
+scripts/ios-app/build-ios-app.sh [simulator|catalyst|archive|device|watch]
+```
+
+`simulator` (default) runs it in the iOS Simulator, `catalyst` builds the
+Mac app (the long-term Mac path, meant to supersede the legacy AppKit app),
+`archive` produces an App Store archive, `device` builds and installs on a
+connected iPhone, and `watch` targets the watchOS app. The build embeds the
+**committed** `web/` + `data/`, so commit before building. Per-target detail
+and the build script reference: [`scripts/ios-app/README.md`](scripts/ios-app/README.md)
+and [`docs/IOS-APP.md`](docs/IOS-APP.md).
+
+Version tracks are deliberately separate: the macOS AppKit DMG is on the
+**1.5.x** line, the iOS/watch family on its own **1.0.x** line.
+
 ## Features
 
 - **Three-coin method** with the correct distribution (1/8 : 3/8 : 3/8 : 1/8)
@@ -110,10 +144,20 @@ Line Tools (`xcode-select --install`). Details:
 - **Chinese character + Pīnyīn** per hexagram
 - **Trigrams** with family, nature, season, cardinal direction,
   associations
-- **Image meditation** (atmospheric keywords) for all 64 hexagrams
-- **AI interpretation** via a local LLM server (Ollama, MLX, LM Studio,
-  vLLM, OpenClaw) with streaming, reasoning control and Markdown
-  rendering
+- **Image meditation** — atmospheric keywords on the web; in the native
+  app, an optional per-reading meditation image generated fully on-device
+  via Apple Image Playground
+- **Daily-hexagram widget** (native) — Home and Lock Screen, on
+  iOS / iPadOS / Mac, reloading at local midnight
+- **Apple Watch app + complication** (native) — the daily hexagram and a
+  full three-coin cast on the wrist; offline, no AI
+- **AI interpretation** with streaming, reasoning control and Markdown
+  rendering — on-device via Apple Foundation Models in the native app
+  (private, offline, no server needed), with a local LLM server (Ollama,
+  MLX, LM Studio, vLLM, OpenClaw) as the cross-platform path and the
+  fallback for ineligible devices
+- **`yijing://` deep link** (native) — open the reader directly on a
+  given hexagram from the widget
 - **History** of the last 20 readings in localStorage, individual
   readings shareable and restorable via URL hash
 - **Export** as Markdown or print-friendly PDF
@@ -219,8 +263,14 @@ mapping happens in the browser via a complete lookup table.
 yijing/
 ├── web/                       # frontend (HTML/CSS/JS, vanilla)
 ├── data/                      # 64 hexagrams + 8 trigrams as JSON
+│   └── widget-hexagrams.json  # slim per-hexagram slice for widget/watch
 ├── scripts/                   # build and dev-server scripts
-├── docs/                      # architecture, data, LLM, development, macOS app
+│   ├── build-macos-app.sh     # legacy AppKit macOS app (1.5.x)
+│   └── ios-app/               # universal iOS/iPadOS/Mac-Catalyst app (1.0.x)
+│       ├── OracleKit/         #   shared Swift core (casting, daily, data)
+│       ├── Widgets/           #   daily-hexagram widget
+│       └── Watch/             #   Apple Watch app + complication
+├── docs/                      # architecture, data, LLM, development, macOS + iOS apps
 ├── .gitea/                    # issue templates for Codeberg
 ├── _archiv/                   # earlier attempts — excluded via .gitignore
 ├── sw.js                      # service worker (offline caching)
@@ -243,6 +293,7 @@ yijing/
 | [`docs/LLM.md`](docs/LLM.md) | LLM backends, reasoning modes, CORS troubleshooting |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Development setup, tests, debugging, release process |
 | [`docs/MACOS-APP.md`](docs/MACOS-APP.md) | Building the macOS app, bundle layout, distribution |
+| [`docs/IOS-APP.md`](docs/IOS-APP.md) | iOS / iPadOS / Mac-Catalyst app, widgets, watch app, on-device AI |
 | [`AGENTS.md`](AGENTS.md) | Conventions for AI-driven sessions |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution notes, PR checklist, commit style |
 | [`SECURITY.md`](SECURITY.md) | Security reports, threat model, scope |

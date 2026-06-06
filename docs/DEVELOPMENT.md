@@ -7,6 +7,9 @@
 - Optional: Ollama or MLX for the AI interpretation
 - Optional: Xcode Command Line Tools — only for building the macOS app
   (`scripts/build-macos-app.sh`), see [`MACOS-APP.md`](MACOS-APP.md)
+- Optional: full Xcode + iOS SDK and `brew install xcodegen` — only for
+  building the iOS/iPadOS/Catalyst/watchOS family
+  (`scripts/ios-app/build-ios-app.sh`)
 
 No npm dependencies, no build tools.
 
@@ -47,14 +50,25 @@ yijing/
 │   ├── DATA.md
 │   ├── DEVELOPMENT.md
 │   ├── LLM.md
-│   └── MACOS-APP.md
+│   ├── MACOS-APP.md
+│   ├── screenshots/       # Store/README screenshots
+│   └── superpowers/       # Skill/workflow notes
 ├── data/
-│   ├── hexagrams.json     # 64 hexagrams normalized
-│   └── trigrams.json      # 8 trigrams as master data
+│   ├── hexagrams.json     # 64 hexagrams normalized (DE)
+│   ├── hexagrams.en.json  # 64 hexagrams normalized (EN)
+│   ├── trigrams.json      # 8 trigrams as master data
+│   └── widget-hexagrams.json # slim slice for widget/complication
 ├── scripts/
 │   ├── build_data.py      # Consolidate data from _archiv/
 │   ├── build-macos-app.sh # builds the macOS app into dist/
 │   ├── macos-app/         # Building blocks for the app build
+│   ├── ios-app/           # Native iOS/iPadOS/Catalyst/watchOS family
+│   │   ├── project.yml    # XcodeGen project (no committed .xcodeproj)
+│   │   ├── build-ios-app.sh # builds simulator/catalyst/watch/archive/device
+│   │   ├── OracleKit/     # Shared Swift logic core + XCTest
+│   │   ├── Widgets/       # WidgetKit app-extension
+│   │   ├── Watch/         # watchOS app
+│   │   └── WatchWidgets/  # watchOS complication
 │   └── serve.py           # Dev server with no-cache
 ├── serve.sh               # Wrapper for serve.py + auto-open
 ├── web/
@@ -94,11 +108,47 @@ Output:
 ```
 OK: 64 Hexagramme → data/hexagrams.json
 OK: 8 Trigramme → data/trigrams.json
-   Schriftzeichen: 64/64, Bild-Assoziationen: 19/64
+   Schriftzeichen: 64/64, Bild-Assoziationen: 2/64
 ```
 
 `Schriftzeichen: 64/64` and `Hexagramme: 64` must be exactly right. On
 discrepancies, debug the build script, do not patch the JSON by hand.
+
+### iOS / Widget / Watch (native family)
+
+The native family lives under `scripts/ios-app/` (XcodeGen project, no
+committed `.xcodeproj`). It builds via:
+
+```bash
+scripts/ios-app/build-ios-app.sh   # simulator (default)
+#                                  | catalyst | watch | archive | device
+```
+
+`catalyst` is the long-term Mac path (meant to supersede the legacy
+AppKit app). `archive`/`device` need `YIJING_TEAM_ID`; `device` takes an
+optional `YIJING_DEVICE_ID` to install+launch. The build embeds the
+*committed* `web/` + `data/` (`git archive HEAD`) — so **commit before
+building**.
+
+The family ships at **1.0.0 / build 1** and versions **independently of
+the macOS 1.5.x app** (two deliberate, separate version tracks). On a
+version bump, keep these in sync:
+
+- `scripts/ios-app/project.yml` — `MARKETING_VERSION` **and**
+  `CURRENT_PROJECT_VERSION`
+- all four `Info.plist` files (`Resources/`, `Widgets/`, `Watch/`,
+  `WatchWidgets/`) — `CFBundleShortVersionString` **and**
+  `CFBundleVersion`
+
+After native work: log it in `CHANGELOG.md` and run the OracleKit tests:
+
+```bash
+cd scripts/ios-app/OracleKit && swift test
+```
+
+This is the gate proving the Swift King-Wen port stays bit-identical to
+`web/app.js` and `scripts/build_data.py` (three canonical King-Wen copies
+must stay in sync).
 
 ### CSS
 

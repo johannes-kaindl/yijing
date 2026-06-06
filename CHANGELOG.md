@@ -5,8 +5,48 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+> **Two version tracks.** The legacy macOS AppKit DMG continues on the **1.5.x**
+> line; the new universal native family (iOS / iPadOS / Mac Catalyst / watchOS)
+> starts independently at **1.0.x**. The skew is deliberate — two separate
+> products with separate histories.
+
 ### Added
 
+- **OracleKit — shared Swift logic core** (`scripts/ios-app/OracleKit/`, a local
+  Swift package) consumed by all four native targets: three-coin casting, the
+  64-entry King-Wen table, the deterministic daily hexagram, Codable models, the
+  JSON loader, App-Group settings, and the language/register text accessors. This
+  makes a **third** canonical King-Wen copy (alongside `web/app.js` and
+  `scripts/build_data.py`) that must stay in sync. Guarded by a **9-test XCTest
+  parity gate** (`swift test` from `OracleKit/`) — King-Wen 64-binary
+  completeness (mirrors `scripts/test-kingwen.mjs`), line-state/target logic,
+  binary round-trip, cast range, and daily-hexagram determinism + cross-day
+  variance.
+- **Daily-hexagram widget** (WidgetKit extension) in `systemSmall`, `systemMedium`
+  and the three Lock-Screen accessory families (Rectangular / Circular / Inline):
+  a six-line SwiftUI figure + name + Judgment Kernsatz, in the app's
+  language/register, reloading at local midnight.
+- **Standalone watchOS app** — two flows, **Heute** (the deterministic daily
+  hexagram + its Judgment) and **Werfen** (a full three-coin cast with changing
+  lines, resulting hexagram, Judgment and changing-line texts) — plus a
+  **daily-hexagram complication**. Offline, no network, no AI; bundles the full
+  DE+EN hexagrams JSON. Embedded in the iOS app so it installs to the paired
+  Apple Watch.
+- **`yijing://h/<n>` deep link** — a custom URL scheme that opens the reader on
+  hexagram `n` (sets the WebView `#h=<n>`), cold-launch safe.
+- **App-Group settings bridge** — `app.js` `publishSettings()` posts the active
+  language/register to the native shell, which writes them into the App-Group
+  defaults and reloads widget timelines, so widgets and watch follow the app's
+  language/register.
+- **`scripts/build_widget_slice.py` → `data/widget-hexagrams.json`** — a slim
+  per-hexagram data slice (number/binary/both names + Judgment Kernsatz, both
+  languages × both registers) for the widget/complication memory budget. Its
+  Kernsatz trimming mirrors OracleKit `Texts.judgmentLead`.
+- **On-device AI in the native app** — interpretation via Apple Foundation
+  Models (served through the loopback OpenAI shim, so `web/llm.js` is unchanged)
+  on eligible hardware, falling back to BYO/remote endpoints otherwise; and an
+  optional per-reading **meditation image** generated fully on-device via Apple
+  Image Playground (foreground-only, eligible hardware only).
 - **iOS app scaffold** (`scripts/ios-app/`) — the start of the native iOS/iPadOS
   App Store build (roadmap #6). A UIKit WKWebView shell that bundles the web app
   over a loopback server (ported from the macOS app) plus an on-device LLM exposed
@@ -37,7 +77,24 @@ Versioning follows [SemVer](https://semver.org/).
   and after adding/removing an endpoint in settings, instead of only on the next
   cast.
 
+### Security
+
+- **`markdown.js` `escapeHTML()` now also escapes `"` and `'`** — a stored-XSS
+  hardening so an untrusted LLM Markdown link URL can no longer break out of an
+  `href` attribute into a live event handler.
+
 ### Fixed
+
+- **Web a11y/WCAG pass** — `aria-live` status region, focus management, AA
+  contrast bumps, `prefers-reduced-motion`, a shared `:focus-visible` ring,
+  aria-labels and `lang` attributes.
+- **Streaming-markdown render coalesced** O(n²) → O(n) via `requestAnimationFrame`.
+- **Cast/re-cast generation-token race guard** — a stale cast can no longer
+  overwrite a newer one.
+- **Native robustness** — an inline error label instead of a `UIAlertController`
+  from `viewDidLoad`, a bounded LocalServer wait (soft-fail instead of a watchdog
+  kill), and `LLMService` errors logged via `os_log` instead of streamed as raw
+  Swift errors into the SSE content.
 
 - **AI-interpretation placeholder localized** — the empty-state hint ("Pick an
   endpoint + model and click Interpret") was hardcoded in German in `style.css`

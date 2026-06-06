@@ -3,81 +3,68 @@ SPDX-FileCopyrightText: 2026 Johannes Kaindl
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-# Yijing Orakel — iOS app (scaffold)
+# Yijing Orakel — native app family (iOS / iPadOS / Mac Catalyst / watchOS)
 
-Native iOS/iPadOS **and Mac (via Mac Catalyst)** shell for the App Store — one
-universal target. Bundles the existing web app and adds **on-device AI
-interpretation** via an in-process engine (Apple Foundation Models by default)
-exposed as a loopback OpenAI endpoint — so `web/llm.js` is consumed **unchanged**.
+The shipped universal native family for the App Store: **five targets** sharing one
+local Swift core. The main app is a `WKWebView` shell that hosts the **same web app**
+over a loopback `LocalServer` + an OpenAI-compatible shim, so `web/llm.js` is consumed
+**unchanged**; on-device AI runs through Apple Foundation Models by default. Widgets,
+the watch app and a complication run **offline, no AI**, off the shared core.
 
-> **Status: builds + runs + real on-device AI verified in the iOS 26.5 Simulator
-> AND on a physical iPhone 16 Plus (iOS 26.5).**
-> Verified on 2026-06-02: the whole scaffold type-checks against the iOS 26.5 SDK,
-> `build-ios-app.sh` produces a valid `Yijing.app`, it installs + launches, the
-> bundled web app renders (full oracle UI via `LocalServer`→`WKWebView`), and the
-> loopback OpenAI shim (`GET /v1/models`, `POST /v1/chat/completions` SSE) works
-> end to end.
->
-> **Default engine = Apple Foundation Models ("Apple Intelligence"), and it runs
-> in the iOS 26.5 Simulator** — real on-device inference produced good structured
-> German hexagram interpretations, no ~2.4 GB download, no bundled model.
->
-> **Guardrails (measured on-device):** an "oracle / fortune-telling" framing
-> refused ~17% of a 12-hexagram risky set; reframing as literary commentary on a
-> historical wisdom text (now built into `FoundationModelsEngine`, DE/EN) dropped
-> that to 0/12 in a controlled run and rescued e.g. Hex 6 (Streit). BUT the
-> guardrail is finicky/content-sensitive, not a guarantee: a few of the heaviest
-> texts (e.g. Hex 49 Umwälzung/Revolution — overthrow, weapons) refuse *consistently*
-> (3/3) even reframed. Refusals are handled gracefully (clean error → switch to a
-> remote endpoint). So Apple FM covers most readings incl. most dark hexagrams; a
-> small residual of the heaviest ones needs the fallback.
->
-> `llama.cpp` + a bundled GGUF (`LlamaCppEngine`, the gated skeleton) remains the
-> documented FALLBACK for users who want 100% on-device coverage / no guardrails
-> (at the cost of the ~2.4 GB download).
->
-> Four real bugs were found + fixed via this testing: nested-struct-in-protocol,
-> missing `CFBundleExecutable`, an SSE `done()` race, and an ARC `[weak self]` drop
-> in `SSEResponder` (trailing `[DONE]` + close were dropped → web spinner hung).
->
-> **Physical-device confirmation (2026-06-03, iPhone 16 Plus, iOS 26.5, A18).**
-> `build-ios-app.sh device` ran end to end on real hardware: Development build,
-> the **first** iOS signing (minting the "Apple Development" cert + profile and
-> auto-registering the device), install + launch — all via CLI. The loopback
-> `/v1/models` reports **`apple-on-device`** (Apple Foundation Models, i.e. Apple
-> Intelligence is enabled and the model is resident), and `/v1/chat/completions`
-> streamed fluent, structured **German** interpretations. Guardrails on real
-> hardware matched the Simulator finding: across 7 runs over dark hexagrams
-> (36 Verfinsterung, 23 Zersplitterung, 29 Abgründiges, 47 Bedrängnis ×4) **6/7
-> were interpreted constructively**; one Hex-47 run refused mid-stream (then 3/3
-> clean on retry) — a small, *sporadic* residual, surfaced cleanly. Two real
-> build-script bugs were found + fixed here: a missing
-> `-allowProvisioningDeviceRegistration` (plain `-allowProvisioningUpdates` won't
-> register a brand-new device) and an unbraced `${YIJING_DEVICE_ID}` before a
-> multibyte `…` (tripped `set -u`).
->
-> **Still needs a physical iPhone** only for: the `llama.cpp` fallback path, an
-> in-app UI round-trip judged by eye (Cast→Interpret tap inside the WKWebView, vs.
-> the loopback path proven above), and the deeper on-device checks (worst-case
-> context, cancel-mid-stream, jetsam, background/foreground) — see the checklist.
+Version line **1.0.x** — independent of the legacy macOS AppKit DMG (1.5.x). Two
+deliberate, separate version tracks; the skew is intentional, not drift.
 
-> **Mac Catalyst verified (2026-06-02, macOS 26.5).** The single target now lists
-> `supportedDestinations: [iOS, macCatalyst]`, so the same app builds as a native
-> Mac app. Verified end to end: `build-ios-app.sh catalyst` builds clean against
-> the macOS 26.5 SDK (and the iOS Simulator build still passes — no regression);
-> the launched `.app` runs natively (arm64), its `LocalServer` serves the web UI on
-> the loopback port, **`/v1/models` reports `apple-on-device`** (Apple Foundation
-> Models is available under Catalyst on macOS 26 — the open question answered), and
-> a real `/v1/chat/completions` inference streamed a fluent German Hexagram-1
-> reading. The same finicky guardrail behaviour as on iOS shows here too (some
-> readings refuse; refusals are surfaced cleanly). `LSRequiresIPhoneOS` was removed
-> from `Info.plist` (Catalyst forbids it; one universal plist). Long-term this Mac
-> build supersedes the legacy AppKit app in `scripts/macos-app/`.
+> This is the practical, component-local README. The canonical, full reference
+> (design rationale, App-Review strategy, device gating, guardrail measurements,
+> verification log) is **`docs/IOS-APP.md`** — read that for the deep story; this
+> file is the lighter how-to for working in `scripts/ios-app/`.
 
-Design rationale (engine/model choice, App-Review strategy, device gating) lives
-in `.claude/specs/2026-06-02-ios-app-ondevice-llm-design.md`.
+## The five targets
 
-## Architecture
+XcodeGen project — `project.yml` is the source of truth; there is **no committed
+`.xcodeproj`** (it's regenerated by the build script; `Yijing.xcodeproj/` is local).
+
+| Target | Kind | Bundle ID | What it is |
+|---|---|---|---|
+| **Yijing** | app (iOS + macCatalyst) | `page.codeberg.jkaindl.Yijing` | `WKWebView` shell hosting the web app via loopback `LocalServer` + OpenAI shim. The Catalyst build (`… catalyst`) is the long-term Mac path and supersedes the legacy AppKit app in `scripts/macos-app/`. |
+| **YijingWidgets** | WidgetKit extension | `…Yijing.widgets` | Daily-hexagram widget: `systemSmall`, `systemMedium`, + the three Lock-Screen families (`accessoryRectangular/Circular/Inline`). Six-line SwiftUI figure + name + Judgment Kernsatz, in the app's language/register; timeline reloads at local midnight. |
+| **YijingWatch** | watchOS app | `…Yijing.watchkitapp` | Two flows: **Heute** (deterministic daily hexagram + its Judgment) and **Werfen** (full three-coin cast with changing lines → resulting hexagram name, Judgment, changing-line texts). No AI / no Image/Meaning/Trigram. Bundles the full DE+EN hexagrams JSON; offline. Embedded in the iOS app (`embed: true`) so it installs to the paired watch. |
+| **YijingWatchWidgets** | complication | `…Yijing.watchkitapp.widgets` | Daily-hexagram complication (accessory Inline/Rectangular/Circular + `accessoryCorner` guarded behind `#if os(watchOS)`). Bundles only the slim slice. |
+| **OracleKit** | local Swift package | — | The single shared logic core consumed by the four above. |
+
+## OracleKit — the shared core
+
+A **local Swift package** (`OracleKit/`, platforms iOS 17 / macCatalyst 17 / watchOS
+10 / macOS 14). One source of truth for casting, the daily hexagram, the data model,
+and text access — so the app, widget, watch and complication can't drift apart.
+
+| File | Role |
+|---|---|
+| `Casting.swift` | Three-coin cast + the 64-entry King-Wen binary→number table. |
+| `Daily.swift` | Deterministic daily hexagram = stable hash of the LOCAL `yyyy-MM-dd`, `%64+1`. Identical across app/widget/watch by construction; midnight reload. |
+| `Models.swift` | `Codable` types mirroring the JSON schema. |
+| `DataStore.swift` | JSON loader. |
+| `Settings.swift` | App-Group settings (`OracleSettings`). |
+| `Texts.swift` | Language/register text accessors incl. Judgment Kernsatz / lead trimming via `judgmentLead`. |
+| `SlimData.swift` | Widget-slice loader (`data/widget-hexagrams.json`). |
+
+### Tests = the King-Wen gate
+
+9 XCTest in `Tests/OracleKitTests/` (`CastingTests.swift`, `DailyTests.swift`):
+King-Wen 64-binary completeness (mirrors `scripts/test-kingwen.mjs`), line-state /
+target logic, binary round-trip, cast value range, daily-hexagram determinism +
+cross-day variance.
+
+```bash
+swift test            # run from scripts/ios-app/OracleKit/
+```
+
+This is the gate proving the Swift King-Wen port is **bit-identical** to the web
+`app.js` `BINARY_TO_KING_WEN` and `build_data.py` `KING_WEN_BINARY`. There are now
+**three canonical King-Wen copies that MUST stay in sync**: `web/app.js`,
+`scripts/build_data.py`, and `OracleKit/Sources/OracleKit/Casting.swift`.
+
+## On-device AI (the default)
 
 ```
 WKWebView  ──http──►  LocalServer (NWListener, loopback)
@@ -85,117 +72,159 @@ WKWebView  ──http──►  LocalServer (NWListener, loopback)
                         ├── GET  /v1/models             → model list
                         └── POST /v1/chat/completions   → SSE token stream
                                                               │
-                                                       LLMService → LLMEngine
-                                                              ├── MockEngine (Simulator / default)
-                                                              └── LlamaCppEngine (real, on device)
+                                                       LLMService → EngineSelector
+                                                              ├── FoundationModelsEngine  (DEFAULT, on-device)
+                                                              └── LlamaCppEngine          (documented fallback skeleton)
 ```
 
-- The shell mirrors `scripts/macos-app/` (`Yijing.swift` + `StaticServer.swift`).
-- `LocalServer` is `StaticServer` extended with POST-body reading + the `/v1`
-  SSE routes (same port → same-origin fetches, ATS satisfied by `http://localhost`).
-- The shell injects the on-device endpoint into `localStorage` so the web layer
-  auto-selects it (no change to `web/`). On ineligible devices nothing is
-  injected → the web app's #1 "set up AI" card + BYO-endpoint path take over.
+- **`Sources/FoundationModelsEngine.swift` is the DEFAULT engine** — Apple
+  Foundation Models / "Apple Intelligence" on-device (~3B model, iOS 26+, A17 Pro+
+  class). Served via the loopback OpenAI shim (`GET /v1/models`,
+  `POST /v1/chat/completions` SSE) so `web/llm.js` works unchanged.
+- `EngineSelector` picks FM when the device is eligible; **ineligible devices fall
+  back** to the existing BYO/remote local-LLM endpoints (Ollama / MLX / LM Studio).
+- Constraints: 4096-token context window; non-disableable content guardrails that
+  can refuse dark I-Ching themes — surfaced gracefully (clean error, switch to a
+  remote endpoint).
+- `Sources/LlamaCppEngine.swift` is a documented `llama.cpp` + GGUF **fallback
+  skeleton** for 100%-on-device coverage / no guardrails (at the cost of a large
+  model download); still unwired.
 
-## Files
+### On-device meditation image
 
-| File | Role | Confidence |
-|---|---|---|
-| `Sources/YijingApp.swift` | `@main` UIKit app delegate | high (tiny) |
-| `Sources/WebViewController.swift` | WKWebView, export→share-sheet, links, endpoint injection | high (ported from macOS) |
-| `Sources/LocalServer.swift` | loopback HTTP + `/v1` router + SSE | medium (new body/SSE paths) |
-| `Sources/SSEResponder.swift` | serialized SSE writes + disconnect→cancel | medium |
-| `Sources/LLMService.swift` | OpenAI request parse + SSE chunk format | medium |
-| `Sources/LLMEngine.swift` | engine protocol + `MockEngine` | high |
-| `Sources/LlamaCppEngine.swift` | **documented skeleton** (throws until wired) | guide only |
-| `Sources/ModelLocator.swift` | memory-gated model selection | medium (tune thresholds) |
-| `Resources/Info.plist`, `Yijing.entitlements` | ATS, increased-memory | verify on device |
-| `project.yml`, `build-ios-app.sh` | XcodeGen + build (simulator/catalyst/archive/device) | verified (sim + Catalyst + physical device) |
+`Sources/ImageGenerator.swift` — an optional per-reading "meditation image"
+generated fully on-device via **Apple Image Playground (`ImageCreator`)**,
+iOS/Catalyst 18.4+, eligible hardware only. **Foreground-only**
+(`backgroundCreationForbidden`), retry-once. The web layer shows the button only
+when `isAvailable`. This foreground-only constraint is exactly **why a
+meditation-image widget is out of scope**.
+
+## Settings bridge (so widgets/watch follow the app's language/register)
+
+`web/app.js` `publishSettings()` posts `{action:'settings', language, register}` over
+`window.webkit.messageHandlers.yijing` on `i18n:changed`, on register change, and at
+load. `WebViewController` writes both into the **App-Group** `UserDefaults` and calls
+`WidgetCenter.reloadAllTimelines()`. `OracleSettings.current()` reads them with a
+device-locale + neutral fallback. `app.js` MUST keep posting this for the widgets and
+watch to follow the app's language/register.
+
+App Group: **`group.page.codeberg.jkaindl.Yijing`** — shared by all four
+entitlements files (`Resources/`, `Widgets/`, `Watch/`, `WatchWidgets/`). Each App ID
+must be **assigned the group individually in the Apple Developer Portal**
+(auto-signing creates the App IDs but does NOT assign the group).
+
+## Deep link
+
+`yijing://h/<n>` custom URL scheme (`CFBundleURLTypes` in `Resources/Info.plist`) →
+`AppDelegate.application(open:)` → `WebViewController.openHexagram(n)` → WebView
+`location.hash = '#h=<n>'` (the Nachschlagewerk/reader on hexagram `n`). Cold-launch
+safe via a deferred `pendingHexagram` until the page's `didFinish`. Distinct from the
+web-only `#r=<uuid>` history links.
+
+## Design decisions (recorded so they aren't re-attempted)
+
+- Daily hexagram = **one** hexagram with **no** changing lines (questionless
+  contemplation). Watch **Werfen** = full mechanics (changing lines + resulting).
+- **No LLM/AI on widget or watch** — offline only. AI lives in the app foreground.
+- Widget + complication bundle **only** `data/widget-hexagrams.json` (memory budget);
+  the watch app bundles the **full** `hexagrams.json` + `.en.json`.
+- **Out of scope:** a meditation-image widget (Image Playground is foreground-only),
+  and a custom watch face (watchOS forbids third-party faces).
 
 ## Prerequisites
 
-- **Full Xcode** (from the App Store) — the Command Line Tools alone (which build
-  the macOS app via `swiftc`) do **not** include the iOS SDK and cannot build or
-  archive an iOS app. After installing: `sudo xcode-select -s /Applications/Xcode.app`.
+- **Full Xcode** (from the App Store) — the Command Line Tools alone (which build the
+  macOS AppKit app via `swiftc`) do **not** include the iOS SDK and cannot build or
+  archive this app. After installing: `sudo xcode-select -s /Applications/Xcode.app`.
 - **XcodeGen**: `brew install xcodegen`.
-- An Apple Developer Program membership (you have one) for device builds + submission.
+- An Apple Developer Program membership for `archive` / `device` builds.
 
-## Quick start (web shell + mock AI, no engine yet)
+## Build
+
+`scripts/ios-app/build-ios-app.sh <mode>` embeds the **committed** `web/` + `data/`
+via `git archive HEAD`, so **commit before building**.
 
 ```bash
 brew install xcodegen
-git commit -am "…"                      # build embeds the COMMITTED web/ + data/
-scripts/ios-app/build-ios-app.sh          # stage + xcodegen + Simulator build
-scripts/ios-app/build-ios-app.sh catalyst # …or a native Mac (Catalyst) build
-open scripts/ios-app/Yijing.xcodeproj     # run on a Simulator / as "My Mac (Mac Catalyst)"
+git commit -am "…"                          # build embeds the COMMITTED web/ + data/
+scripts/ios-app/build-ios-app.sh            # simulator (default)
+scripts/ios-app/build-ios-app.sh catalyst   # native Mac (Mac Catalyst) build
+scripts/ios-app/build-ios-app.sh watch      # watchOS-Simulator build
 ```
 
-In the Simulator you get the full offline oracle + reference reader, and the AI
-panel streams a **mock** interpretation (real inference needs Metal → a device).
+Signed modes (need `YIJING_TEAM_ID`; `YIJING_DEVICE_ID` also installs + launches):
 
-## Wiring the real on-device engine (the device path)
+```bash
+# UDID from: xcrun devicectl list devices
+YIJING_TEAM_ID=<team> YIJING_DEVICE_ID=<UDID> scripts/ios-app/build-ios-app.sh device
 
-1. **Add llama.cpp** — uncomment the `packages:`/`dependencies:` blocks in
-   `project.yml` and pin a tag you validate; or add a prebuilt `libllama`
-   XCFramework as an SPM `binaryTarget`. `#if canImport(llama)` then compiles
-   `LlamaCppEngine` instead of the mock (on device, not Simulator).
-2. **Implement `LlamaCppEngine.generate`** following the in-file step-by-step
-   guide (load → tokenize via the model's chat template → decode/sample/detokenize
-   loop → poll `isCancelled` → clear KV cache). Match the C API to your pinned
-   llama.cpp version.
-3. **Add the model** — ship `qwen3-4b-q4_k_m.gguf` (Apache-2.0; **verify the exact
-   repo LICENSE**) and optionally `qwen3-1.7b-q4_k_m.gguf`. Bundle them as
-   resources, or (recommended) deliver via an **Apple-Hosted Background Asset**
-   (iOS 26+) and resolve the path in `ModelLocator.resolve`. Fill in
-   `Resources/Acknowledgements.md` and surface it in-app.
-4. **Build to a physical iPhone** (A17 Pro+ / 8 GB). For a Development build that
-   signs, installs and launches on a connected device in one shot (the first run
-   mints the iOS "Apple Development" cert + profile and registers the device):
-   ```bash
-   # UDID from: xcrun devicectl list devices
-   YIJING_TEAM_ID=<your-team-id> YIJING_DEVICE_ID=<UDID> \
-     scripts/ios-app/build-ios-app.sh device
-   ```
-   …or build an App Store archive (Release, no install):
-   ```bash
-   YIJING_TEAM_ID=<your-team-id> scripts/ios-app/build-ios-app.sh archive
-   ```
+# App Store archive (Release, no install) — leaves the __BUILD__ placeholder so
+# the dev tooling / build badge is disabled:
+YIJING_TEAM_ID=<team> scripts/ios-app/build-ios-app.sh archive
+```
 
-## On-device verification checklist
+The first `device` build mints the "Apple Development" cert + profile and registers
+the device.
 
-- [x] Simulator: app builds, installs, launches; web shell loads (full oracle UI).
-- [x] **Physical device: app builds (first iOS signing + auto device registration),
-      installs + launches** on an iPhone 16 Plus (iOS 26.5) via `… device`.
-- [x] `/v1/models` + `/v1/chat/completions` SSE serve correctly (verified by probing
-      the running app's loopback port over an `iproxy` USB tunnel — in the Simulator
-      against `MockEngine`, on device against the real `apple-on-device` engine).
-- [x] **Real Apple-FM inference on device:** full **German** readings complete with
-      fluent, structured prose (multiple hexagrams incl. dark ones, streamed).
-- [x] **Guardrails on device:** 6/7 dark-hexagram runs interpreted constructively;
-      1 sporadic mid-stream refusal (Hex 47, then 3/3 clean) — surfaced cleanly.
-- [ ] In-app UI round-trip: tap Cast → Interpret → streamed text **in the WKWebView**
-      (the loopback path above is proven; this just confirms the UI wiring/ATS).
-- [ ] English reading prose quality judged on device (only DE exercised so far).
-- [ ] Worst-case prompt (Hex 1, all 6 changing lines + resulting) vs. Apple FM's
-      ~4096-token window (overflow is caught + surfaced; confirm the boundary).
-- [ ] Cancel mid-stream (reset/new reading) actually stops inference.
-- [ ] Memory: no jetsam kill under WebKit + resident model; background/foreground
-      transitions don't wedge the listener socket.
-- [ ] `llama.cpp` fallback path (Qwen3-4B GGUF) — still unwired; the above is all
-      the Apple-FM path.
+> **CRITICAL build rule:** do **not** add an explicit `-sdk` to the
+> `simulator` / `archive` / `device` `xcodebuild` invocations. The embedded watchOS
+> app must build for watchOS via `-destination`; forcing `-sdk iphoneos` breaks it
+> (`WatchKitAppInvalidUIDeviceFamily`).
+
+## Versions & hardening
+
+- **Version policy.** Native family = **1.0.x** (`project.yml` `MARKETING_VERSION 1.0.0`
+  / `CURRENT_PROJECT_VERSION 1`; `CFBundleShortVersionString 1.0.0` /
+  `CFBundleVersion 1` in the Resources/Widgets/Watch/WatchWidgets Info.plist). The
+  legacy macOS AppKit DMG stays on 1.5.x — two separate tracks by design.
+- **Pre-App-Store hardening** (commit `a425a46`): `markdown.js` `escapeHTML()` now
+  also escapes `"` and `'` (stored-XSS fix); web a11y/WCAG pass; streaming-markdown
+  render O(n²)→O(n) via `requestAnimationFrame`; cast/re-cast token-race guard;
+  native robustness (inline error label instead of `UIAlertController` from
+  `viewDidLoad`, bounded `LocalServer` semaphore wait, `os_log` for LLM errors).
+  Entitlements: App Sandbox + `network.server`/`client` + increased-memory-limit.
+  `Info.plist`: `ITSAppUsesNonExemptEncryption=false` + an ATS loopback exception.
+  `PrivacyInfo.xcprivacy` on all four native targets (no tracking, no collected data,
+  no required-reason APIs). `CFBundleDisplayName` "Yijing Orakel". There is
+  deliberately **no** Content-Security-Policy — do not claim one.
+
+## Data pipeline (canonical run order)
+
+Run in order — each step depends on the previous:
+
+1. `python3 scripts/build_data.py` → `data/hexagrams.json` + `data/hexagrams.en.json`
+   + `data/trigrams.json` (DE+EN corpus; drops `*_neutral` fields).
+2. `python3 scripts/apply_neutral.py` → re-merges committed gender-neutral overrides
+   (`scripts/sources/neutral_overrides.json`); a DE rebuild discards them, so this
+   MUST follow `build_data.py`.
+3. `python3 scripts/sync_image_seeds_to_en.py` → mirrors the language-independent
+   `image_association` seeds DE→EN, drops the obsolete `image_association_en`.
+4. `python3 scripts/build_widget_slice.py` → `data/widget-hexagrams.json` (~26 KB:
+   per-hexagram number/binary/both names + the Judgment Kernsatz, both languages ×
+   both registers). Its `lead()`/Kernsatz trimming is mirrored in OracleKit
+   `Texts.judgmentLead` — the two must stay in sync.
+
+Tracked outputs: `data/hexagrams.json`, `data/hexagrams.en.json`,
+`data/trigrams.json`, `data/widget-hexagrams.json`.
+(`image_association` is **2/64** — hexagrams 1 and 64.)
 
 ## App Review (don't treat as pre-cleared)
 
-- **4.2** (web-wrapper): lean on native share/export, native nav, and substantive
-  on-device AI as the "beyond a repackaged website" argument.
-- **4.3(b)** (Spam — names "fortune telling"): position as an **I-Ching
-  reference / study tool** (the Nachschlagewerk, the scholarly Wilhelm corpus,
-  offline privacy, on-device AI as the unique/high-quality differentiator). Set a
-  defensible **age rating** (not 4+) for unpredictable AI output.
+- **4.2** (web-wrapper): lean on native share/export, native nav, the widgets +
+  watch app + complication, and substantive on-device AI as the "beyond a
+  repackaged website" argument.
+- **4.3(b)** (Spam — names "fortune telling"): position as an **I-Ching reference /
+  study tool** (the Nachschlagewerk, the scholarly Wilhelm corpus, offline privacy,
+  on-device AI as the unique differentiator). Set a defensible **age rating** (not
+  4+) for unpredictable AI output.
+
+## Repo hygiene
+
+`OracleKit/.build` and `OracleKit/.swiftpm` are build caches, gitignored — never
+commit them.
 
 ## Licensing
 
-Open-source build: AGPL-3.0-or-later (see repo `LICENSE`). Official App Store
-builds are self-distributed under a separate license (`LICENSING.md` §3), source
-stays AGPL in the repo. Bundled model + engine attributions:
-`Resources/Acknowledgements.md`.
+Open-source build: AGPL-3.0-or-later (see repo `LICENSE`). Official App Store builds
+are self-distributed under a separate license (`LICENSING.md` §3); source stays AGPL
+in the repo. Bundled model + engine attributions: `Resources/Acknowledgements.md`.

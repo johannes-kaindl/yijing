@@ -7,6 +7,8 @@
 [![Codeberg-Release](https://img.shields.io/gitea/v/release/jkaindl/Yijing?gitea_url=https%3A%2F%2Fcodeberg.org&label=codeberg&color=green&style=flat-square)](https://codeberg.org/jkaindl/Yijing/releases)
 [![Status: aktiv](https://img.shields.io/badge/status-aktiv-success?style=flat-square)](https://codeberg.org/jkaindl/Yijing/commits/branch/main)
 [![Platform: macOS](https://img.shields.io/badge/macOS-11%2B%20·%20Universal-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/MACOS-APP.md)
+[![Platform: iOS](https://img.shields.io/badge/iOS%20·%20iPadOS-17%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
+[![Platform: watchOS](https://img.shields.io/badge/watchOS-10%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
 [![PWA](https://img.shields.io/badge/PWA-installierbar-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://jkaindl.codeberg.page/Yijing/)
 [![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#warum-keine-build-pipeline)
 
@@ -19,6 +21,14 @@ UI und Hexagramm-Texte umschaltbar (Englisch ist eine eigene
 Übersetzung des Wilhelm-Originals, im Wilhelm-Stil gehalten, klassische
 I-Ching-Vokabeln). Vanilla JavaScript, kein Build-Step, kein Backend,
 offline-fähig als PWA.
+
+Neben der Static-Site und der älteren macOS-App gibt es jetzt eine
+**universelle native App für iOS, iPadOS und Mac (Catalyst)** für den App
+Store. Sie zeigt dieselbe Web-App in einer WebView und ergänzt
+Apple-Plattform-Extras: **KI-Deutung on-device** (Apple Foundation
+Models), **Meditationsbild-Generierung on-device** (Apple Image
+Playground), ein **Tages-Hexagramm-Widget für Home- und Sperrbildschirm**
+sowie eine **eigenständige Apple-Watch-App mit Komplikation**.
 
 <p align="center">
   <a href="https://jkaindl.codeberg.page/Yijing/">
@@ -41,6 +51,7 @@ sofort, ohne Gatekeeper-Warnung. Hintergrund und die Signatur-Pipeline:
 - [Live-Demo](#live-demo)
 - [Schnellstart](#schnellstart)
 - [Als macOS-App](#als-macos-app)
+- [Als iOS- / iPadOS- / Mac-(Catalyst-)App](#als-ios---ipados---mac-catalyst-app)
 - [Features](#features)
 - [Sprache (Deutsch / English)](#sprache-deutsch--english)
 - [Lokale LLM-Anbindung](#lokale-llm-anbindung)
@@ -97,6 +108,31 @@ Orakel in einem eigenen Fenster, ganz ohne Terminal und ohne Browser.
 Voraussetzung zum Bauen: Xcode Command Line Tools
 (`xcode-select --install`). Details: [`docs/MACOS-APP.md`](docs/MACOS-APP.md).
 
+## Als iOS- / iPadOS- / Mac-(Catalyst-)App
+
+Die universelle native Familie (iOS 17 / iPadOS / Mac Catalyst + watchOS
+10) liegt unter `scripts/ios-app/`. Es ist ein [XcodeGen](https://github.com/yonaskolb/XcodeGen)-Projekt
+— das `.xcodeproj` wird generiert, nicht eingecheckt. Voraussetzungen: das
+**vollständige Xcode** (nicht nur die Command Line Tools) und
+`brew install xcodegen`. Bauen mit:
+
+```bash
+scripts/ios-app/build-ios-app.sh [simulator|catalyst|archive|device|watch]
+```
+
+`simulator` (Default) startet im iOS-Simulator, `catalyst` baut die
+Mac-App (der langfristige Mac-Weg, der die alte AppKit-App ablösen soll),
+`archive` erzeugt ein App-Store-Archiv, `device` baut und installiert auf
+einem angeschlossenen iPhone, `watch` zielt auf die watchOS-App. Der Build
+bettet das **eingecheckte** `web/` + `data/` ein — also vor dem Bauen
+committen. Details pro Target und die Build-Skript-Referenz:
+[`scripts/ios-app/README.md`](scripts/ios-app/README.md) und
+[`docs/IOS-APP.md`](docs/IOS-APP.md).
+
+Die Versionsstränge sind bewusst getrennt: die macOS-AppKit-DMG läuft auf
+der **1.5.x**-Linie, die iOS-/Watch-Familie auf ihrer eigenen
+**1.0.x**-Linie.
+
 ## Features
 
 - **Drei-Münzen-Methode** mit korrekter Verteilung (1/8 : 3/8 : 3/8 : 1/8)
@@ -112,10 +148,20 @@ Voraussetzung zum Bauen: Xcode Command Line Tools
 - **Chinesisches Schriftzeichen + Pīnyīn** pro Hexagramm
 - **Trigramme** mit Familie, Natur, Jahreszeit, Himmelsrichtung,
   Assoziationen
-- **Bildmeditation** (atmosphärische Stichworte) für alle 64 Hexagramme
-- **KI-Interpretation** via lokalem LLM-Server (Ollama, MLX, LM Studio,
-  vLLM, OpenClaw) mit Streaming, Reasoning-Steuerung und Markdown-
-  Rendering
+- **Bildmeditation** — atmosphärische Stichworte im Web; in der nativen
+  App ein optionales Meditationsbild pro Lesung, vollständig on-device
+  über Apple Image Playground generiert
+- **Tages-Hexagramm-Widget** (nativ) — Home- und Sperrbildschirm, auf
+  iOS / iPadOS / Mac, lädt zur lokalen Mitternacht neu
+- **Apple-Watch-App + Komplikation** (nativ) — das Tages-Hexagramm und
+  ein voller Drei-Münzen-Wurf am Handgelenk; offline, ohne KI
+- **KI-Interpretation** mit Streaming, Reasoning-Steuerung und
+  Markdown-Rendering — in der nativen App on-device über Apple Foundation
+  Models (privat, offline, ohne Server), mit einem lokalen LLM-Server
+  (Ollama, MLX, LM Studio, vLLM, OpenClaw) als plattformübergreifendem Weg
+  und Fallback für nicht geeignete Geräte
+- **`yijing://`-Deep-Link** (nativ) — öffnet das Nachschlagewerk direkt
+  beim jeweiligen Hexagramm aus dem Widget heraus
 - **Verlauf** der letzten 20 Würfe in localStorage, einzelne Würfe via
   URL-Hash teilbar und wiederherstellbar
 - **Export** als Markdown oder druckfreundliches PDF
@@ -221,8 +267,14 @@ Zuordnung erfolgt im Browser über eine vollständige Lookup-Tabelle.
 yijing/
 ├── web/                       # Frontend (HTML/CSS/JS, vanilla)
 ├── data/                      # 64 Hexagramme + 8 Trigramme als JSON
+│   └── widget-hexagrams.json  # schlanker Hexagramm-Slice für Widget/Watch
 ├── scripts/                   # Build- und Dev-Server-Skripte
-├── docs/                      # Architektur, Daten, LLM, Entwicklung, macOS-App
+│   ├── build-macos-app.sh     # ältere AppKit-macOS-App (1.5.x)
+│   └── ios-app/               # universelle iOS-/iPadOS-/Mac-Catalyst-App (1.0.x)
+│       ├── OracleKit/         #   gemeinsamer Swift-Kern (Wurf, Tag, Daten)
+│       ├── Widgets/           #   Tages-Hexagramm-Widget
+│       └── Watch/             #   Apple-Watch-App + Komplikation
+├── docs/                      # Architektur, Daten, LLM, Entwicklung, macOS- + iOS-App
 ├── .gitea/                    # Issue-Vorlagen für Codeberg
 ├── _archiv/                   # alte Anläufe — per .gitignore ausgeschlossen
 ├── sw.js                      # Service Worker (Offline-Caching)
@@ -245,6 +297,7 @@ yijing/
 | [`docs/LLM.md`](docs/LLM.md) | LLM-Backends, Reasoning-Modi, CORS-Fehlersuche |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | Entwicklungs-Setup, Tests, Debugging, Release-Prozess |
 | [`docs/MACOS-APP.md`](docs/MACOS-APP.md) | macOS-App bauen, Bundle-Aufbau, Weitergabe |
+| [`docs/IOS-APP.md`](docs/IOS-APP.md) | iOS-/iPadOS-/Mac-Catalyst-App, Widgets, Watch-App, On-Device-KI |
 | [`AGENTS.md`](AGENTS.md) | Konventionen für KI-getriebene Sessions |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Beitragshinweise, PR-Checkliste, Commit-Stil |
 | [`SECURITY.md`](SECURITY.md) | Sicherheits-Meldungen, Threat-Model, Scope |

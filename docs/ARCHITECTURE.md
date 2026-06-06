@@ -144,6 +144,36 @@ analogous to `serve.py`. Used by the bundled `Yijing.app` to
 serve the bundle resources (`web/`, `data/`, `sw.js`) locally to the
 WKWebView — no Python dependency on the user side.
 
+### `scripts/ios-app/OracleKit/` (Swift package)
+
+The shared logic core of the native iOS/iPadOS/Catalyst/watchOS family
+(under `scripts/ios-app/`, XcodeGen project `project.yml`). A single local
+Swift package consumed by all four native targets — the App, the
+WidgetKit extension (`YijingWidgets`), the watchOS app (`YijingWatch`), and
+the watch complication (`YijingWatchWidgets`). Platforms: iOS 17 /
+macCatalyst 17 / watchOS 10 / macOS 14.
+
+| File | Role |
+|---|---|
+| `Casting.swift` | Three-coin cast + the 64-entry King-Wen binary→number table |
+| `Daily.swift` | Deterministic daily hexagram (stable hash of the local `yyyy-MM-dd`, `%64+1`), identical across app/widget/watch by construction, midnight reload |
+| `Models.swift` | `Codable` types mirroring the JSON schema |
+| `DataStore.swift` | JSON loader |
+| `Settings.swift` | App-Group settings (`OracleSettings`) |
+| `Texts.swift` | Language/register text accessors incl. Judgment "Kernsatz"/lead trimming via `judgmentLead` |
+| `SlimData.swift` | Widget slice loader (`data/widget-hexagrams.json`) |
+
+`Casting.swift` is the **second canonical King-Wen copy in Swift**; together
+with `web/app.js` (`BINARY_TO_KING_WEN`) and `scripts/build_data.py`
+(`KING_WEN_BINARY`) there are now **three King-Wen tables that must stay in
+sync**. `Tests/OracleKitTests/` (`swift test`) is the gate proving the Swift
+port is bit-identical — King-Wen completeness, line-state/target logic,
+binary round-trip, cast value range, daily-hexagram determinism + cross-day
+variance. `Texts.judgmentLead` mirrors the `lead()`/Kernsatz trimming in
+`scripts/build_widget_slice.py` and the two must stay in sync.
+
+See [`docs/DEVELOPMENT.md`](DEVELOPMENT.md) for the native build modes.
+
 ## Data Flow of a Reading
 
 ```
@@ -209,18 +239,55 @@ name (`v2`, `v3`, …) and fallback logic.
 
 ## URL Scheme
 
-There is only one URL hash:
+Two URL hashes, both routed by `applyHashIfAny()`:
 
 ```
-#r=<uuid>
+#r=<uuid>   → restore a saved reading from localStorage
+#h=<n>      → open the Nachschlagewerk/reader on hexagram n (1–64)
 ```
 
-On load: the matching entry from `localStorage` is restored
-(`applyHashIfAny()`). On a reading the hash is set anew
-(`history.replaceState`, no scroll jump). On reset the hash is
-removed.
+On load the matching `#r=` entry from `localStorage` is restored. On a
+reading the hash is set anew (`history.replaceState`, no scroll jump). On
+reset the hash is removed. `#h=<n>` jumps the reader to a single hexagram,
+independent of any saved reading.
 
 The `hashchange` event triggers `applyHashIfAny()` for the browser back button.
+
+### Native deep link
+
+The native app registers a custom URL scheme (`CFBundleURLTypes` in
+`Resources/Info.plist`):
+
+```
+yijing://h/<n>
+```
+
+`AppDelegate.application(open:)` → `WebViewController.openHexagram(n)` sets
+the WebView's `location.hash = "#h=<n>"`, i.e. it maps onto the web-only
+`#h=` target above. Cold-launch safe via a deferred `pendingHexagram` until
+the page's `didFinish`. Distinct from the `#r=<uuid>` history links, which
+stay web-only.
+
+## Native Bridge
+
+When the web app runs inside a native WKWebView, `app.js` posts messages to
+`window.webkit.messageHandlers.yijing` (a no-op in a plain browser, where
+`window.webkit` is absent). The native side handles three actions:
+
+| Action | Message | Effect |
+|---|---|---|
+| `saveMarkdown` | `{action,filename,content}` | macOS AppKit app: save the Markdown export to a file |
+| `savePdf` | `{action,mode,filename}` | macOS AppKit app: render and save a PDF export |
+| `settings` | `{action,language,register}` | iOS family: persist the app's language/register for widgets/watch |
+
+The `settings` message is posted by `publishSettings()` on `i18n:changed`,
+on register change, and at load. In the iOS family `WebViewController` writes
+both fields into the **App-Group** `UserDefaults`
+(`group.page.codeberg.jkaindl.Yijing`) and calls
+`WidgetCenter.reloadAllTimelines()`. OracleKit's `OracleSettings.current()`
+reads them back, with a device-locale + neutral fallback, so the widget,
+watch app, and complication follow the app's language/register. `app.js` must
+keep posting this for the widgets/watch to stay in sync.
 
 ## Security Assumptions
 

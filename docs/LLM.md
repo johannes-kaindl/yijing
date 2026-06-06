@@ -120,6 +120,43 @@ The `OpenAI-compatible` type speaks the standard `/v1/models` +
 implements it — a self-hosted gateway, a privacy-friendly provider —
 plugs in the same way. No app change required.
 
+## On-device engine (native app)
+
+The native app family (`scripts/ios-app/`) adds an *in-app* engine on top
+of everything above — it does **not** replace the browser-side
+Ollama/MLX/LM-Studio/remote endpoints, it complements them. The app hosts
+the same web app in a WebView and exposes a loopback **OpenAI-compatible
+shim** (`GET /v1/models`, `POST /v1/chat/completions` SSE) right next to
+the page, so `web/llm.js` consumes it **unchanged** — to the web layer it
+looks like any other OpenAI-compatible endpoint.
+
+### Default: Apple Foundation Models (on-device)
+
+The shim is backed by `FoundationModelsEngine.swift` as the **default**
+engine: Apple Foundation Models / "Apple Intelligence", running fully
+on-device (~3B model, no network, no key). Requires **iOS 26+** on
+A17 Pro-class hardware or newer.
+
+- An `EngineSelector` picks Foundation Models when the device is
+  **eligible**.
+- On **ineligible** devices it falls back to the existing **BYO/remote
+  local-LLM endpoints** (Ollama / MLX / LM Studio, configured exactly as
+  above) — so the app still works everywhere.
+
+### Constraints
+
+- **4096-token context window.** The on-device model has a fixed, small
+  context — keep prompts compact.
+- **Non-disableable content guardrails.** Apple's on-device safety layer
+  cannot be turned off and may **refuse** darker I-Ching themes. This is
+  surfaced gracefully instead of failing silently.
+
+### Fallback skeleton: llama.cpp + GGUF
+
+A `llama.cpp` + GGUF path exists as a documented fallback skeleton — a
+bundled local model behind the same shim for cases where Foundation
+Models is unavailable and no BYO endpoint is configured.
+
 ## Reasoning/thinking mode
 
 Many modern models (Qwen3, Qwen3.5, Qwen3.6, Gemma4, DeepSeek, …)

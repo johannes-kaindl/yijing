@@ -39,8 +39,21 @@ layers, FastAPI wrappers). This attempt is intentionally different.
   necessary, prefer `node --check` and targeted ad-hoc smoke tests.
   Existing sanity test: `node scripts/test-kingwen.mjs` (King-Wen
   lookups + `data/hexagrams.json` consistency, no dependencies).
+  (OracleKit's XCTest suite is the one sanctioned exception — see
+  "[Tests / verification](#tests--verification)".)
 - **`_archiv/yijing_1/.env`** contains a plaintext Google API key. Never
   commit it to git, never remove the `_archiv/` `.gitignore` entry.
+- **Do not add an explicit `-sdk`** to the `build-ios-app.sh`
+  simulator/archive/device `xcodebuild` invocations. The embedded
+  watchOS app must build for watchOS via `-destination`; forcing
+  `-sdk iphoneos` breaks it (`WatchKitAppInvalidUIDeviceFamily`).
+- **Do not add a meditation/image widget.** Apple Image Playground
+  (`ImageCreator`) is foreground-only (`backgroundCreationForbidden`),
+  so it cannot run in a WidgetKit timeline.
+- **Do not attempt a custom watch face.** watchOS forbids third-party
+  faces; the daily hexagram ships as a complication, not a face.
+- **Never commit `scripts/ios-app/OracleKit/.build` or
+  `OracleKit/.swiftpm`** — they are build caches (gitignored).
 
 ## Code style guidelines
 
@@ -77,21 +90,38 @@ translation treadmill.
 
 ## Rebuild the data
 
+The canonical pipeline runs in order — each step depends on the previous:
+
 ```bash
-python3 scripts/build_data.py
+python3 scripts/build_data.py             # 1. DE+EN corpus + trigrams
+python3 scripts/apply_neutral.py          # 2. re-merge gender-neutral overrides
+python3 scripts/sync_image_seeds_to_en.py # 3. mirror image seeds DE->EN
+python3 scripts/build_widget_slice.py     # 4. slim widget/complication slice
 ```
+
+1. `build_data.py` produces `data/hexagrams.json` + `data/hexagrams.en.json`
+   + `data/trigrams.json` (drops `*_neutral` fields).
+2. `apply_neutral.py` re-merges the committed `*_neutral` / `*_en_neutral`
+   overrides from `scripts/sources/neutral_overrides.json` — a DE rebuild
+   discards them, so this **must** follow `build_data.py`.
+3. `sync_image_seeds_to_en.py` mirrors the language-independent
+   `image_association` seeds DE→EN and drops the obsolete
+   `image_association_en`.
+4. `build_widget_slice.py` produces `data/widget-hexagrams.json` (~26 KB:
+   per-hexagram number/binary/both names + the Judgment Kernsatz, both
+   languages × both registers; slim enough for the widget memory budget).
+   Its `lead()`/Kernsatz trimming mirrors OracleKit `Texts.judgmentLead` —
+   the two must stay in sync.
 
 Sources: `_archiv/Yijing_6/yijing/resources/hexagram_json/` (Wilhelm texts
 for the 64 hexagrams, two schema variants — see the build script),
 `_archiv/yijing_5/data/processed/` (Chinese names, trigram
 reference data), `_archiv/yijing_3/` (image associations from file names, only
-19/64 present).
+2/64 present — hexagrams 1 and 64).
 
-Output: `data/hexagrams.json` (~580 KB, all 64 hexagrams normalized),
-`data/trigrams.json` (8 trigrams with reference data).
-
-Both files **belong to the commit** (they are not build artifacts in the
-strict sense, but primary data assets of the app).
+Tracked outputs (all **belong to the commit** — primary data assets, not
+strict build artifacts): `data/hexagrams.json`, `data/hexagrams.en.json`,
+`data/trigrams.json`, `data/widget-hexagrams.json`.
 
 ## Branches: `main` and `pages`
 
@@ -136,7 +166,79 @@ native Swift app (`scripts/macos-app/Yijing.swift` +
 No Python and no command-line tools on the user's side — the app
 brings everything itself. The `CFBundleExecutable` **must** be a
 compiled binary — a shell script triggers a Rosetta prompt on Apple
-Silicon. Details: `docs/MACOS-APP.md`.
+Silicon. Details: `docs/MACOS-APP.md`. The newer iOS app also builds as a
+native Mac app via Mac Catalyst (`build-ios-app.sh catalyst`) and is the
+long-term Mac path; this legacy AppKit `Yijing.app` still exists but is
+slated to be superseded.
+
+## iOS / iPadOS / Mac / watchOS app (native family)
+
+A universal native family under `scripts/ios-app/` (iOS 17 / iPadOS /
+Mac Catalyst + watchOS 10), on its own **1.0.x** version line — deliberately
+separate from the macOS AppKit DMG's **1.5.x** line (two version tracks).
+The project is generated with **XcodeGen** from `scripts/ios-app/project.yml`;
+there is **no committed `.xcodeproj`**. Details: `scripts/ios-app/README.md`
+and `docs/IOS-APP.md`.
+
+Five targets:
+
+| Target | Bundle suffix | Role |
+|---|---|---|
+| **App** (iOS + macCatalyst) | `page.codeberg.jkaindl.Yijing` | WKWebView hosting the same web app via a loopback `LocalServer` + an OpenAI-compatible shim, so `web/llm.js` is consumed **unchanged**. |
+| **YijingWidgets** | `.widgets` | WidgetKit daily-hexagram widget (systemSmall/Medium + the three Lock-Screen accessory families); timeline reloads at local midnight. |
+| **YijingWatch** | `.watchkitapp` | watchOS app: "Heute" (deterministic daily hexagram) + "Werfen" (full three-coin cast). Offline, no network, no AI. Embedded in the iOS app (`embed:true`) so it installs to the paired watch. |
+| **YijingWatchWidgets** | `.watchkitapp.widgets` | daily-hexagram complication. |
+| **OracleKit** | (local Swift package) | The single shared logic core consumed by all four targets. |
+
+**OracleKit** (`scripts/ios-app/OracleKit/`) holds the shared Swift logic:
+`Casting.swift` (three-coin cast + the 64-entry King-Wen binary→number
+table), `Daily.swift` (deterministic daily hexagram), `Models.swift`
+(Codable, mirrors the JSON schema), `DataStore.swift` (JSON loader),
+`Settings.swift` (App-Group settings), `Texts.swift` (language/register
+accessors incl. `judgmentLead` Kernsatz trimming), `SlimData.swift` (widget
+slice loader).
+
+> There are now **three canonical King-Wen copies** that MUST stay in sync:
+> `web/app.js` `BINARY_TO_KING_WEN`, `scripts/build_data.py`
+> `KING_WEN_BINARY`, and OracleKit `Casting.swift`.
+
+**Build** — `scripts/ios-app/build-ios-app.sh` modes:
+`simulator` (default) | `catalyst` | `watch` | `archive` | `device`.
+Signing is configured by env vars: `YIJING_TEAM_ID` (required for
+`archive`/`device`) and optional `YIJING_DEVICE_ID` (install + launch on a
+device). The build embeds the **committed** `web/` + `data/` via
+`git archive HEAD` — so **commit before building**. `archive` mode leaves the
+`__BUILD__` placeholder so the build badge / dev tooling stays disabled.
+Prereqs: full Xcode + iOS SDK, `brew install xcodegen`.
+
+**App Group:** `group.page.codeberg.jkaindl.Yijing`, shared by all four
+entitlements files. Each App ID must be **assigned the group individually**
+in the Apple Developer Portal — auto-signing creates the App IDs but does
+**not** assign the group.
+
+**Settings bridge:** `web/app.js` `publishSettings()` posts
+`{action:'settings', language, register}` over
+`window.webkit.messageHandlers.yijing` (on `i18n:changed`, on register
+change, at load). `WebViewController` writes both into the App-Group
+`UserDefaults` and calls `WidgetCenter.reloadAllTimelines()`. `app.js` MUST
+keep posting this so widgets/watch follow the app's language/register.
+
+**Deep link:** `yijing://h/<n>` (custom URL scheme, `CFBundleURLTypes` in
+`Resources/Info.plist`) → `AppDelegate.application(open:)` →
+`WebViewController.openHexagram(n)` → WebView hash `#h=<n>` (the reader on
+hexagram *n*). Cold-launch safe via a deferred `pendingHexagram`. Distinct
+from the web-only `#r=<uuid>` history links.
+
+**Native architecture principles** (decisions recorded so they aren't
+re-attempted):
+
+- **Daily hexagram = one hexagram with NO changing lines** (questionless
+  contemplation). The watch's "Werfen" flow is the full mechanics.
+- **No LLM/AI on widget or watch** — offline only. AI lives in the app
+  foreground (on-device Apple Foundation Models by default, BYO/remote
+  local LLMs as fallback).
+- **Widget/complication bundle only `data/widget-hexagrams.json`** (memory
+  budget); the **watch** bundles the full `hexagrams.json` + `.en.json`.
 
 ## CORS — important setup note
 
@@ -196,12 +298,21 @@ Otherwise, better leave it.
 
 ## Tests / verification
 
-There is no unit test suite. Accepted. If you change something:
+There is no unit test suite **for the web app**. Accepted. If you change
+something:
 
 1. `node --check web/<file>.js` for syntax
 2. In the browser hard-reload, make a reading, test "Interpret" with both
    endpoints (Ollama + MLX)
 3. For data changes: `python3 scripts/build_data.py` must run through
    without errors, the counters in the output consistent
+
+**OracleKit is the one sanctioned exception to the
+"[no new test frameworks](#what-you-should-not-do)" rule.** It ships an
+XCTest suite (9 tests in `Tests/OracleKitTests/` — `CastingTests.swift`,
+`DailyTests.swift`). Run `swift test` from `scripts/ios-app/OracleKit/`.
+It is the King-Wen / daily-determinism **parity gate**: it proves the Swift
+port is bit-identical to `web/app.js` `BINARY_TO_KING_WEN` and
+`build_data.py` `KING_WEN_BINARY` (mirrors `scripts/test-kingwen.mjs`).
 
 For larger changes, add a short note to `CHANGELOG.md`.
