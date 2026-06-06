@@ -4,3 +4,6 @@ Yijing.xcodeproj/
 build/
 DerivedData/
 *.xcarchive
+# SwiftPM per-package metadata/cache (OracleKit)
+OracleKit/.swiftpm/
+.build/
