@@ -81,7 +81,7 @@ Array of 64 objects, indexed by King Wen order (`number`
 | `meaning` | Gutenberg | Wilhelm: introduction / meaning |
 | `judgment` | Gutenberg | Wilhelm: "the Judgment" incl. commentary |
 | `image` | Gutenberg | Wilhelm: "the Image" incl. commentary |
-| `image_association` | `yijing_3` (file names) | Atmospheric image keywords (2/64; see below) |
+| `image_association` | `build_data.py` `IMAGE_SEEDS` | Curated English meditation-image motif, one per hexagram (64/64; see below) |
 | `lines[i]` | Gutenberg | Changing lines — position, line text, commentary. Hexagrams 1 & 2 have a 7th entry, the "use the nine / use the six" all-moving oracle (`bedeutet das:`). |
 | `notes[i]` | Gutenberg | Wilhelm footnotes — `{anchor, marker, text}` (+ `text_en`). Rendered in the "Anmerkungen" block. |
 
@@ -184,11 +184,14 @@ Other known irregularities:
 - Hexagrams 26 and 42 are missing in `_archiv/yijing_5/data/processed/
   hexagram_df.csv`. Their characters and Pīnyīn are added manually in the build
   script as the `FALLBACK_NAMES` constant.
-- **`image_association` is now 2/64** (hexagrams 1 and 64). 17 of the original
-  19 `_archiv/yijing_3/` values were filename-truncated mid-word and
-  irrecoverable; they are dropped (`IMAGE_ASSOC_DROP`) rather than shown broken.
-  These are self-authored atmospheric prompts, not Wilhelm text — regenerate as
-  desired.
+- **`image_association` is a curated 64/64 set** of short English
+  meditation-image motifs — one distinct subject per hexagram (animal /
+  plant / object / sky) — maintained inline in `build_data.py` as the
+  `IMAGE_SEEDS` table and applied on every build. They are self-authored,
+  not Wilhelm text, and feed only the on-device Image Playground meditation
+  image (never shown as UI text). The earlier `_archiv/yijing_3/` filename
+  extraction (only 2/64 usable, the rest truncated mid-word) has been
+  superseded by these curated seeds.
 - **Hexagram 2 has no "DAS BILD" section in the Gutenberg edition.** Its image
   (`Die Erdbeschaffenheit ist Hingebung …`) is supplied from the canonical
   Wilhelm 1924 text via the documented `GAP_FILL` map in `build_data.py`.
@@ -279,4 +282,5 @@ differs from its base (no redundant copies); it does **not** force DE⟺EN parit
   historical source (>2000 years old).
 - **Trigram reference data**: from standard literature (Wilhelm,
   Vogelmann, etc.). Factual.
-- **Image associations** (19 of them): self-created, own prompts.
+- **Image associations** (all 64): self-created, curated as `IMAGE_SEEDS` in
+  `build_data.py`.

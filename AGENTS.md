@@ -116,8 +116,9 @@ python3 scripts/build_widget_slice.py     # 4. slim widget/complication slice
 Sources: `_archiv/Yijing_6/yijing/resources/hexagram_json/` (Wilhelm texts
 for the 64 hexagrams, two schema variants — see the build script),
 `_archiv/yijing_5/data/processed/` (Chinese names, trigram
-reference data), `_archiv/yijing_3/` (image associations from file names, only
-2/64 present — hexagrams 1 and 64).
+reference data), the curated `IMAGE_SEEDS` table in `build_data.py` (one short English
+meditation-image motif per hexagram, 64/64 — superseding the old
+`_archiv/yijing_3/` filename extraction).
 
 Tracked outputs (all **belong to the commit** — primary data assets, not
 strict build artifacts): `data/hexagrams.json`, `data/hexagrams.en.json`,

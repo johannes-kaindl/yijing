@@ -108,7 +108,7 @@ Output:
 ```
 OK: 64 Hexagramme → data/hexagrams.json
 OK: 8 Trigramme → data/trigrams.json
-   Schriftzeichen: 64/64, Bild-Assoziationen: 2/64
+   Schriftzeichen: 64/64, Bild-Assoziationen: 64/64
 ```
 
 `Schriftzeichen: 64/64` and `Hexagramme: 64` must be exactly right. On
