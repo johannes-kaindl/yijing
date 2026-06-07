@@ -188,7 +188,7 @@ const els = {
   savePromptPresetBtn: document.getElementById("savePromptPreset"),
   deletePromptPresetBtn: document.getElementById("deletePromptPreset"),
   fontSizeSelect: document.getElementById("fontSizeSelect"),
-  languageSelect: document.getElementById("languageSelect"),
+  languageToggle: document.getElementById("languageToggle"),
   registerSelect: document.getElementById("registerSelect"),
   // Nachschlagewerk / Reader
   navOracle: document.getElementById("navOracle"),
@@ -685,7 +685,7 @@ function persistHistory(h) {
 function saveHistory(entry) {
   const h = loadHistory();
   h.unshift(entry);
-  persistHistory(h.slice(0, 20));
+  persistHistory(capHistory(h));
 }
 
 /** Patcht einen vorhandenen Verlaufseintrag (z. B. die fertige KI-Deutung oder das
@@ -703,6 +703,26 @@ function updateHistoryEntry(id, patch) {
 function removeHistoryEntry(id) {
   if (!id) return;
   const h = loadHistory().filter((e) => e.id !== id);
+  persistHistory(h);
+  renderHistory(CURRENT_READING?.id || null);
+}
+
+/** Begrenzt den Verlauf auf 20 — angeheftete (pinned) bleiben IMMER erhalten,
+ *  vom Rest nur die neuesten. */
+function capHistory(h) {
+  const restBudget = Math.max(0, 20 - h.filter((e) => e.pinned).length);
+  let kept = 0;
+  return h.filter((e) => (e.pinned ? true : ++kept <= restBudget));
+}
+
+/** Heftet einen Verlaufseintrag an / löst ihn (angeheftete bleiben oben + vom
+ *  20-Limit ausgenommen). */
+function togglePin(id) {
+  if (!id) return;
+  const h = loadHistory();
+  const i = h.findIndex((e) => e.id === id);
+  if (i === -1) return;
+  h[i] = { ...h[i], pinned: !h[i].pinned };
   persistHistory(h);
   renderHistory(CURRENT_READING?.id || null);
 }
@@ -768,8 +788,11 @@ function renderHistory(activeId = null) {
   }
   els.history.hidden = false;
   els.historyList.innerHTML = "";
-  for (const entry of h) {
+  // Angeheftete zuerst (stabiler Sort → Recency innerhalb der Gruppen bleibt erhalten).
+  const sorted = [...h].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  for (const entry of sorted) {
     const li = document.createElement("li");
+    li.className = "hist-li" + (entry.pinned ? " pinned" : "");
     if (activeId && entry.id === activeId) li.classList.add("active");
     const date = new Date(entry.ts);
     const dateStr = date.toLocaleString(localeTag(), {
@@ -784,27 +807,86 @@ function renderHistory(activeId = null) {
       : `${entry.primary.unicode || ""} ${entry.primary.name}`;
     const href = entry.id ? `#r=${entry.id}` : "#";
     li.innerHTML = `
+      <button type="button" class="hist-act hist-act-pin" data-act="pin">${escapeHTML(entry.pinned ? t("history.unpin") : t("history.pin"))}</button>
+      <button type="button" class="hist-act hist-act-del" data-act="del">${escapeHTML(t("history.delete"))}</button>
       <a class="history-item" href="${href}">
         <span class="date">${dateStr}</span>
         <span class="q">${escapeHTML(entry.question || "—")}</span>
         <span class="h">${escapeHTML(hexStr)}</span>
       </a>
-      <button type="button" class="history-del" title="${escapeHTML(t("history.delete"))}" aria-label="${escapeHTML(t("history.delete"))}"><svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>
     `;
-    li.querySelector("a").addEventListener("click", (e) => {
-      e.preventDefault();
-      if (!entry.id) return;
-      // Hash setzen → hashchange-Handler übernimmt das Anzeigen
-      window.location.hash = `r=${entry.id}`;
-    });
-    const delBtn = li.querySelector(".history-del");
-    if (delBtn) delBtn.addEventListener("click", (e) => {
+    const link = li.querySelector(".history-item");
+    link.draggable = false; // sonst startet ein nativer Link-Drag statt des Swipes
+    li.querySelector(".hist-act-del").addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       removeHistoryEntry(entry.id);
     });
+    li.querySelector(".hist-act-pin").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      togglePin(entry.id);
+    });
+    wireHistorySwipe(li, link, entry);
     els.historyList.appendChild(li);
   }
+}
+
+// ——— Verlauf: Swipe-Reveal (links → Löschen, rechts → Anheften) ———
+let openSwipeLi = null;
+function closeSwipe(li) {
+  if (!li) return;
+  const link = li.querySelector(".history-item");
+  if (link) link.style.transform = "";
+  li.classList.remove("swiped-left", "swiped-right");
+  if (openSwipeLi === li) openSwipeLi = null;
+}
+function wireHistorySwipe(li, link, entry) {
+  const PIN_W = 88, DEL_W = 88, THRESH = 40;
+  let startX = 0, startY = 0, dx = 0, dragging = false, moved = false, vertical = false;
+  link.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    startX = e.clientX; startY = e.clientY; dx = 0;
+    dragging = true; moved = false; vertical = false;
+    link.style.transition = "none";
+  });
+  link.addEventListener("pointermove", (e) => {
+    if (!dragging || vertical) return;
+    const ndx = e.clientX - startX, ndy = e.clientY - startY;
+    if (!moved && Math.abs(ndy) > Math.abs(ndx) && Math.abs(ndy) > 8) { vertical = true; link.style.transition = ""; return; }
+    dx = ndx;
+    if (Math.abs(dx) > 6) moved = true;
+    link.style.transform = `translateX(${Math.max(-DEL_W, Math.min(PIN_W, dx))}px)`;
+  });
+  const finish = () => {
+    if (!dragging) return;
+    dragging = false;
+    link.style.transition = "";
+    if (vertical) return;
+    if (dx <= -THRESH) {
+      if (openSwipeLi && openSwipeLi !== li) closeSwipe(openSwipeLi);
+      link.style.transform = `translateX(${-DEL_W}px)`;
+      li.classList.add("swiped-left");
+      openSwipeLi = li;
+    } else if (dx >= THRESH) {
+      if (openSwipeLi && openSwipeLi !== li) closeSwipe(openSwipeLi);
+      link.style.transform = `translateX(${PIN_W}px)`;
+      li.classList.add("swiped-right");
+      openSwipeLi = li;
+    } else {
+      closeSwipe(li);
+    }
+  };
+  link.addEventListener("pointerup", finish);
+  link.addEventListener("pointercancel", finish);
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (moved || li.classList.contains("swiped-left") || li.classList.contains("swiped-right")) {
+      closeSwipe(li);
+      return;
+    }
+    if (entry.id) window.location.hash = `r=${entry.id}`;
+  });
 }
 
 function buildMarkdownExport(reading, interpretation) {
@@ -1506,7 +1588,7 @@ function openSettings() {
   renderPromptPresets();
   if (els.fontSizeSelect) els.fontSizeSelect.value = currentFontSize();
   els.defaultThinking.value = localStorage.getItem("yijing-default-thinking") || "default";
-  if (els.languageSelect) els.languageSelect.value = getLang();
+  syncLanguageToggle();
   if (els.registerSelect) els.registerSelect.value = getRegister();
   els.newEpName.value = "";
   els.newEpUrl.value = "";
@@ -1887,9 +1969,19 @@ els.modelSelect.addEventListener("change", () => {
 els.interpretBtn.addEventListener("click", () => void runInterpretation());
 els.stopInterpretBtn.addEventListener("click", () => interpretAbortCtrl?.abort());
 
-if (els.languageSelect) {
-  els.languageSelect.addEventListener("change", () => {
-    void changeLanguage(els.languageSelect.value);
+function syncLanguageToggle() {
+  if (!els.languageToggle) return;
+  const cur = getLang();
+  els.languageToggle.querySelectorAll(".seg-btn").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.lang === cur));
+  });
+}
+if (els.languageToggle) {
+  els.languageToggle.querySelectorAll(".seg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      void changeLanguage(btn.dataset.lang).then(syncLanguageToggle);
+      syncLanguageToggle();
+    });
   });
 }
 

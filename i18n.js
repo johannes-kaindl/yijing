@@ -114,6 +114,8 @@ const STRINGS = {
     "history.clear": "Verlauf löschen",
     "history.clearConfirm": "Verlauf wirklich löschen?",
     "history.delete": "Eintrag löschen",
+    "history.pin": "Anheften",
+    "history.unpin": "Lösen",
 
     // ——— Settings-Modal ———
     "settings.heading": "Einstellungen",
@@ -366,6 +368,8 @@ const STRINGS = {
     "history.clear": "Clear history",
     "history.clearConfirm": "Really clear the history?",
     "history.delete": "Delete entry",
+    "history.pin": "Pin",
+    "history.unpin": "Unpin",
 
     // ——— Settings-Modal ———
     "settings.heading": "Settings",

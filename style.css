@@ -611,54 +611,56 @@ button.ghost:hover {
   margin: 0 0 1rem;
 }
 
-#historyList li {
+#historyList li.hist-li {
+  position: relative;
+  overflow: hidden;
   border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: stretch;
 }
 
 .history-item {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
   display: flex;
-  flex: 1 1 auto;
-  min-width: 0;
   gap: 0.8rem;
   align-items: flex-start;
   padding: 0.6rem 0.4rem;
   font-size: 0.9rem;
   color: var(--ink-soft);
   text-decoration: none;
-  border-radius: var(--radius);
-  transition: background 0.12s ease;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  transition: transform 0.18s ease, background 0.12s ease;
 }
 
-.history-item:hover {
-  background: rgba(199, 154, 74, 0.08);
-  color: var(--ink);
-}
-
-#historyList li.active .history-item {
-  background: rgba(199, 154, 74, 0.15);
-  color: var(--ink);
-}
+.history-item:hover { background: var(--bg-card); color: var(--ink); }
+#historyList li.active .history-item { background: var(--bg-card); color: var(--ink); }
+#historyList li.pinned .history-item { box-shadow: inset 3px 0 0 var(--accent); }
 
 .history-item .date { color: var(--ink-faint); font-size: 0.8rem; flex: 0 0 8.5em; }
 .history-item .q { flex: 2 1 0; min-width: 0; font-style: italic; }
 .history-item .h { flex: 3 1 0; min-width: 0; color: var(--accent); font-weight: 500; }
 
-/* Per-entry delete button (sibling of the .history-item link). */
-.history-del {
-  flex: 0 0 auto;
-  background: none;
+/* Swipe-revealed actions behind the sliding history item. */
+.hist-act {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  width: 88px;
   border: none;
   cursor: pointer;
-  color: var(--ink-faint);
-  padding: 0 0.5rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: #fff;
   display: flex;
   align-items: center;
-  border-radius: var(--radius);
-  transition: color 0.12s ease, background 0.12s ease;
+  justify-content: center;
 }
-.history-del:hover { color: var(--accent); background: rgba(199, 154, 74, 0.08); }
+.hist-act-pin { left: 0; background: var(--accent); }
+.hist-act-del { right: 0; background: #b5503a; }
 
 @media (max-width: 540px) {
   .history-item { flex-wrap: wrap; }
@@ -1712,4 +1714,29 @@ html.exporting.pdf-glossy body { background: var(--bg) !important; }
   .hex-line.appearing,
   .coin { animation: none; }
   .thinking-marker { animation: none; opacity: 1; }
+}
+
+
+/* Segmented toggle (e.g. language Deutsch / English in settings). */
+.seg-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.seg-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem 1.1rem;
+  color: var(--ink-soft);
+  font: inherit;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.seg-btn + .seg-btn { border-left: 1px solid var(--line); }
+.seg-btn[aria-pressed="true"] {
+  background: rgba(199, 154, 74, 0.15);
+  color: var(--ink);
+  font-weight: 500;
 }
