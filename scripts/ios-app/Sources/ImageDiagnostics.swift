@@ -35,23 +35,24 @@ enum ImageDiagnostics {
               scene: "an old stone well, in warm golden light"),
     ]
 
+    /// Manual entry (dev "img-diag" button): render + share sheet, with progress.
     static func run(progress: @escaping (String) -> Void,
                     present: @escaping (UIActivityViewController) -> Void) async {
         await MainActor.run { progress("Bilddiagnose startet…") }
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("img-diag", isDirectory: true)
         try? FileManager.default.removeItem(at: dir)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-
-        var report = "Image Playground diagnostics\n\n"
-        if let creator = try? await ImageCreator() {
-            report += "availableStyles: " + creator.availableStyles.map { String(describing: $0) }.joined(separator: ", ") + "\n\n"
-        } else {
-            report += "ImageCreator() could NOT be instantiated on this device/Mac.\n"
-            report += "(Image Playground unavailable — not an Apple-Intelligence target, or not set up.)\n\n"
-            await MainActor.run { progress("Image Playground ist hier nicht verfügbar (siehe report.txt).") }
+        let report = await generate(into: dir, jobs: defaultJobs(), progress: progress)
+        try? report.data(using: .utf8)?.write(to: dir.appendingPathComponent("report.txt"))
+        let items = ((try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)) ?? [])
+        await MainActor.run {
+            progress("Bilddiagnose fertig — Share-Sheet öffnet sich.")
+            present(UIActivityViewController(activityItems: items, applicationActivities: nil))
         }
+    }
 
-        // Flatten to a job list so we can report N/total progress.
+
+    private static func defaultJobs() -> [(String, [ImagePlaygroundConcept])] {
         var jobs: [(String, [ImagePlaygroundConcept])] = []
         for p in probes {
             jobs.append(("\(p.id)__multi", multiConcepts(p)))
@@ -59,31 +60,35 @@ enum ImageDiagnostics {
             jobs.append(("\(p.id)__scene_extracted", [.extracted(from: p.scene, title: nil)]))
             jobs.append(("\(p.id)__primary_only", [.text(p.motif)]))
         }
+        return jobs
+    }
+
+
+    private static func generate(into dir: URL,
+                                 jobs: [(String, [ImagePlaygroundConcept])],
+                                 progress: ((String) -> Void)?) async -> String {
+        var report = "Image Playground diagnostics\n\n"
+        if let creator = try? await ImageCreator() {
+            report += "availableStyles: " + creator.availableStyles.map { String(describing: $0) }.joined(separator: ", ") + "\n\n"
+        } else {
+            report += "ImageCreator() could NOT be instantiated (Image Playground unavailable here).\n\n"
+            if let progress { await MainActor.run { progress("Image Playground nicht verfügbar (siehe report.txt).") } }
+        }
         let total = jobs.count
-        var files: [URL] = []
         var done = 0
         for (label, concepts) in jobs {
             done += 1
             let n = done
-            await MainActor.run { progress("Bilddiagnose \(n)/\(total): \(label)…") }
+            if let progress { await MainActor.run { progress("Bilddiagnose \(n)/\(total): \(label)…") } }
             do {
                 let data = try await render(concepts)
-                let url = dir.appendingPathComponent("\(label).jpg")
-                try data.write(to: url); files.append(url)
+                try data.write(to: dir.appendingPathComponent("\(label).jpg"))
                 report += "OK   \(label)\n"
             } catch {
                 report += "FAIL \(label): \(error)\n"
             }
         }
-
-        let reportURL = dir.appendingPathComponent("report.txt")
-        try? report.data(using: .utf8)?.write(to: reportURL)
-        files.append(reportURL)
-        let items = files
-        await MainActor.run {
-            progress("Bilddiagnose fertig (\(total) Versuche) — Share-Sheet öffnet sich.")
-            present(UIActivityViewController(activityItems: items, applicationActivities: nil))
-        }
+        return report
     }
 
     private static func multiConcepts(_ p: Probe) -> [ImagePlaygroundConcept] {
