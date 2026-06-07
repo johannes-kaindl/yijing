@@ -50,34 +50,43 @@ final class FoundationModelsEngine: LLMEngine {
         // no such guardrails.
         let isEnglish = incomingSystem.range(of: "You are", options: .caseInsensitive) != nil
         let instructions = isEnglish ? Self.guardrailSafeEN : Self.guardrailSafeDE
-        let session = LanguageModelSession(instructions: instructions)
-
-        // Bridge the async response stream onto this synchronous (background-queue)
-        // call. streamResponse emits cumulative snapshots → emit only the suffix.
-        let sem = DispatchSemaphore(value: 0)
+        // Apple FM rate-limits / "exhausts" under rapid successive requests and
+        // surfaces that indistinguishably from a content guardrail (both error
+        // descriptions contain "guardrail"). So if a request fails BEFORE emitting
+        // any token, wait briefly and retry ONCE from a fresh session (clean — no
+        // duplicated output). A genuine content refusal simply re-refuses; a transient
+        // throttle usually clears. streamResponse emits cumulative snapshots → we
+        // forward only the newly-appended suffix.
         var thrown: Error?
-        var lastCount = 0
-
-        let task = Task {
-            do {
-                for try await snapshot in session.streamResponse(to: user) {
-                    if isCancelled() { break }
-                    let full = snapshot.content
-                    if full.count > lastCount {
-                        let start = full.index(full.startIndex, offsetBy: lastCount)
-                        onToken(String(full[start...]))
-                        lastCount = full.count
+        var emitted = false
+        for attempt in 0..<2 {
+            thrown = nil
+            let session = LanguageModelSession(instructions: instructions)
+            let sem = DispatchSemaphore(value: 0)
+            var lastCount = 0
+            let task = Task {
+                do {
+                    for try await snapshot in session.streamResponse(to: user) {
+                        if isCancelled() { break }
+                        let full = snapshot.content
+                        if full.count > lastCount {
+                            let start = full.index(full.startIndex, offsetBy: lastCount)
+                            onToken(String(full[start...]))
+                            lastCount = full.count
+                            emitted = true
+                        }
                     }
+                } catch {
+                    thrown = error
                 }
-            } catch {
-                thrown = error
+                sem.signal()
             }
-            sem.signal()
-        }
-
-        // Wait for completion; cancel the generation if the web client disconnects.
-        while sem.wait(timeout: .now() + 0.1) == .timedOut {
-            if isCancelled() { task.cancel() }
+            // Wait for completion; cancel the generation if the web client disconnects.
+            while sem.wait(timeout: .now() + 0.1) == .timedOut {
+                if isCancelled() { task.cancel() }
+            }
+            if thrown == nil || isCancelled() || emitted { break }
+            if attempt == 0 { Thread.sleep(forTimeInterval: 6) } // let a throttle clear
         }
 
         if let error = thrown { throw mapError(error) }
@@ -114,8 +123,9 @@ final class FoundationModelsEngine: LLMEngine {
         let text = String(describing: error).lowercased()
         if text.contains("guardrail") {
             return EngineError.message(
-                "Das eingebaute Apple-Modell hat diese Deutung abgelehnt (Inhaltsfilter). "
-                + "Du kannst stattdessen einen Remote-Endpoint in den Einstellungen nutzen.")
+                "Das eingebaute Apple-Modell hat keine Deutung erzeugt — meist kurzzeitige "
+                + "Auslastung (dann einfach nochmal „Interpretieren“ tippen), seltener der "
+                + "Inhaltsfilter. Alternativ ein Remote-Endpoint in den Einstellungen.")
         }
         if text.contains("context") || text.contains("exceededcontext") {
             return EngineError.message(
