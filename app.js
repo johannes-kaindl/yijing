@@ -2212,25 +2212,9 @@ window.__yijingImageError = (requestId, message) => {
   els.genImageStatus.textContent = message || t("image.error");
   els.genImageBtn.disabled = false;
 };
-// Dev-Diagnose-Status (img-diag) live ins Meditations-Status-Feld spiegeln.
-window.__yijingDiagStatus = (msg) => {
-  if (els.genImageStatus) els.genImageStatus.textContent = msg;
-};
 
 if (els.genImageBtn) els.genImageBtn.addEventListener("click", requestMeditationImage);
 window.addEventListener("yijing:imagegen", refreshMeditationVisibility);
-
-// Dev-only: on-device Image-Playground-Diagnose anstoßen (Konzept-Form-Matrix in
-// scripts/ios-app/Sources/ImageDiagnostics.swift). In ausgelieferten Builds nie sichtbar.
-if (DEV_MODE && nativeBridge && els.meditation) {
-  const diagBtn = document.createElement("button");
-  diagBtn.type = "button";
-  diagBtn.textContent = "img-diag";
-  if (els.genImageBtn) diagBtn.className = els.genImageBtn.className;
-  diagBtn.addEventListener("click", () =>
-    nativeBridge.postMessage({ action: "runImageDiagnostics" }));
-  els.meditation.appendChild(diagBtn);
-}
 
 // ——— Init ———
 
