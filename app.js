@@ -810,9 +810,11 @@ function renderHistory(activeId = null) {
       <button type="button" class="hist-act hist-act-pin" data-act="pin">${escapeHTML(entry.pinned ? t("history.unpin") : t("history.pin"))}</button>
       <button type="button" class="hist-act hist-act-del" data-act="del">${escapeHTML(t("history.delete"))}</button>
       <a class="history-item" href="${href}">
-        <span class="date">${dateStr}</span>
-        <span class="q">${escapeHTML(entry.question || "—")}</span>
-        <span class="h">${escapeHTML(hexStr)}</span>
+        <span class="hist-top">
+          <span class="date">${dateStr}</span>
+          <span class="h">${escapeHTML(hexStr)}</span>
+        </span>
+        ${entry.question ? `<span class="q">${escapeHTML(entry.question)}</span>` : ""}
       </a>
     `;
     const link = li.querySelector(".history-item");

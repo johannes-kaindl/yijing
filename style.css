@@ -622,8 +622,8 @@ button.ghost:hover {
   z-index: 1;
   background: var(--bg);
   display: flex;
-  gap: 0.8rem;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.25rem;
   padding: 0.6rem 0.4rem;
   font-size: 0.9rem;
   color: var(--ink-soft);
@@ -639,9 +639,10 @@ button.ghost:hover {
 #historyList li.active .history-item { background: var(--bg-card); color: var(--ink); }
 #historyList li.pinned .history-item { box-shadow: inset 3px 0 0 var(--accent); }
 
-.history-item .date { color: var(--ink-faint); font-size: 0.8rem; flex: 0 0 8.5em; }
-.history-item .q { flex: 2 1 0; min-width: 0; font-style: italic; }
-.history-item .h { flex: 3 1 0; min-width: 0; color: var(--accent); font-weight: 500; }
+.hist-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.8rem; }
+.history-item .date { color: var(--ink-faint); font-size: 0.8rem; white-space: nowrap; flex: 0 0 auto; }
+.history-item .h { color: var(--accent); font-weight: 500; text-align: right; overflow-wrap: anywhere; }
+.history-item .q { font-style: italic; color: var(--ink-soft); overflow-wrap: anywhere; }
 
 /* Swipe-revealed actions behind the sliding history item. */
 .hist-act {
