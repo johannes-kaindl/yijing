@@ -252,13 +252,10 @@
       <details class="settings-section">
         <summary data-i18n="settings.language">Sprache / Language</summary>
         <p class="hint" data-i18n="settings.language.hint">Wirkt sofort auf die UI und auf den Beratungs-Prompt-Default. Lädt beim Wechsel die passenden Hexagramm-Texte nach.</p>
-        <label class="row-inline">
-          <span data-i18n="settings.language.label">Sprache:</span>
-          <select id="languageSelect">
-            <option value="de" data-i18n="settings.language.de">Deutsch (Wilhelm)</option>
-            <option value="en" data-i18n="settings.language.en">English (Wilhelm — translated)</option>
-          </select>
-        </label>
+        <div class="seg-toggle" role="group" id="languageToggle" aria-label="Sprache / Language">
+          <button type="button" class="seg-btn" data-lang="de" aria-pressed="true">Deutsch</button>
+          <button type="button" class="seg-btn" data-lang="en" aria-pressed="false">English</button>
+        </div>
       </details>
 
       <details class="settings-section">
