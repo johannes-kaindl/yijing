@@ -1,8 +1,20 @@
 # AGENTS.md
 
+> **Workspace-Standards:** Die verbindliche Leitkonvention steht in `_docs/CONVENTIONS.md`
+> (am Workspace-Root `/Users/Shared/code/`), Modell comply-or-explain. Offene Punkte fuer
+> dieses Repo siehe Abschnitt "Offene Konventions-Punkte".
+
 Conventions for AI agents (Claude Code, Codex, Cursor, …) working on this
 repository. Humans benefit too — but this is primarily aimed at
 automated sessions.
+
+## Offene Konventions-Punkte
+
+- [ ] CORE-META-03 — Hero-Bild in `docs/images/` ergaenzen + Screenshots reproduzierbar per Skript erzeugen (aktuell nur `docs/screenshots/`, kein Skript).
+- [ ] CORE-GIT-01 — GitHub-Mirror-Remote `github` einrichten (derzeit nur `origin` = Codeberg).
+- [ ] PROF-WEB-03 — `node --check`-Gate-Skript anlegen, das `<script>` aus HTML extrahiert und syntaktisch prueft.
+- [ ] PROF-NAT-01 — Separates `scripts/package-native-app.sh` (sign + notarize) ergaenzen; iOS-Build (`build-ios-app.sh`) um Notarize/Staple-Schritt erweitern.
+- [ ] PROF-NAT-02 — Version-Bump-Skript anlegen, das die `Info.plist`-`CFBundleShortVersionString` der Targets synchron haelt.
 
 ## Project character
 
