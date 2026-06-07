@@ -206,6 +206,21 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
                                 motif2: body["motif2"] as? String ?? "",
                                 modifier: body["modifier"] as? String ?? "",
                                 requestId: body["requestId"] as? String ?? "")
+        case "runImageDiagnostics":
+            // DEV-only (the web button is gated by DEV_MODE). Renders a matrix of
+            // ImagePlaygroundConcept forms and shares the results for review.
+            if #available(iOS 18.4, macCatalyst 18.4, *) {
+                #if canImport(ImagePlayground)
+                Task { await ImageDiagnostics.run { [weak self] vc in
+                    guard let self else { return }
+                    // Popover anchor required on Mac Catalyst / iPad or present() crashes.
+                    vc.popoverPresentationController?.sourceView = self.view
+                    vc.popoverPresentationController?.sourceRect =
+                        CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 1, height: 1)
+                    self.present(vc, animated: true)
+                } }
+                #endif
+            }
         case "settings":
             // Mirror language/register into the App Group so the widget + watch
             // reflect the user's choice; refresh widgets immediately.
