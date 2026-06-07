@@ -1189,6 +1189,49 @@ async function refreshModelSelect() {
   }
 }
 
+/** Erster Satz eines Textes (Whitespace normalisiert) — der „Kernsatz". */
+function firstSentence(s) {
+  const txt = (s || "").replace(/\s+/g, " ").trim();
+  const m = txt.match(/^.*?[.!?。！？](?=\s|$)/);
+  return (m ? m[0] : txt).trim();
+}
+
+/** Schlanker, frage-erst Prompt für das kleine On-Device-Modell (Apple FM, 4096-Token-
+ *  Fenster): nur das Kernsymbol (Bild) + Urteils-Kernsatz + Linientexte (ohne
+ *  Konfuzius-Kommentar, ohne „Bedeutung") — damit das Modell auf der Frage bleibt
+ *  statt den ausführlichen Wilhelm-Text zu paraphrasieren. Sprach-/registergerecht via
+ *  hexTextFieldsForLang/lineFieldsForLang. BYO/Remote-Modelle behalten buildUserPrompt. */
+function buildCompactPrompt(reading) {
+  const en = getLang() === "en";
+  const nameLine = (h) => `${h.unicode} ${en ? "No." : "Nr."} ${h.number} — ${hexNameForLang(h)}`;
+  const prim = reading.primaryHex;
+  const pt = hexTextFieldsForLang(prim);
+  const parts = [];
+  parts.push(t("prompt.question", { question: reading.question?.trim() || t("prompt.noQuestion") }));
+  parts.push("");
+  parts.push(`${en ? "Hexagram" : "Hexagramm"}: ${nameLine(prim)}`);
+  if (pt.image) parts.push(`${t("prompt.image")} ${firstSentence(pt.image)}`);
+  if (pt.judgment) parts.push(`${t("prompt.judgment")} ${firstSentence(pt.judgment)}`);
+  const idxs = reading.changingIndices || [];
+  if (idxs.length && prim.lines) {
+    parts.push(t("prompt.changing"));
+    for (const i of idxs) {
+      const ln = prim.lines[i];
+      if (!ln) continue;
+      const lf = lineFieldsForLang(ln);
+      parts.push(`• ${lf.position} ${lf.text}`);
+    }
+    if (reading.resultingHex) {
+      const rt = hexTextFieldsForLang(reading.resultingHex);
+      parts.push(`${en ? "Resulting hexagram" : "Zielbild"}: ${nameLine(reading.resultingHex)}`);
+      if (rt.image) parts.push(`${t("prompt.image")} ${firstSentence(rt.image)}`);
+    }
+  }
+  parts.push("");
+  parts.push(t("prompt.tail"));
+  return parts.join("\n");
+}
+
 async function runInterpretation() {
   if (!CURRENT_READING) return;
   const ep = Endpoints.list().find((e) => e.id === els.endpointSelect.value);
@@ -1204,13 +1247,18 @@ async function runInterpretation() {
   Endpoints.setSelectedId(ep.id);
   Endpoints.update(ep.id, { defaultModel: model });
 
-  const userPrompt = buildUserPrompt({
-    question: CURRENT_READING.question,
-    primary: CURRENT_READING.primaryHex,
-    changingLines: CURRENT_READING.changingIndices,
-    primaryHex: CURRENT_READING.primaryHex,
-    resultingHex: CURRENT_READING.resultingHex,
-  });
+  // On-device (Apple FM, kleines 4096-Token-Fenster) bekommt den schlanken,
+  // frage-fokussierten Prompt; BYO/Remote-Modelle den vollen Wilhelm-Kontext.
+  const onDevice = ep.id === "on-device" || model === "apple-on-device";
+  const userPrompt = onDevice
+    ? buildCompactPrompt(CURRENT_READING)
+    : buildUserPrompt({
+        question: CURRENT_READING.question,
+        primary: CURRENT_READING.primaryHex,
+        changingLines: CURRENT_READING.changingIndices,
+        primaryHex: CURRENT_READING.primaryHex,
+        resultingHex: CURRENT_READING.resultingHex,
+      });
 
   els.interpBody.innerHTML = "";
   els.interpThinking.textContent = "";
