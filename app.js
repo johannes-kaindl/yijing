@@ -698,6 +698,14 @@ function updateHistoryEntry(id, patch) {
   persistHistory(h);
 }
 
+/** Löscht einen einzelnen Verlaufseintrag und rendert die Liste neu. */
+function removeHistoryEntry(id) {
+  if (!id) return;
+  const h = loadHistory().filter((e) => e.id !== id);
+  persistHistory(h);
+  renderHistory(CURRENT_READING?.id || null);
+}
+
 // ——— Dev-Verlauf: kuratierte, schwierige Wandel-Kombinationen zum Durchklicken ———
 // (überschreibt den Verlauf; nur im Dev-Build per Tipp aufs Build-Badge)
 const DEV_COMBOS = [
@@ -780,12 +788,19 @@ function renderHistory(activeId = null) {
         <span class="q">${escapeHTML(entry.question || "—")}</span>
         <span class="h">${escapeHTML(hexStr)}</span>
       </a>
+      <button type="button" class="history-del" title="${escapeHTML(t("history.delete"))}" aria-label="${escapeHTML(t("history.delete"))}"><svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>
     `;
     li.querySelector("a").addEventListener("click", (e) => {
       e.preventDefault();
       if (!entry.id) return;
       // Hash setzen → hashchange-Handler übernimmt das Anzeigen
       window.location.hash = `r=${entry.id}`;
+    });
+    const delBtn = li.querySelector(".history-del");
+    if (delBtn) delBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      removeHistoryEntry(entry.id);
     });
     els.historyList.appendChild(li);
   }
@@ -1725,6 +1740,10 @@ els.openSettingsBtn.addEventListener("click", openSettings);
 els.closeSettingsBtn.addEventListener("click", closeSettings);
 els.interpSetupConfigure?.addEventListener("click", openSettings);
 els.settingsModal.addEventListener("close", persistSettings);
+// Klick auf den Dialog-Hintergrund (außerhalb des Formulars) schließt + speichert.
+els.settingsModal.addEventListener("click", (e) => {
+  if (e.target === els.settingsModal) closeSettings();
+});
 els.newEpType.addEventListener("change", suggestUrlForType);
 els.newEpUrl.addEventListener("focus", suggestUrlForType);
 els.newEpUrl.addEventListener("input", updateMixedContentWarn);
@@ -2078,9 +2097,25 @@ window.__yijingImageError = (requestId, message) => {
   els.genImageStatus.textContent = message || t("image.error");
   els.genImageBtn.disabled = false;
 };
+// Dev-Diagnose-Status (img-diag) live ins Meditations-Status-Feld spiegeln.
+window.__yijingDiagStatus = (msg) => {
+  if (els.genImageStatus) els.genImageStatus.textContent = msg;
+};
 
 if (els.genImageBtn) els.genImageBtn.addEventListener("click", requestMeditationImage);
 window.addEventListener("yijing:imagegen", refreshMeditationVisibility);
+
+// Dev-only: on-device Image-Playground-Diagnose anstoßen (Konzept-Form-Matrix in
+// scripts/ios-app/Sources/ImageDiagnostics.swift). In ausgelieferten Builds nie sichtbar.
+if (DEV_MODE && nativeBridge && els.meditation) {
+  const diagBtn = document.createElement("button");
+  diagBtn.type = "button";
+  diagBtn.textContent = "img-diag";
+  if (els.genImageBtn) diagBtn.className = els.genImageBtn.className;
+  diagBtn.addEventListener("click", () =>
+    nativeBridge.postMessage({ action: "runImageDiagnostics" }));
+  els.meditation.appendChild(diagBtn);
+}
 
 // ——— Init ———
 

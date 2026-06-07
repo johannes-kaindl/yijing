@@ -613,10 +613,14 @@ button.ghost:hover {
 
 #historyList li {
   border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: stretch;
 }
 
 .history-item {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   gap: 0.8rem;
   align-items: flex-start;
   padding: 0.6rem 0.4rem;
@@ -640,6 +644,21 @@ button.ghost:hover {
 .history-item .date { color: var(--ink-faint); font-size: 0.8rem; flex: 0 0 8.5em; }
 .history-item .q { flex: 2 1 0; min-width: 0; font-style: italic; }
 .history-item .h { flex: 3 1 0; min-width: 0; color: var(--accent); font-weight: 500; }
+
+/* Per-entry delete button (sibling of the .history-item link). */
+.history-del {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-faint);
+  padding: 0 0.5rem;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+  transition: color 0.12s ease, background 0.12s ease;
+}
+.history-del:hover { color: var(--accent); background: rgba(199, 154, 74, 0.08); }
 
 @media (max-width: 540px) {
   .history-item { flex-wrap: wrap; }
