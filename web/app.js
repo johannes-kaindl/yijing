@@ -34,6 +34,7 @@ import {
 } from "./llm.js";
 import { renderMarkdown } from "./markdown.js";
 import { initI18n, applyI18n, setLang, getLang, t, localeTag } from "./i18n.js";
+import { composeImageRequest } from "./image-scene.js";
 
 const HISTORY_KEY = "yijing-history-v1";
 
@@ -2025,51 +2026,22 @@ window.__yijingOnServerResume = (baseUrl) => {
 // Gerät verfügbar ist, und feuert „yijing:imagegen". Im Web/auf nicht-fähigen
 // Geräten bleibt die Sektion verborgen (kein Web-API für on-device-Bilder).
 
-// Bild-Anfrage an die native Schicht: das Kern-Motiv des Hexagramms (image_association,
-// ein kurzes englisches Bildsubjekt) + ein Frage-abhängiger Modifikator. Apple FM ist
-// bewusst RAUS (zu unzuverlässig + ignorierte die Frage); ImageCreator nutzt die Frage
-// selbst nicht — darum erzwingen wir die Variation hier: derselbe Wurf sieht je Frage
-// anders aus (Tageszeit/Jahreszeit/Wetter), die Frage wirkt als „Random Seed".
-const IMAGE_MODIFIERS = [
-  "at dawn",
-  "at dusk",
-  "under a starry night sky",
-  "in morning mist",
-  "in autumn colors",
-  "under falling snow",
-  "in spring bloom",
-  "in lush summer green",
-  "in gentle rain",
-  "under a clear blue sky",
-  "in warm golden light",
-  "under drifting clouds",
-];
-
-// Kleiner stabiler String-Hash (djb2) → deterministischer Modifikator je Frage:
-// gleiche Frage → gleiches Bild-Setting, andere Frage → meist anderes.
-function hashString(s) {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
-  return h;
-}
-
+// Bild-Anfrage an die native Schicht. Die Szenen-Komposition (beide Motive +
+// Atmosphäre zu EINEM Satz, Modell A) liegt in image-scene.js (rein, node-getestet).
+// Apple FM ist bei der Bilderzeugung bewusst RAUS (unzuverlässig + ignorierte die
+// Frage); die frage-abhängige Variation (Tageszeit/Jahreszeit) ist deterministisch.
 function buildImageRequest(reading) {
   const prim = reading.primaryHex;
   const res = reading.resultingHex; // null, wenn keine Linie wandelt → kein Wandel
-  const motif = (prim && prim.image_association) || "a still mountain lake";
-  // Wandel: das resultierende Motiv NUR bei echter Wandlung (abweichendes Hexagramm).
-  // So zeigt das Bild die Spannung beider Zustände (primär ↔ resultierend); ohne
-  // wandelnde Linie bleibt es beim einen Motiv.
-  const motif2 =
-    res && res.number !== prim.number && res.image_association
-      ? res.image_association
-      : "";
-  const q = (reading.question || "").trim();
-  // Mit Frage: Hash → Modifikator. Ohne Frage: ein neutraler, immer schöner Default.
-  const modifier = q
-    ? IMAGE_MODIFIERS[hashString(q) % IMAGE_MODIFIERS.length]
-    : "in soft daylight";
-  return { motif, motif2, modifier };
+  const primaryMotif = (prim && prim.image_association) || "";
+  // Zielmotiv NUR bei echter Wandlung (abweichendes Hexagramm) → Spannung beider Zustände.
+  const resultingMotif =
+    res && res.number !== prim.number ? (res.image_association || "") : "";
+  return composeImageRequest({
+    primaryMotif,
+    resultingMotif,
+    question: reading.question || "",
+  });
 }
 
 function refreshMeditationVisibility() {
@@ -2114,6 +2086,7 @@ function requestMeditationImage() {
   if (LAST_IMAGE_SIG) console.log("[yijing img] " + LAST_IMAGE_SIG.replace("\n", " | "));
   nativeBridge.postMessage({
     action: "generateImage",
+    scene: req.scene,
     motif: req.motif,
     motif2: req.motif2,
     modifier: req.modifier,

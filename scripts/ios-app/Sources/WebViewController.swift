@@ -116,14 +116,14 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
             completionHandler: nil)
     }
 
-    private func handleGenerateImage(motif: String, motif2: String, modifier: String, requestId: String) {
+    private func handleGenerateImage(scene: String, motif: String, motif2: String, modifier: String, requestId: String) {
         guard #available(iOS 18.4, macCatalyst 18.4, *) else {
             sendImageError(requestId, "Bildgenerierung wird auf diesem Gerät nicht unterstützt."); return
         }
         #if canImport(ImagePlayground)
         Task {
             do {
-                let jpeg = try await ImageGenerator.generateMeditationImage(motif: motif, motif2: motif2, modifier: modifier)
+                let jpeg = try await ImageGenerator.generateMeditationImage(scene: scene, motif: motif, motif2: motif2, modifier: modifier)
                 let url = "data:image/jpeg;base64," + jpeg.base64EncodedString()
                 await MainActor.run { self.sendImageResult(requestId, url) }
             } catch {
@@ -209,7 +209,8 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         case "savePdf":
             sharePdf(filename: body["filename"] as? String ?? "yijing.pdf")
         case "generateImage":
-            handleGenerateImage(motif: body["motif"] as? String ?? "",
+            handleGenerateImage(scene: body["scene"] as? String ?? "",
+                                motif: body["motif"] as? String ?? "",
                                 motif2: body["motif2"] as? String ?? "",
                                 modifier: body["modifier"] as? String ?? "",
                                 requestId: body["requestId"] as? String ?? "")

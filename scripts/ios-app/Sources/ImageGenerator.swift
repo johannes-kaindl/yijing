@@ -33,41 +33,38 @@ enum ImageGenerator {
         catch { return false }
     }
 
-    /// Render the reading's image. `motif` is the primary hexagram's motif; `motif2`
-    /// (empty when no line changes) is the resulting hexagram's motif — when present
-    /// we render "<motif> and <motif2>" so the image shows the TENSION of both states,
-    /// i.e. the change. `modifier` (day-time / season, chosen web-side from the
-    /// question) varies the same reading per question. On failure: drop the modifier,
-    /// then the change, then a neutral scene.
+    /// Render the reading's meditation image. Model A: `scene` is one composed
+    /// sentence (both motifs + atmosphere, built web-side in image-scene.js) rendered
+    /// as a SINGLE Image Playground concept. On failure we shed detail: the bare
+    /// primary `motif` (+ `modifier`), then the primary alone, then a neutral scene.
+    /// `motif2` is retained for a possible future diptych fallback.
     ///
-    /// NO Apple FM (on-device distillation refused most requests + ignored the
-    /// question) and NO "ink-wash" suffix (it only pulled images toward generic
-    /// mountain-water). All deterministic.
-    static func generateMeditationImage(motif: String, motif2: String, modifier: String) async throws -> Data {
+    /// NO Apple FM for the prompt (on-device distillation refused most requests +
+    /// ignored the question) and NO "ink-wash" suffix (it only pulled images toward
+    /// generic mountain-water). All deterministic.
+    static func generateMeditationImage(scene: String, motif: String, motif2: String, modifier: String) async throws -> Data {
+        let scene = scene.trimmingCharacters(in: .whitespacesAndNewlines)
+        let motif = motif.trimmingCharacters(in: .whitespacesAndNewlines)
         let mod = modifier.trimmingCharacters(in: .whitespacesAndNewlines)
-        let m2 = motif2.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Pass each motif + the modifier as SEPARATE concepts (not "A in front of B" —
-        // a fixed depth order is often nonsensical, e.g. a stream BEHIND a mountain).
-        // Separate concepts let ImageCreator arrange them sensibly on its own (birds
-        // up, rocks below) and weight them more evenly, so a weaker motif is less
-        // likely to be swallowed. With a changing line both motifs go in — the tension
-        // of the transition; without one, just the primary.
-        func concepts(change: Bool, useMod: Bool) -> [ImagePlaygroundConcept] {
-            var c: [ImagePlaygroundConcept] = [.text(motif)]
-            if change, !m2.isEmpty { c.append(.text(m2)) }
-            if useMod, !mod.isEmpty { c.append(.text(mod)) }
-            return c
+        let attempts: [(String, [ImagePlaygroundConcept])] = [
+            ("scene",       scene.isEmpty ? [] : [.text(scene)]),
+            ("primary+mod", motif.isEmpty ? [] : (mod.isEmpty ? [.text(motif)] : [.text("\(motif), \(mod)")])),
+            ("primary",     motif.isEmpty ? [] : [.text(motif)]),
+        ]
+        for (label, concepts) in attempts where !concepts.isEmpty {
+            if let data = try? await render(concepts) {
+                logRender(label)
+                return data
+            }
         }
-        // 1. both motifs + modifier
-        if let img = try? await render(concepts(change: true, useMod: true)) { return img }
-        // 2. both motifs, no modifier
-        if !m2.isEmpty, let img = try? await render(concepts(change: true, useMod: false)) { return img }
-        // 3. primary motif + modifier (drop the change)
-        if let img = try? await render(concepts(change: false, useMod: true)) { return img }
-        // 4. primary motif only
-        if let img = try? await render(concepts(change: false, useMod: false)) { return img }
-        // 5. guaranteed-ish neutral scene
+        // Last resort, surfaced rather than swallowed.
         return try await render([.text("a quiet meadow under a wide sky")])
+    }
+
+    private static func logRender(_ label: String) {
+        #if DEBUG
+        print("[img] rendered via: \(label)")
+        #endif
     }
 
     private static func render(_ concepts: [ImagePlaygroundConcept]) async throws -> Data {
