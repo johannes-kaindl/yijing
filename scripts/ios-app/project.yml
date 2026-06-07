@@ -66,6 +66,11 @@ targets:
       - target: YijingWidgets   # embedded WidgetKit extension
       - target: YijingWatch     # embedded watchOS app (installs to the paired Watch)
         embed: true
+        # Only embed on iOS (device/simulator) — a Mac Catalyst app must NOT embed
+        # a watchOS app (xcodebuild: "WatchKitAppInvalidUIDeviceFamily" / embedded
+        # watchOS content not allowed in a macOS app). Macs have no paired watch via
+        # the Mac build anyway. Keeps the watch in the iOS device/archive build.
+        destinationFilters: [iOS]
     # llama.cpp engine — uncomment after adding the package; MockEngine until then.
     #   - package: llama
 
