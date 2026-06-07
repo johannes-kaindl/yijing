@@ -637,7 +637,7 @@ button.ghost:hover {
 
 .history-item:hover { background: var(--bg-card); color: var(--ink); }
 #historyList li.active .history-item { background: var(--bg-card); color: var(--ink); }
-#historyList li.pinned .history-item { box-shadow: inset 3px 0 0 var(--accent); }
+#historyList li.pinned .history-item { box-shadow: inset 3px 0 0 var(--accent); padding-left: 0.9rem; }
 
 .hist-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.8rem; }
 .history-item .date { color: var(--ink-faint); font-size: 0.8rem; white-space: nowrap; flex: 0 0 auto; }
