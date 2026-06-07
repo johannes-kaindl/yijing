@@ -170,19 +170,26 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
             "apiKey": "",
             "defaultModel": modelName,
         ]
-        let json = (try? JSONSerialization.data(withJSONObject: [endpoint]))
-            .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        // Only seed if the user has not configured their own endpoints yet, so we
-        // never clobber a BYO endpoint the user added on a previous launch.
+        let epJson = (try? JSONSerialization.data(withJSONObject: endpoint))
+            .flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+        // Always ensure the on-device endpoint is present and points at the CURRENT
+        // loopback port (it can change between launches) — WITHOUT clobbering the
+        // user's BYO endpoints. Select it only when there is no valid selection yet,
+        // so we never override a backend the user deliberately picked.
         let js = """
         (function () {
           try {
             var KEY = 'yijing-endpoints-v1', SEL = 'yijing-endpoint-selected-v1';
-            var existing = JSON.parse(localStorage.getItem(KEY) || '[]');
-            if (!existing.length) {
-              localStorage.setItem(KEY, '\(json.escapedForJSStringLiteral)');
-              localStorage.setItem(SEL, 'on-device');
-            }
+            var ep = JSON.parse('\(epJson.escapedForJSStringLiteral)');
+            var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+            if (!Array.isArray(list)) list = [];
+            var found = -1;
+            for (var i = 0; i < list.length; i++) { if (list[i] && list[i].id === ep.id) { found = i; break; } }
+            if (found >= 0) { list[found] = ep; } else { list.push(ep); }
+            localStorage.setItem(KEY, JSON.stringify(list));
+            var sel = localStorage.getItem(SEL), valid = false;
+            for (var k = 0; k < list.length; k++) { if (list[k] && list[k].id === sel) { valid = true; break; } }
+            if (!valid) localStorage.setItem(SEL, ep.id);
           } catch (e) {}
         })();
         """
@@ -208,17 +215,22 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
                                 requestId: body["requestId"] as? String ?? "")
         case "runImageDiagnostics":
             // DEV-only (the web button is gated by DEV_MODE). Renders a matrix of
-            // ImagePlaygroundConcept forms and shares the results for review.
+            // ImagePlaygroundConcept forms with live progress + shares the results.
             if #available(iOS 18.4, macCatalyst 18.4, *) {
                 #if canImport(ImagePlayground)
-                Task { await ImageDiagnostics.run { [weak self] vc in
+                Task { await ImageDiagnostics.run(progress: { [weak self] msg in
+                    guard let self else { return }
+                    self.webView?.evaluateJavaScript(
+                        "window.__yijingDiagStatus && window.__yijingDiagStatus(\(self.jsLiteral(msg)))",
+                        completionHandler: nil)
+                }, present: { [weak self] vc in
                     guard let self else { return }
                     // Popover anchor required on Mac Catalyst / iPad or present() crashes.
                     vc.popoverPresentationController?.sourceView = self.view
                     vc.popoverPresentationController?.sourceRect =
                         CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 1, height: 1)
                     self.present(vc, animated: true)
-                } }
+                }) }
                 #endif
             }
         case "settings":

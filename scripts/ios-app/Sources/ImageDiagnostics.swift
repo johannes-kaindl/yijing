@@ -24,23 +24,20 @@ import UIKit
 enum ImageDiagnostics {
     struct Probe { let id: String; let motif: String; let motif2: String; let modifier: String; let scene: String }
 
-    // Representative sample: change / no-change, light / dark motifs.
+    // Small representative sample (kept short so the run stays responsive):
+    // change / light, change / dark, and no-change.
     static let probes: [Probe] = [
         .init(id: "01_change_eagle_grain", motif: "a soaring eagle", motif2: "a wide field of golden grain", modifier: "at dawn",
               scene: "a soaring eagle, and beyond it a wide field of golden grain, at dawn"),
-        .init(id: "02_change_river_streams", motif: "a river splitting around a great rock", motif2: "many streams joining one river", modifier: "in morning mist",
-              scene: "a river splitting around a great rock giving way to many streams joining one river, in morning mist"),
+        .init(id: "02_change_dark", motif: "a dark river between steep cliffs", motif2: "a glowing lantern in darkness", modifier: "at dusk",
+              scene: "a dark river between steep cliffs, with a glowing lantern in darkness rising in the distance, at dusk"),
         .init(id: "03_nochange_well", motif: "an old stone well", motif2: "", modifier: "in warm golden light",
               scene: "an old stone well, in warm golden light"),
-        .init(id: "04_nochange_fox_ice", motif: "a fox crossing thin ice", motif2: "", modifier: "under falling snow",
-              scene: "a fox crossing thin ice, under falling snow"),
-        .init(id: "05_change_dark", motif: "a dark river between steep cliffs", motif2: "a glowing lantern in darkness", modifier: "at dusk",
-              scene: "a dark river between steep cliffs, with a glowing lantern in darkness rising in the distance, at dusk"),
-        .init(id: "06_nochange_blossom", motif: "bright blossoms opening on an old bare branch", motif2: "", modifier: "in spring bloom",
-              scene: "bright blossoms opening on an old bare branch, in spring bloom"),
     ]
 
-    static func run(present: @escaping (UIActivityViewController) -> Void) async {
+    static func run(progress: @escaping (String) -> Void,
+                    present: @escaping (UIActivityViewController) -> Void) async {
+        await MainActor.run { progress("Bilddiagnose startet…") }
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("img-diag", isDirectory: true)
         try? FileManager.default.removeItem(at: dir)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -51,36 +48,42 @@ enum ImageDiagnostics {
         } else {
             report += "ImageCreator() could NOT be instantiated on this device/Mac.\n"
             report += "(Image Playground unavailable — not an Apple-Intelligence target, or not set up.)\n\n"
+            await MainActor.run { progress("Image Playground ist hier nicht verfügbar (siehe report.txt).") }
         }
 
-        var files: [URL] = []
+        // Flatten to a job list so we can report N/total progress.
+        var jobs: [(String, [ImagePlaygroundConcept])] = []
         for p in probes {
-            var configs: [(String, [ImagePlaygroundConcept])] = [
-                ("multi", multiConcepts(p)),
-                ("scene_text", [.text(p.scene)]),
-                ("scene_extracted", [.extracted(from: p.scene, title: nil)]),
-                ("primary_only", [.text(p.motif)]),
-            ]
-            if !p.motif2.isEmpty { configs.append(("two_concepts", [.text(p.motif), .text(p.motif2)])) }
-            for (name, concepts) in configs {
-                let label = "\(p.id)__\(name)"
-                do {
-                    let data = try await render(concepts)
-                    let url = dir.appendingPathComponent("\(label).jpg")
-                    try data.write(to: url); files.append(url)
-                    report += "OK   \(label)\n"
-                } catch {
-                    report += "FAIL \(label): \(error)\n"
-                }
+            jobs.append(("\(p.id)__multi", multiConcepts(p)))
+            jobs.append(("\(p.id)__scene_text", [.text(p.scene)]))
+            jobs.append(("\(p.id)__scene_extracted", [.extracted(from: p.scene, title: nil)]))
+            jobs.append(("\(p.id)__primary_only", [.text(p.motif)]))
+        }
+        let total = jobs.count
+        var files: [URL] = []
+        var done = 0
+        for (label, concepts) in jobs {
+            done += 1
+            let n = done
+            await MainActor.run { progress("Bilddiagnose \(n)/\(total): \(label)…") }
+            do {
+                let data = try await render(concepts)
+                let url = dir.appendingPathComponent("\(label).jpg")
+                try data.write(to: url); files.append(url)
+                report += "OK   \(label)\n"
+            } catch {
+                report += "FAIL \(label): \(error)\n"
             }
-            report += "\n"
         }
 
         let reportURL = dir.appendingPathComponent("report.txt")
         try? report.data(using: .utf8)?.write(to: reportURL)
         files.append(reportURL)
         let items = files
-        await MainActor.run { present(UIActivityViewController(activityItems: items, applicationActivities: nil)) }
+        await MainActor.run {
+            progress("Bilddiagnose fertig (\(total) Versuche) — Share-Sheet öffnet sich.")
+            present(UIActivityViewController(activityItems: items, applicationActivities: nil))
+        }
     }
 
     private static func multiConcepts(_ p: Probe) -> [ImagePlaygroundConcept] {
