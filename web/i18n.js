@@ -113,6 +113,7 @@ const STRINGS = {
     "history.heading": "Verlauf",
     "history.clear": "Verlauf löschen",
     "history.clearConfirm": "Verlauf wirklich löschen?",
+    "history.delete": "Eintrag löschen",
 
     // ——— Settings-Modal ———
     "settings.heading": "Einstellungen",
@@ -364,6 +365,7 @@ const STRINGS = {
     "history.heading": "History",
     "history.clear": "Clear history",
     "history.clearConfirm": "Really clear the history?",
+    "history.delete": "Delete entry",
 
     // ——— Settings-Modal ———
     "settings.heading": "Settings",
