@@ -95,6 +95,18 @@ const STRINGS = {
     "image.error": "Das Bild konnte nicht erzeugt werden. Versuch es noch einmal.",
     "image.alt": "Meditationsbild zur Weissagung",
 
+    // Dev-Sweep (Prompt-Test-Harness, nur Dev-Build)
+    "sweep.heading": "Prompt-Sweep (Dev)",
+    "sweep.text": "Text",
+    "sweep.image": "Bild",
+    "sweep.pacing": "Pause (ms)",
+    "sweep.start": "Sweep starten",
+    "sweep.abort": "Abbrechen",
+    "sweep.status.running": "Fall {current}/{total} — {id} ({stage})",
+    "sweep.status.done": "Fertig: {n} Fälle, {errors} Fehler — Export {dir}",
+    "sweep.status.aborted": "Abgebrochen nach Fall {current}/{total}.",
+    "sweep.status.error": "Sweep fehlgeschlagen: {message}",
+
     "llm.status.thinking": "… denke nach",
     "llm.status.aborted": "Abgebrochen.",
     "llm.status.error": "Fehler: {message}",
@@ -348,6 +360,18 @@ const STRINGS = {
     "image.generating": "Creating image … (this can take a moment)",
     "image.error": "The image could not be created. Please try again.",
     "image.alt": "Meditation image for the reading",
+
+    // Dev sweep (prompt test-harness, dev builds only)
+    "sweep.heading": "Prompt sweep (dev)",
+    "sweep.text": "Text",
+    "sweep.image": "Image",
+    "sweep.pacing": "Pause (ms)",
+    "sweep.start": "Start sweep",
+    "sweep.abort": "Abort",
+    "sweep.status.running": "Case {current}/{total} — {id} ({stage})",
+    "sweep.status.done": "Done: {n} cases, {errors} errors — export {dir}",
+    "sweep.status.aborted": "Aborted after case {current}/{total}.",
+    "sweep.status.error": "Sweep failed: {message}",
 
     "llm.status.thinking": "… thinking",
     "llm.status.aborted": "Aborted.",

@@ -1692,6 +1692,29 @@ html.exporting.pdf-glossy body { background: var(--bg) !important; }
 }
 .build-badge[hidden] { display: none; }
 
+/* ——— Dev-Sweep-Panel (Prompt-Test-Harness, nur im Dev-Build sichtbar) ——— */
+.sweep {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+/* display-Regeln oben würden sonst [hidden] aushebeln — explizit zurücksetzen. */
+.sweep[hidden] { display: none; }
+.sweep-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+}
+.sweep-pacing input { width: 5.5rem; }
+.sweep-status {
+  margin-top: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  min-height: 1.2em;
+}
+
 /* Dev-Signatur unter dem Meditationsbild (Hex-Kombi + Prompt). */
 .meditation-sig {
   margin: 0.5rem auto 0;
