@@ -242,6 +242,23 @@
 
       <section class="texts" id="readerTexts"></section>
     </section>
+
+    <!-- Dev-only: Prompt-Sweep-Harness — app.js zeigt die Section nur im
+         Dev-Build (DEV_MODE); im Web-Build bleibt sie inert/hidden. -->
+    <section class="sweep" id="sweepPanel" hidden>
+      <h2 data-i18n="sweep.heading">Prompt-Sweep (Dev)</h2>
+      <div class="sweep-controls">
+        <label><input type="checkbox" id="sweepText" checked>
+          <span data-i18n="sweep.text">Text</span></label>
+        <label><input type="checkbox" id="sweepImage" checked>
+          <span data-i18n="sweep.image">Bild</span></label>
+        <label class="sweep-pacing"><span data-i18n="sweep.pacing">Pause (ms)</span>
+          <input type="number" id="sweepPacing" value="4000" min="0" step="500"></label>
+        <button id="sweepStart" type="button" data-i18n="sweep.start">Sweep starten</button>
+        <button id="sweepAbort" type="button" class="ghost" data-i18n="sweep.abort" hidden>Abbrechen</button>
+      </div>
+      <div class="sweep-status" id="sweepStatus" aria-live="polite"></div>
+    </section>
   </main>
 
   <!-- Settings-Modal -->

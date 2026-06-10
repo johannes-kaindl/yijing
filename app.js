@@ -2289,3 +2289,83 @@ if ("serviceWorker" in navigator) {
     b.addEventListener("click", populateDevHistory); // Tipp → Test-Verlauf laden
   }
 })();
+
+// ——— Dev-Sweep-Panel (Prompt-Test-Harness; Spec .claude/specs/2026-06-08) ———
+// Nur im Dev-Build sichtbar. Treibt web/sweep.js mit injizierten Abhängigkeiten —
+// sweep.js bleibt import-frei (node-testbar), app.js bleibt das einzige Entry-Modul.
+(() => {
+  const panel = document.getElementById("sweepPanel");
+  if (!panel || !DEV_MODE) return;
+  panel.hidden = false;
+  const startBtn = document.getElementById("sweepStart");
+  const abortBtn = document.getElementById("sweepAbort");
+  const status = document.getElementById("sweepStatus");
+  let sweepAbortCtrl = null;
+
+  startBtn.addEventListener("click", async () => {
+    if (!HEXAGRAMS) return;
+    // Exakt dieselbe Quelle wie runInterpretation (DOM-Selects im Settings-Modal),
+    // mit Endpoints-Store als Fallback, falls das Modal nie geöffnet wurde.
+    const ep =
+      Endpoints.list().find((e) => e.id === els.endpointSelect.value) ||
+      Endpoints.getSelected();
+    const model = els.modelSelect.value || ep?.defaultModel || "";
+    if (!ep || !model) {
+      status.textContent = t("llm.status.needEndpoint");
+      return;
+    }
+    startBtn.hidden = true;
+    abortBtn.hidden = false;
+    sweepAbortCtrl = new AbortController();
+    try {
+      const sweep = await import("./sweep.js");
+      const result = await sweep.runSweep(
+        {
+          hexagrams: HEXAGRAMS,
+          kingWenFromBinary,
+          buildCompactPrompt,
+          buildUserPrompt,
+          buildImageRequest,
+          makeClient,
+          getSystemPrompt: () => SystemPrompt.get(),
+          endpoint: ep,
+          model,
+          bridge: nativeBridge,
+          lang: getLang(),
+          register: getRegister(),
+          buildId: BUILD_ID,
+        },
+        {
+          doText: document.getElementById("sweepText").checked,
+          doImage: document.getElementById("sweepImage").checked,
+          pacingMs: Number(document.getElementById("sweepPacing").value) || 4000,
+          signal: sweepAbortCtrl.signal,
+          onProgress: (current, total, id, stage) => {
+            status.textContent = t("sweep.status.running", { current, total, id, stage });
+          },
+        }
+      );
+      const errors = result.manifest.cases.filter(
+        (c) => c.text?.error || c.image?.error
+      ).length;
+      status.textContent = result.aborted
+        ? t("sweep.status.aborted", {
+            current: result.manifest.cases.length,
+            total: sweep.SWEEP_CASES.length,
+          })
+        : t("sweep.status.done", {
+            n: result.manifest.cases.length,
+            errors,
+            dir: result.dir,
+          });
+    } catch (e) {
+      status.textContent = t("sweep.status.error", { message: String(e?.message || e) });
+    } finally {
+      startBtn.hidden = false;
+      abortBtn.hidden = true;
+      sweepAbortCtrl = null;
+    }
+  });
+
+  abortBtn.addEventListener("click", () => sweepAbortCtrl?.abort());
+})();
