@@ -12,6 +12,14 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **Dev-only prompt test-harness** (`web/sweep.js` + a `DEV_MODE`-gated panel):
+  a curated 10-case sweep through the live text/image pipeline (paced against
+  the Apple-FM throttle), exporting `{prompt, output, image}` per case to
+  `Documents/yijing-test/<run>/` via two new bridge actions
+  (`sweepImage`/`sweepFinish`) with one share sheet at the end. The corpus is
+  node-verified (`scripts/test-sweep-cases.mjs`); the Documents container is now
+  visible in the Files app (`UIFileSharingEnabled`). Never ships in archive
+  builds (the `__BUILD__` placeholder keeps `DEV_MODE` off).
 - **OracleKit — shared Swift logic core** (`scripts/ios-app/OracleKit/`, a local
   Swift package) consumed by all four native targets: three-coin casting, the
   64-entry King-Wen table, the deterministic daily hexagram, Codable models, the
