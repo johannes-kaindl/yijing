@@ -82,5 +82,12 @@
 			</array>
 		</dict>
 	</array>
+	<!-- Dev convenience: expose the Documents container (sweep exports,
+	     Documents/yijing-test/) in the Files app / iTunes file sharing.
+	     Harmless in release; UIFileSharingEnabled is inert on Catalyst. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>

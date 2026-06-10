@@ -221,6 +221,13 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
             if let lang = body["language"] as? String { store?.set(lang, forKey: "language") }
             if let reg = body["register"] as? String { store?.set(reg, forKey: "register") }
             WidgetCenter.shared.reloadAllTimelines()
+        case "sweepImage":
+            saveSweepImage(dir: body["dir"] as? String ?? "",
+                           file: body["file"] as? String ?? "",
+                           dataURL: body["dataURL"] as? String ?? "")
+        case "sweepFinish":
+            finishSweep(dir: body["dir"] as? String ?? "",
+                        manifest: body["manifest"] as? String ?? "")
         default:
             break
         }
@@ -278,6 +285,42 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         vc.popoverPresentationController?.sourceRect =
             CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
         present(vc, animated: true)
+    }
+
+    // MARK: - Dev sweep export (prompt test-harness → Documents/yijing-test/<run>/)
+    // Best-effort like shareMarkdown: write errors are swallowed; the single
+    // share sheet at the end is the user-visible success signal. This is the
+    // app's first and only Documents-container writer (other exports go through
+    // temporaryDirectory). On Catalyst the container lives at
+    // ~/Library/Containers/page.codeberg.jkaindl.Yijing/Data/Documents.
+
+    /// Resolve and create Documents/yijing-test/<dir>. Rejects path traversal
+    /// (defense in depth — the caller is our own dev-only JS).
+    private func sweepRunDirectory(_ dir: String) -> URL? {
+        guard !dir.isEmpty, !dir.contains("/"), !dir.contains("..") else { return nil }
+        guard let docs = FileManager.default.urls(for: .documentDirectory,
+                                                  in: .userDomainMask).first else { return nil }
+        let url = docs.appendingPathComponent("yijing-test", isDirectory: true)
+            .appendingPathComponent(dir, isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    private func saveSweepImage(dir: String, file: String, dataURL: String) {
+        guard let runDir = sweepRunDirectory(dir),
+              !file.isEmpty, !file.contains("/"), !file.contains("..") else { return }
+        let prefix = "data:image/jpeg;base64,"
+        guard dataURL.hasPrefix(prefix),
+              let data = Data(base64Encoded: String(dataURL.dropFirst(prefix.count)))
+        else { return }
+        try? data.write(to: runDir.appendingPathComponent(file))
+    }
+
+    private func finishSweep(dir: String, manifest: String) {
+        guard let runDir = sweepRunDirectory(dir) else { return }
+        try? manifest.data(using: .utf8)?
+            .write(to: runDir.appendingPathComponent("manifest.json"))
+        presentShare(for: runDir)
     }
 
     // MARK: - Navigation: open external links in the system browser
