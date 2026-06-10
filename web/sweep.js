@@ -90,3 +90,196 @@ export function deriveReading(c, { hexagrams, kingWenFromBinary }) {
     changingIndices: c.changingIndices,
   };
 }
+
+// ——— Sweep-Treiber ———
+
+// Eigene pending-Map statt des interaktiven pendingImageRequest-Skalars:
+// Sweep-Bilder laufen über DIESELBEN nativen Callbacks __yijingImageResult/
+// __yijingImageError (Namen sind in WebViewController.swift fixiert). Der Hook
+// fängt Sweep-requestIds ab und lässt alles andere an den interaktiven Pfad
+// durchfallen — kein Race mit einer Nutzer-Bildanfrage.
+const pendingSweepImages = new Map(); // requestId -> { resolve, reject }
+let hooksInstalled = false;
+
+function ensureImageHooks() {
+  if (hooksInstalled) return;
+  hooksInstalled = true;
+  const prevResult = window.__yijingImageResult;
+  const prevError = window.__yijingImageError;
+  window.__yijingImageResult = (requestId, dataURL) => {
+    const p = pendingSweepImages.get(requestId);
+    if (!p) return prevResult?.(requestId, dataURL);
+    pendingSweepImages.delete(requestId);
+    p.resolve(dataURL);
+  };
+  window.__yijingImageError = (requestId, message) => {
+    const p = pendingSweepImages.get(requestId);
+    if (!p) return prevError?.(requestId, message);
+    pendingSweepImages.delete(requestId);
+    p.reject(new Error(message || "image error"));
+  };
+}
+
+/** Ein Bild über die Bridge anfordern; eigener Timeout (der Bild-Pfad hat keinen). */
+function requestImageFor(bridge, req, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const requestId = crypto.randomUUID();
+    const timer = setTimeout(() => {
+      pendingSweepImages.delete(requestId);
+      reject(new Error("timeout"));
+    }, timeoutMs);
+    pendingSweepImages.set(requestId, {
+      resolve: (v) => { clearTimeout(timer); resolve(v); },
+      reject: (e) => { clearTimeout(timer); reject(e); },
+    });
+    bridge.postMessage({
+      action: "generateImage",
+      scene: req.scene, motif: req.motif, motif2: req.motif2,
+      modifier: req.modifier, requestId,
+    });
+  });
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** Lokaler Zeitstempel als Run-Ordnername (Format wie exportFilename in app.js). */
+function runStamp() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
+
+/**
+ * Den Korpus sequenziell durch die echte Pipeline fahren.
+ *
+ * deps (von app.js injiziert):
+ *   hexagrams, kingWenFromBinary, buildCompactPrompt, buildUserPrompt,
+ *   buildImageRequest, makeClient, getSystemPrompt, endpoint, model,
+ *   bridge (nativeBridge|null), lang, register, buildId
+ * opts:
+ *   doText, doImage, pacingMs (Drossel-Pause zwischen Calls),
+ *   textTimeoutMs, imageTimeoutMs, signal (AbortSignal), onProgress(i, n, id, stage)
+ *
+ * Fehler eines Falls werden im Manifest erfasst, der Sweep läuft weiter
+ * (viele Bild-Fehler sind selbst ein Messergebnis).
+ */
+export async function runSweep(deps, opts = {}) {
+  const ep = deps.endpoint;
+  const model = deps.model;
+  const doText = opts.doText !== false;
+  const doImage = opts.doImage !== false && !!deps.bridge;
+  const pacingMs = opts.pacingMs ?? 4000;
+  const textTimeoutMs = opts.textTimeoutMs ?? 180000;
+  const imageTimeoutMs = opts.imageTimeoutMs ?? 120000;
+  if (doImage) ensureImageHooks();
+
+  const stamp = runStamp();
+  const run = {
+    timestamp: stamp,
+    endpointId: ep.id,
+    endpointType: ep.type,
+    model,
+    // Exakt die Weiche aus runInterpretation (app.js) — sonst misst der
+    // Sweep nicht die echte Pipeline.
+    onDevice: ep.id === "on-device" || model === "apple-on-device",
+    lang: deps.lang,
+    register: deps.register,
+    pacingMs, doText, doImage,
+    appBuild: deps.buildId,
+    systemPrompt: deps.getSystemPrompt(),
+  };
+  const cases = [];
+  let aborted = false;
+
+  for (let i = 0; i < SWEEP_CASES.length && !aborted; i++) {
+    const c = SWEEP_CASES[i];
+    if (opts.signal?.aborted) { aborted = true; break; }
+    const reading = deriveReading(c, deps);
+    const rec = {
+      id: c.id, label: c.label, question: c.question,
+      reading: { primary: c.primary, changingIndices: c.changingIndices, resulting: c.resulting },
+      text: null, image: null,
+    };
+
+    if (doText) {
+      opts.onProgress?.(i + 1, SWEEP_CASES.length, c.id, "text");
+      const prompt = run.onDevice
+        ? deps.buildCompactPrompt(reading)
+        : deps.buildUserPrompt({
+            question: reading.question,
+            primary: reading.primaryHex,
+            changingLines: reading.changingIndices,
+            primaryHex: reading.primaryHex,
+            resultingHex: reading.resultingHex,
+          });
+      let output = "";
+      let error = null;
+      const ctrl = new AbortController();
+      const onAbort = () => ctrl.abort();
+      opts.signal?.addEventListener("abort", onAbort, { once: true });
+      const timer = setTimeout(() => ctrl.abort(), textTimeoutMs);
+      const t0 = performance.now();
+      try {
+        await deps.makeClient(ep).chatStream({
+          model,
+          thinking: null,
+          messages: [
+            { role: "system", content: run.systemPrompt },
+            { role: "user", content: prompt },
+          ],
+          signal: ctrl.signal,
+          onToken: (tok) => { output += tok; },
+        });
+        // Der On-Device-Shim meldet Engine-Fehler als Content-Token
+        // "\n\n⚠️ <msg>" — der Stream resolved trotzdem erfolgreich.
+        if (/(^|\n)⚠️/.test(output)) error = "on-device-error";
+        else if (!output.trim()) error = "empty";
+      } catch (e) {
+        error = e?.name === "AbortError"
+          ? (opts.signal?.aborted ? "aborted" : "timeout")
+          : String(e?.message || e);
+      } finally {
+        clearTimeout(timer);
+        opts.signal?.removeEventListener("abort", onAbort);
+      }
+      rec.text = { prompt, output, ms: Math.round(performance.now() - t0), error };
+      if (opts.signal?.aborted) aborted = true;
+      else await sleep(pacingMs);
+    }
+
+    if (doImage && !aborted) {
+      opts.onProgress?.(i + 1, SWEEP_CASES.length, c.id, "image");
+      const req = deps.buildImageRequest(reading);
+      const file = `${c.id}.jpg`;
+      const t0 = performance.now();
+      let error = null;
+      try {
+        const dataURL = await requestImageFor(deps.bridge, req, imageTimeoutMs);
+        // Sofort nativ persistieren und das base64 fallenlassen — n Bilder in
+        // EINEM Abschluss-postMessage wären 4–10 MB und gingen bei Abort verloren.
+        deps.bridge.postMessage({ action: "sweepImage", dir: stamp, file, dataURL });
+      } catch (e) {
+        error = String(e?.message || e);
+      }
+      rec.image = {
+        scene: req.scene, motif: req.motif, motif2: req.motif2, modifier: req.modifier,
+        file: error ? null : file,
+        ms: Math.round(performance.now() - t0),
+        error,
+      };
+      if (opts.signal?.aborted) aborted = true;
+      else await sleep(pacingMs);
+    }
+
+    cases.push(rec);
+    opts.onProgress?.(i + 1, SWEEP_CASES.length, c.id, "done");
+  }
+
+  const manifest = { run: { ...run, aborted }, cases };
+  // Manifest auch bei Abbruch posten — Teilergebnisse sind wertvoll.
+  deps.bridge?.postMessage({
+    action: "sweepFinish", dir: stamp,
+    manifest: JSON.stringify(manifest, null, 2),
+  });
+  return { dir: stamp, manifest, aborted };
+}
