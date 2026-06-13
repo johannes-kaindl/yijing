@@ -402,7 +402,11 @@ function escapeHTML(s) {
   return String(s || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    // Quote chars too: harmless in text nodes, but defense-in-depth if escaped
+    // output ever lands in an attribute context (BYO-LLM output is user-controlled).
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 /** Render a plain-text field (\n\n = paragraph, \n = line break) as escaped <p> HTML. */
