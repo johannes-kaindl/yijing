@@ -146,6 +146,7 @@ const els = {
   trigramText: document.getElementById("trigramText"),
   changingSection: document.getElementById("changingSection"),
   changingLines: document.getElementById("changingLines"),
+  changingWhy: document.getElementById("changingWhy"),
   resultingSection: document.getElementById("resultingSection"),
   resultingSummary: document.getElementById("resultingSummary"),
   resultingJudgment: document.getElementById("resultingJudgment"),
@@ -478,6 +479,10 @@ function showReading(question, lines, options = {}) {
   let resultingHex = null;
   if (changingIndices.length > 0) {
     els.changingSection.hidden = false;
+    // Methoden-Transparenz: welche Zhu-Xi-Regel ist maßgeblich?
+    const ruling = rulingText({ primaryNumber: primaryHex.number, changingIndices });
+    els.changingWhy.textContent = `${t("ruling.label")}: ${t("ruling." + ruling.rule)}`;
+    els.changingWhy.hidden = false;
     const allMoving = changingIndices.length === 6;
     if (allMoving && (primaryHex.number === 1 || primaryHex.number === 2)
         && primaryHex.lines.length >= 7) {

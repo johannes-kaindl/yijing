@@ -445,6 +445,14 @@ button.ghost:hover {
   font-weight: 500;
 }
 
+.changing-why {
+  margin: 0 0 .75rem;
+  font-size: .85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.changing-why[hidden] { display: none; }
+
 .changing-line {
   background: var(--bg-card);
   border: 1px solid var(--line);
