@@ -120,6 +120,9 @@ Versioning follows [SemVer](https://semver.org/).
 - **`markdown.js` `escapeHTML()` now also escapes `"` and `'`** — a stored-XSS
   hardening so an untrusted LLM Markdown link URL can no longer break out of an
   `href` attribute into a live event handler.
+- **`app.js` `escapeHTML()` now also escapes `"` and `'`** — the same
+  defense-in-depth on the app's own escaper (BYO-LLM output is user-controlled).
+  Harmless in text nodes; correct if escaped output ever lands in an attribute.
 
 ### Fixed
 
