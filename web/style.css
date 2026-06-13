@@ -1162,6 +1162,10 @@ html:has(.settings-modal[open]) { overflow: hidden; }
   letter-spacing: 0.05em;
 }
 
+/* Dialog-Titel wird beim Öffnen programmatisch fokussiert (tabindex=-1) — nie
+   per Tastatur, daher kein Fokus-Ring nötig (verhindert WebKit-Akzentrahmen). */
+.settings-modal h2:focus { outline: none; }
+
 /* Collapsible settings sections (details/summary), collapsed by default. */
 .settings-form details.settings-section {
   border: 1px solid var(--line);
