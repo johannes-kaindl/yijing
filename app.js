@@ -176,6 +176,7 @@ const els = {
   // Settings
   openSettingsBtn: document.getElementById("openSettings"),
   settingsModal: document.getElementById("settingsModal"),
+  settingsTitle: document.getElementById("settingsTitle"),
   closeSettingsBtn: document.getElementById("closeSettings"),
   endpointList: document.getElementById("endpointList"),
   newEpName: document.getElementById("newEpName"),
@@ -1620,15 +1621,13 @@ function openSettings() {
   if (typeof els.settingsModal.showModal === "function") {
     els.settingsModal.showModal();
   } else {
-    // Fallback ohne native <dialog>-Unterstützung: showModal() würde sonst
-    // den ersten fokussierbaren Knoten automatisch fokussieren — hier
-    // manuell, damit Tastatur- und Screen-Reader-Nutzer:innen ankommen.
     els.settingsModal.setAttribute("open", "");
-    const first = els.settingsModal.querySelector(
-      "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
-    );
-    if (first) first.focus();
   }
+  // Initialfokus auf die Überschrift statt aufs erste <summary> — sonst malt
+  // showModal()/WebKit einen :focus-visible-Akzentrahmen um „Sprache / Language".
+  // tabindex="-1" macht die Überschrift programmatisch fokussierbar ohne
+  // Tastatur-Ring; Screen-Reader landen so sauber am Dialogtitel (a11y gewahrt).
+  els.settingsTitle?.focus();
 }
 
 // Persistenz + Refresh beim Schließen der Einstellungen. Trägt das 'close'-Event
