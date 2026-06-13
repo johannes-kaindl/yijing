@@ -266,6 +266,17 @@ const STRINGS = {
     "export.attribution": "*Text: Richard Wilhelm — I Ging, Das Buch der Wandlungen.*",
     "export.filenameSlug": "yijing", // fallback when latin name missing
 
+    // ——— Zhu-Xi-Linienregel (Reader-Methoden-Transparenz) ———
+    "ruling.label": "Maßgeblich nach Tradition",
+    "ruling.judgment-primary": "Keine wandelnde Linie — das Urteil des Hexagramms ist maßgeblich.",
+    "ruling.line-primary": "Eine wandelnde Linie — ihr Text ist maßgeblich.",
+    "ruling.lines-primary": "Zwei wandelnde Linien — beide gelten, die obere entscheidet.",
+    "ruling.judgments-both": "Drei wandelnde Linien — die Urteile von Ursprungs- und Zielbild gelten, das Ursprungsurteil führt.",
+    "ruling.lines-resulting": "Vier wandelnde Linien — die beiden ruhenden Linien des Zielbilds gelten, die untere entscheidet.",
+    "ruling.line-resulting": "Fünf wandelnde Linien — die eine ruhende Linie des Zielbilds ist maßgeblich.",
+    "ruling.judgment-resulting": "Sechs wandelnde Linien — das Urteil des Zielbilds ist maßgeblich.",
+    "ruling.special-qian-kun": "Sechs wandelnde Linien — es gilt der Sonderspruch „Anwendung der Neun/Sechs".",
+
     // ——— LLM-Prompt-Builder (User-Prompt) ———
     "prompt.question": "Frage: {question}",
     "prompt.noQuestion": "(keine konkrete Frage gestellt)",
@@ -532,6 +543,17 @@ const STRINGS = {
     "export.attribution":
       "*Text: Richard Wilhelm — I Ching, The Book of Changes (translated from the German edition).*",
     "export.filenameSlug": "yijing",
+
+    // ——— Zhu-Xi line rule (reader method transparency) ———
+    "ruling.label": "Decisive by tradition",
+    "ruling.judgment-primary": "No moving line — the hexagram's judgment is decisive.",
+    "ruling.line-primary": "One moving line — its text is decisive.",
+    "ruling.lines-primary": "Two moving lines — both apply; the upper one decides.",
+    "ruling.judgments-both": "Three moving lines — the judgments of the primary and resulting hexagrams apply; the primary leads.",
+    "ruling.lines-resulting": "Four moving lines — the two resting lines of the resulting hexagram apply; the lower decides.",
+    "ruling.line-resulting": "Five moving lines — the single resting line of the resulting hexagram is decisive.",
+    "ruling.judgment-resulting": "Six moving lines — the judgment of the resulting hexagram is decisive.",
+    "ruling.special-qian-kun": "Six moving lines — the special text “use of the nine/six” applies.",
 
     // ——— LLM prompt builder (user prompt) ———
     "prompt.question": "Question: {question}",
