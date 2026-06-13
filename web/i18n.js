@@ -78,6 +78,7 @@ const STRINGS = {
     "llm.thinking.on": "Reasoning: An",
     "llm.thinking.off": "Reasoning: Aus",
     "llm.interpret": "Interpretieren",
+    "llm.disclaimer": "Reflexion, keine Vorhersage.",
     "llm.stop": "Abbrechen",
     "llm.thinkingDetails": "Denkprozess",
     "llm.bodyPlaceholder": "Wähle Endpunkt + Modell und klick „Interpretieren“.",
@@ -205,6 +206,10 @@ const STRINGS = {
     "settings.about": "Über",
     "settings.about.copyright":
       '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) · <a href="https://codeberg.org/jkaindl/Yijing">Quellcode</a>',
+    "settings.about.privacy":
+      '<a href="privacy.html">Datenschutzerklärung</a>',
+    "settings.about.disclaimer":
+      "Yijing ist ein Werkzeug zur Reflexion und Kontemplation — keine Vorhersage der Zukunft.",
 
     "settings.language": "Sprache / Language",
     "settings.language.label": "Sprache:",
@@ -355,6 +360,7 @@ const STRINGS = {
     "llm.thinking.on": "Reasoning: on",
     "llm.thinking.off": "Reasoning: off",
     "llm.interpret": "Interpret",
+    "llm.disclaimer": "Reflection, not prediction.",
     "llm.stop": "Stop",
     "llm.thinkingDetails": "Thinking trace",
     "llm.bodyPlaceholder": "Pick an endpoint and model, then click “Interpret”.",
@@ -482,6 +488,10 @@ const STRINGS = {
     "settings.about": "About",
     "settings.about.copyright":
       '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (docs) · <a href="https://codeberg.org/jkaindl/Yijing">Source</a>',
+    "settings.about.privacy":
+      '<a href="privacy.html">Privacy Policy</a>',
+    "settings.about.disclaimer":
+      "Yijing is a tool for reflection and contemplation — not a prediction of the future.",
 
     "settings.language": "Sprache / Language",
     "settings.language.label": "Language:",

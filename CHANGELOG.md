@@ -12,6 +12,16 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **Privacy policy** — a standalone, self-contained bilingual `web/privacy.html`
+  (DE/EN toggle; both render with JS off), linked from the in-app About section.
+  States the actual data behaviour: everything stays on-device, no collection /
+  tracking / analytics, on-device AI sends nothing, and the only egress is a
+  user-configured BYO endpoint (under that server's own policy). Serves on
+  Codeberg Pages, the dev server, and the native WKWebView (no allow-list).
+- **Visible "Reflexion, keine Vorhersage" / "Reflection, not prediction"
+  disclaimer** (DE/EN) under the AI interpretation and in About — surfaces the
+  reflection/study-tool framing that previously lived only in the never-shown
+  prompt (App Store 4.3 positioning).
 - **iOS App Store export + upload pipeline** — `build-ios-app.sh archive` now
   exports (`app-store-connect`) and uploads to App Store Connect via `altool`,
   driven by a committed `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID`
