@@ -14,7 +14,7 @@ automated sessions.
 - [ ] CORE-GIT-01 — GitHub-Mirror-Remote `github` einrichten (derzeit nur `origin` = Codeberg).
 - [ ] PROF-WEB-03 — `node --check`-Gate-Skript anlegen, das `<script>` aus HTML extrahiert und syntaktisch prueft.
 - [ ] PROF-NAT-01 — Add a separate `scripts/package-native-app.sh` (sign + notarize) for the **macOS AppKit DMG**. *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
-- [ ] PROF-NAT-02 — Version-Bump-Skript anlegen, das die `Info.plist`-`CFBundleShortVersionString` der Targets synchron haelt.
+- [x] PROF-NAT-02 — All four target `Info.plist`s now derive `CFBundleShortVersionString` / `CFBundleVersion` from `project.yml`'s `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` (build-setting expansion). A version bump is two lines in `project.yml`, in lockstep by construction — no script needed (done 2026-06-13).
 
 ## Project character
 

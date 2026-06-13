@@ -107,6 +107,12 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Changed
 
+- **Target versions derive from `project.yml`.** All four iOS-family
+  `Info.plist`s now read `CFBundleShortVersionString` / `CFBundleVersion` from
+  the `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` build settings, so a
+  version bump is a single edit in `project.yml` and the targets stay in
+  lockstep by construction (verified: a simulator build resolves all four
+  bundles to 1.0.0 / 1).
 - **Auto-discovery is now https-aware.** The localhost endpoint probes only run
   on `http` origins (the macOS app's loopback server, the dev server — and, later,
   an on-device loopback LLM in a native mobile shell). On `https` origins they are
