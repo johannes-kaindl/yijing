@@ -12,6 +12,13 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **iOS App Store export + upload pipeline** — `build-ios-app.sh archive` now
+  exports (`app-store-connect`) and uploads to App Store Connect via `altool`,
+  driven by a committed `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID`
+  (the API key `9NPJZ2DPG6` already lives in `~/.appstoreconnect/private_keys/`).
+  Without the Issuer-ID it stops at the `.xcarchive` — no account side effects.
+  This is the App Store distribution channel, **not** notarization (that
+  toolchain is for the macOS AppKit DMG).
 - **Compositional on-device interpretation** (`web/ruling.js` + a revised
   `buildCompactPrompt` + the Apple-FM guardrail-safe prompt): the on-device reading
   now applies the classical **Zhu-Xi changing-line rules** (Wilhelm/Baynes scheme)

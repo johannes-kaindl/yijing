@@ -13,7 +13,7 @@ automated sessions.
 - [ ] CORE-META-03 — Hero-Bild in `docs/images/` ergaenzen + Screenshots reproduzierbar per Skript erzeugen (aktuell nur `docs/screenshots/`, kein Skript).
 - [ ] CORE-GIT-01 — GitHub-Mirror-Remote `github` einrichten (derzeit nur `origin` = Codeberg).
 - [ ] PROF-WEB-03 — `node --check`-Gate-Skript anlegen, das `<script>` aus HTML extrahiert und syntaktisch prueft.
-- [ ] PROF-NAT-01 — Separates `scripts/package-native-app.sh` (sign + notarize) ergaenzen; iOS-Build (`build-ios-app.sh`) um Notarize/Staple-Schritt erweitern.
+- [ ] PROF-NAT-01 — Add a separate `scripts/package-native-app.sh` (sign + notarize) for the **macOS AppKit DMG**. *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
 - [ ] PROF-NAT-02 — Version-Bump-Skript anlegen, das die `Info.plist`-`CFBundleShortVersionString` der Targets synchron haelt.
 
 ## Project character
@@ -221,7 +221,10 @@ Signing is configured by env vars: `YIJING_TEAM_ID` (required for
 `archive`/`device`) and optional `YIJING_DEVICE_ID` (install + launch on a
 device). The build embeds the **committed** `web/` + `data/` via
 `git archive HEAD` — so **commit before building**. `archive` mode leaves the
-`__BUILD__` placeholder so the build badge / dev tooling stays disabled.
+`__BUILD__` placeholder so the build badge / dev tooling stays disabled. With
+`YIJING_ASC_ISSUER_ID` set, `archive` also exports (`app-store-connect`) and
+uploads to App Store Connect via `altool` (API key `9NPJZ2DPG6`) using
+`exportOptions.plist`; without it it stops at the `.xcarchive`.
 Prereqs: full Xcode + iOS SDK, `brew install xcodegen`.
 
 **App Group:** `group.page.codeberg.jkaindl.Yijing`, shared by all four

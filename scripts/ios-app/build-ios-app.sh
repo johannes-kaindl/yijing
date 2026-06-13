@@ -93,8 +93,33 @@ case "$MODE" in
       DEVELOPMENT_TEAM="$YIJING_TEAM_ID" \
       -archivePath "$APPDIR/build/Yijing.xcarchive" archive
     echo "✓ Archive erstellt: $APPDIR/build/Yijing.xcarchive"
-    echo "  Export/Upload für den App Store via Xcode Organizer oder:"
-    echo "    xcodebuild -exportArchive -archivePath … -exportOptionsPlist … -exportPath …"
+    # Export (App Store) + Upload — only when an App Store Connect Issuer-ID is
+    # supplied (the one missing credential; the API key 9NPJZ2DPG6 already lives
+    # in ~/.appstoreconnect/private_keys/AuthKey_9NPJZ2DPG6.p8). Without it we
+    # stop at the .xcarchive — safe, no account side effects.
+    ASC_KEY_ID="${YIJING_ASC_KEY_ID:-9NPJZ2DPG6}"
+    if [ -n "${YIJING_ASC_ISSUER_ID:-}" ]; then
+      EXPORT_DIR="$APPDIR/build/export"
+      rm -rf "$EXPORT_DIR"
+      echo "→ Export für den App Store (-exportArchive, app-store-connect)…"
+      xcodebuild -exportArchive \
+        -archivePath "$APPDIR/build/Yijing.xcarchive" \
+        -exportOptionsPlist "$APPDIR/exportOptions.plist" \
+        -exportPath "$EXPORT_DIR" \
+        -allowProvisioningUpdates
+      IPA="$(find "$EXPORT_DIR" -name '*.ipa' | head -1)"
+      [ -f "$IPA" ] || { echo "FEHLER: keine .ipa exportiert ($EXPORT_DIR)." >&2; exit 1; }
+      echo "✓ Exportiert: $IPA"
+      echo "→ Upload zu App Store Connect (altool; Key $ASC_KEY_ID, Issuer $YIJING_ASC_ISSUER_ID)…"
+      # altool, NICHT notarytool — letzteres ist Developer-ID-Direktvertrieb (macOS-DMG).
+      xcrun altool --upload-app -f "$IPA" --type ios \
+        --apiKey "$ASC_KEY_ID" --apiIssuer "$YIJING_ASC_ISSUER_ID"
+      echo "✓ Hochgeladen zu App Store Connect."
+    else
+      echo "  (kein YIJING_ASC_ISSUER_ID → Export/Upload übersprungen; nur .xcarchive.)"
+      echo "  App-Store-Upload: YIJING_ASC_ISSUER_ID=<issuer-id> erneut ausführen"
+      echo "  (Key $ASC_KEY_ID muss in ~/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8 liegen)."
+    fi
     ;;
   device)
     : "${YIJING_TEAM_ID:?YIJING_TEAM_ID muss gesetzt sein (Apple Developer Team ID)}"
