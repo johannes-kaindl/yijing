@@ -275,7 +275,7 @@ const STRINGS = {
     "ruling.lines-resulting": "Vier wandelnde Linien — die beiden ruhenden Linien des Zielbilds gelten, die untere entscheidet.",
     "ruling.line-resulting": "Fünf wandelnde Linien — die eine ruhende Linie des Zielbilds ist maßgeblich.",
     "ruling.judgment-resulting": "Sechs wandelnde Linien — das Urteil des Zielbilds ist maßgeblich.",
-    "ruling.special-qian-kun": "Sechs wandelnde Linien — es gilt der Sonderspruch „Anwendung der Neun/Sechs".",
+    "ruling.special-qian-kun": "Sechs wandelnde Linien — es gilt der Sonderspruch zur Anwendung der Neun bzw. der Sechs.",
 
     // ——— LLM-Prompt-Builder (User-Prompt) ———
     "prompt.question": "Frage: {question}",
