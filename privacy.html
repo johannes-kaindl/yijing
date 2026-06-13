@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<!--
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Copyright (C) 2026 Johannes Kaindl
+
+  Standalone, self-contained privacy policy (no JS/CSS dependencies on the SPA),
+  so it renders directly as a stable URL on Codeberg Pages and inside the native
+  WKWebView. Bilingual DE/EN: a tiny inline toggle shows one language at a time;
+  with JS disabled both render (safe legal fallback). The facts mirror the app's
+  actual data behaviour (all local; the only egress is a user-configured BYO
+  endpoint). WORDING PENDING REVIEW before the URL goes into App Store Connect.
+-->
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Datenschutz · Privacy — Yijing</title>
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#1a1814" />
+  <meta name="robots" content="index, follow" />
+  <style>
+    :root {
+      --bg: #1a1814; --bg-card: #221f1a; --ink: #ece4d3; --ink-soft: #b8ad96;
+      --ink-faint: #938974; --accent: #c79a4a; --accent-soft: #8a6a30;
+      --line: #443f35; --max: 760px; --radius: 6px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4efe4; --bg-card: #fffdf7; --ink: #2a2620; --ink-soft: #5c5444;
+        --ink-faint: #6f6852; --accent: #7a5a18; --accent-soft: #bf9a52;
+        --line: #ddd4bf;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 2rem 1.25rem 4rem;
+    }
+    main { max-width: var(--max); margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
+    h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; color: var(--accent); }
+    p, li { color: var(--ink-soft); }
+    a { color: var(--accent); text-decoration-color: var(--accent-soft); }
+    a:hover { text-decoration-color: var(--accent); }
+    .lede { color: var(--ink); }
+    .meta { color: var(--ink-faint); font-size: .9rem; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 1rem 1.25rem; margin: 1rem 0;
+    }
+    .switch { display: flex; gap: .5rem; margin: 1rem 0 1.5rem; }
+    .switch button {
+      font: inherit; cursor: pointer; padding: .35rem .8rem;
+      background: var(--bg-card); color: var(--ink-soft);
+      border: 1px solid var(--line); border-radius: var(--radius);
+    }
+    .switch button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent-soft); }
+    .switch button:focus-visible { outline: 2px solid var(--accent); }
+    footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: .9rem; }
+    /* JS-on: show only the selected language. JS-off: both render. */
+    html.js .lang { display: none; }
+    html.js.show-de #de, html.js.show-en #en { display: block; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="switch" role="group" aria-label="Sprache / Language">
+      <button type="button" id="btn-de" aria-pressed="true">Deutsch</button>
+      <button type="button" id="btn-en" aria-pressed="false">English</button>
+    </div>
+
+    <!-- ════════════════════════ DEUTSCH ════════════════════════ -->
+    <section class="lang" id="de" lang="de">
+      <h1>Datenschutzerklärung — Yijing</h1>
+      <p class="meta">Stand: 13. Juni 2026</p>
+
+      <div class="card">
+        <p class="lede"><strong>Kurz gesagt:</strong> Yijing sammelt nichts. Alle Daten
+        (Lesungen, Verlauf, Einstellungen) bleiben auf deinem Gerät. Es gibt keinen
+        Server des Anbieters, kein Tracking, keine Analyse, keine Werbung. Die einzige
+        mögliche Datenübertragung entsteht, wenn du selbst einen externen KI-Endpunkt
+        einträgst — dann geht dein Lesungstext an genau diesen, von dir gewählten Server.</p>
+      </div>
+
+      <h2>Welche Daten verarbeitet werden</h2>
+      <p>Yijing ist ein Nachschlagewerk und Studientool zum Yijing (I Ging). Du wirfst das
+      Orakel, liest die Wilhelm-Texte und kannst optional eine KI-Deutung anfragen. Dabei
+      entstehen ausschließlich Daten, die du selbst eingibst (deine optionale Frage) oder
+      die die App lokal erzeugt (der geworfene Hexagramm-Zustand, dein Verlauf).</p>
+
+      <h2>Lokale Speicherung</h2>
+      <p>Verlauf, Endpunkt-Einstellungen, Sprache, Fassung und Theme werden im
+      <em>localStorage</em> deines Browsers gespeichert (in der nativen App im geteilten
+      App-Group-Speicher des Geräts). Es gibt keine Datenbank und keinen serverseitigen
+      Zustand. Du kannst den Verlauf jederzeit in der App löschen.</p>
+
+      <h2>Keine Sammlung, kein Tracking</h2>
+      <p>Es gibt keine Analyse-Dienste, keine Telemetrie, keine Cookies zu Werbezwecken,
+      keine Drittanbieter-Tracker und keine Weitergabe von Daten an den Anbieter. Der
+      Anbieter erhält oder speichert keinerlei personenbezogene Daten.</p>
+
+      <h2>KI-Deutung auf dem Gerät</h2>
+      <p>Auf unterstützten Apple-Geräten läuft die KI-Deutung standardmäßig
+      <strong>on-device</strong> (Apple Foundation Models); ein optionales Meditationsbild
+      wird über Apple Image Playground lokal erzeugt. Diese Verarbeitung findet auf dem
+      Gerät statt und sendet nichts an den Anbieter oder an Apple-Server.</p>
+
+      <h2>Selbst eingetragene KI-Endpunkte (der einzige Datenausgang)</h2>
+      <p>Du kannst optional einen eigenen KI-Endpunkt eintragen — etwa einen lokalen
+      Server (Ollama, MLX, LM Studio) oder einen entfernten, OpenAI-kompatiblen Dienst.
+      Tust du das und fragst eine Deutung an, wird dein Lesungstext (deine Frage und der
+      Hexagramm-Kontext) an genau diesen von dir gewählten Server gesendet. Diese
+      Übertragung unterliegt der Datenschutzrichtlinie des jeweiligen Anbieters, nicht
+      dieser. Die voreingestellten Endpunkte sind lokal (localhost); ohne dein Zutun
+      verlässt nichts dein Gerät.</p>
+
+      <h2>Offline-Betrieb (PWA)</h2>
+      <p>Als installierbare Web-App speichert ein Service Worker die App-Dateien lokal im
+      Browser-Cache, damit Yijing offline funktioniert. Das ist reines lokales Caching
+      ohne Datenübertragung.</p>
+
+      <h2>Kinder</h2>
+      <p>Die App richtet sich nicht gezielt an Kinder und erhebt keine Daten von
+      irgendjemandem.</p>
+
+      <h2>Änderungen</h2>
+      <p>Wird diese Erklärung angepasst, ändert sich das Datum oben. Die jeweils aktuelle
+      Fassung steht unter dieser Adresse.</p>
+
+      <h2>Kontakt</h2>
+      <p>Yijing ist quelloffen. Fragen und Hinweise gerne über die
+      <a href="https://codeberg.org/jkaindl/Yijing/issues">Codeberg-Issues</a> oder das
+      Profil <a href="https://codeberg.org/jkaindl">codeberg.org/jkaindl</a>.</p>
+    </section>
+
+    <!-- ════════════════════════ ENGLISH ════════════════════════ -->
+    <section class="lang" id="en" lang="en">
+      <h1>Privacy Policy — Yijing</h1>
+      <p class="meta">Last updated: 13 June 2026</p>
+
+      <div class="card">
+        <p class="lede"><strong>In short:</strong> Yijing collects nothing. All data
+        (readings, history, settings) stays on your device. There is no provider server,
+        no tracking, no analytics, no advertising. The only possible data transfer happens
+        if you yourself enter an external AI endpoint — then your reading text is sent to
+        exactly that server of your choosing.</p>
+      </div>
+
+      <h2>What data is processed</h2>
+      <p>Yijing is a reference and study tool for the Yijing (I Ching). You cast the
+      oracle, read the Wilhelm texts, and may optionally request an AI interpretation. The
+      only data involved is what you enter yourself (your optional question) or what the
+      app generates locally (the cast hexagram state, your history).</p>
+
+      <h2>Local storage</h2>
+      <p>History, endpoint settings, language, register and theme are stored in your
+      browser's <em>localStorage</em> (in the native app, in the device's shared App-Group
+      storage). There is no database and no server-side state. You can clear the history
+      in the app at any time.</p>
+
+      <h2>No collection, no tracking</h2>
+      <p>There are no analytics services, no telemetry, no advertising cookies, no
+      third-party trackers, and no sharing of data with the provider. The provider
+      receives and stores no personal data whatsoever.</p>
+
+      <h2>On-device AI interpretation</h2>
+      <p>On supported Apple devices the AI interpretation runs <strong>on-device</strong>
+      by default (Apple Foundation Models); an optional meditation image is generated
+      locally via Apple Image Playground. This processing happens on the device and sends
+      nothing to the provider or to Apple servers.</p>
+
+      <h2>Self-configured AI endpoints (the only data egress)</h2>
+      <p>You may optionally enter your own AI endpoint — a local server (Ollama, MLX, LM
+      Studio) or a remote, OpenAI-compatible service. If you do and request an
+      interpretation, your reading text (your question and the hexagram context) is sent
+      to exactly that server you chose. That transfer is governed by the respective
+      provider's privacy policy, not this one. The default endpoints are local
+      (localhost); without your action, nothing leaves your device.</p>
+
+      <h2>Offline use (PWA)</h2>
+      <p>As an installable web app, a service worker stores the app files locally in the
+      browser cache so Yijing works offline. This is purely local caching with no data
+      transfer.</p>
+
+      <h2>Children</h2>
+      <p>The app is not directed at children and collects no data from anyone.</p>
+
+      <h2>Changes</h2>
+      <p>If this policy changes, the date above changes with it. The current version is
+      always available at this address.</p>
+
+      <h2>Contact</h2>
+      <p>Yijing is open source. Questions and notes are welcome via the
+      <a href="https://codeberg.org/jkaindl/Yijing/issues">Codeberg issues</a> or the
+      profile <a href="https://codeberg.org/jkaindl">codeberg.org/jkaindl</a>.</p>
+    </section>
+
+    <footer>
+      <p>© 2026 Johannes Kaindl ·
+        <a href="https://codeberg.org/jkaindl/Yijing">Quellcode / Source</a> ·
+        <a href="index.html">← Zurück zur App / Back to the app</a></p>
+    </footer>
+  </main>
+
+  <script>
+    // Progressive enhancement: with JS, show one language; default from the
+    // browser/OS language. Without JS both sections render (legal fallback).
+    (function () {
+      var html = document.documentElement;
+      html.classList.add("js");
+      var de = document.getElementById("btn-de");
+      var en = document.getElementById("btn-en");
+      function show(lang) {
+        var isDe = lang !== "en";
+        html.classList.toggle("show-de", isDe);
+        html.classList.toggle("show-en", !isDe);
+        html.setAttribute("lang", isDe ? "de" : "en");
+        de.setAttribute("aria-pressed", String(isDe));
+        en.setAttribute("aria-pressed", String(!isDe));
+      }
+      de.addEventListener("click", function () { show("de"); });
+      en.addEventListener("click", function () { show("en"); });
+      show((navigator.language || "de").slice(0, 2) === "en" ? "en" : "de");
+    })();
+  </script>
+</body>
+</html>
