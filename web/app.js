@@ -35,6 +35,7 @@ import {
 import { renderMarkdown } from "./markdown.js";
 import { initI18n, applyI18n, setLang, getLang, t, localeTag } from "./i18n.js";
 import { composeImageRequest } from "./image-scene.js";
+import { rulingText } from "./ruling.js";
 
 const HISTORY_KEY = "yijing-history-v1";
 
@@ -1299,17 +1300,32 @@ function buildCompactPrompt(reading) {
   if (pt.judgment) parts.push(`${t("prompt.judgment")} ${firstSentence(pt.judgment)}`);
   const idxs = reading.changingIndices || [];
   if (idxs.length && prim.lines) {
+    // Zhu-Xi-Regel bestimmt den maßgeblichen Text — nur diesen füttern (nicht alle
+    // Linien), das hält den On-Device-Prompt im 160-Wort/4096-Token-Budget.
+    const r = rulingText({ primaryNumber: prim.number, changingIndices: idxs });
+    const res = reading.resultingHex;
+    const rt = res ? hexTextFieldsForLang(res) : null;
+    const lineFrom = (hex, i) => {
+      const lf = lineFieldsForLang(hex.lines[i]);
+      return `• ${lf.position} ${lf.text}`;
+    };
+
     parts.push(t("prompt.changing"));
-    for (const i of idxs) {
-      const ln = prim.lines[i];
-      if (!ln) continue;
-      const lf = lineFieldsForLang(ln);
-      parts.push(`• ${lf.position} ${lf.text}`);
+    if (r.rule === "line-primary" || r.rule === "lines-primary") {
+      for (const i of r.lineIndices) parts.push(lineFrom(prim, i));
+    } else if (r.rule === "special-qian-kun") {
+      parts.push(lineFrom(prim, 6)); // „Anwendung der Neun/Sechs"
+    } else if ((r.rule === "lines-resulting" || r.rule === "line-resulting") && res) {
+      for (const i of r.lineIndices) parts.push(lineFrom(res, i));
+    } else if ((r.rule === "judgments-both" || r.rule === "judgment-resulting") && rt?.judgment) {
+      // 3 Linien: Primär-Urteil steht schon oben; 6 Linien: Zielbild-Urteil ist maßgeblich
+      parts.push(`${t("prompt.judgment")} ${firstSentence(rt.judgment)}`);
     }
-    if (reading.resultingHex) {
-      const rt = hexTextFieldsForLang(reading.resultingHex);
-      parts.push(`${en ? "Resulting hexagram" : "Zielbild"}: ${nameLine(reading.resultingHex)}`);
-      if (rt.image) parts.push(`${t("prompt.image")} ${firstSentence(rt.image)}`);
+
+    // Zielbild immer benennen (Name + Bild):
+    if (res) {
+      parts.push(`${en ? "Resulting hexagram" : "Zielbild"}: ${nameLine(res)}`);
+      if (rt?.image) parts.push(`${t("prompt.image")} ${firstSentence(rt.image)}`);
     }
   }
   parts.push("");
