@@ -59,6 +59,14 @@ export const SWEEP_CASES = [
   { id: "58-heiterkeit-see", label: "Das Heitere — helle Wandlung mit Frage",
     primary: 58, changingIndices: [5], resulting: 10,
     question: "Wie bewahre ich mir die Heiterkeit?" },
+  // (h) Drei wandelnde Linien — Zhu-Xi-Regel judgments-both (beide Urteile)
+  { id: "11-friede-3-linien", label: "Friede — drei wandelnde Linien (beide Urteile)",
+    primary: 11, changingIndices: [0, 2, 4], resulting: 29,
+    question: "Worauf darf ich jetzt vertrauen?" },
+  // (i) Fünf wandelnde Linien — Zhu-Xi-Regel line-resulting (eine ruhende Linie des Zielbilds)
+  { id: "01-schoepferisch-5-linien", label: "Das Schöpferische — fünf wandelnde Linien",
+    primary: 1, changingIndices: [0, 1, 2, 3, 4], resulting: 23,
+    question: "Wie setze ich meine Kraft richtig ein?" },
 ];
 
 /** Zielbild-Binary: wandelnde Bits geflippt (binary bottom-up, "1" = Yang). */
