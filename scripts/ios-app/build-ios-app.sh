@@ -135,8 +135,13 @@ case "$MODE" in
     ;;
   watch)
     echo "→ Build für watchOS-Simulator (kein Signing)…"
+    # No -sdk: let -destination drive the platform. Forcing -sdk watchsimulator
+    # makes the iOS-only YijingWidgets target (which can't build for watchOS, so
+    # it stays iphonesimulator) link the watchOS-built OracleKit → ld error
+    # "building for iOS-simulator, but linking object built for watchOS-simulator".
+    # Same -sdk hazard the simulator/archive/device modes deliberately avoid.
     xcodebuild -project "$APPDIR/Yijing.xcodeproj" -scheme YijingWatch \
-      -configuration Release -sdk watchsimulator \
+      -configuration Release \
       -destination 'generic/platform=watchOS Simulator' \
       CODE_SIGNING_ALLOWED=NO build
     echo "✓ watchOS-Build fertig (Schema YijingWatch)."

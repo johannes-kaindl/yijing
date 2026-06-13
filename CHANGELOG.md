@@ -106,6 +106,17 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Fixed
 
+- **watchOS app icon** — `YijingWatch` shipped without an asset catalog, so an
+  App Store build validation would reject it ("Missing App Icon"). Added
+  `Watch/Assets.xcassets` (single 1024px source, no alpha — the same brand mark
+  as the phone app) and wired it into the target (`ASSETCATALOG_COMPILER_APPICON_NAME`).
+  The embedded `YijingWatch.app` now carries `Assets.car` (AppIcon) and a
+  `CFBundleIcons` Info.plist key.
+- **`build-ios-app.sh watch` mode** — dropped the explicit `-sdk watchsimulator`,
+  which made the iOS-only `YijingWidgets` extension link the watchOS build of
+  OracleKit (`ld: building for iOS-simulator, but linking object built for
+  watchOS-simulator`). `-destination` now resolves each target's platform, the
+  same way the simulator/archive/device modes already do.
 - **Web a11y/WCAG pass** — `aria-live` status region, focus management, AA
   contrast bumps, `prefers-reduced-motion`, a shared `:focus-visible` ring,
   aria-labels and `lang` attributes.
