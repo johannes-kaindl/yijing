@@ -12,6 +12,19 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **Compositional on-device interpretation** (`web/ruling.js` + a revised
+  `buildCompactPrompt` + the Apple-FM guardrail-safe prompt): the on-device reading
+  now applies the classical **Zhu-Xi changing-line rules** (Wilhelm/Baynes scheme)
+  to feed only the *governing* source text (e.g. six moving lines → the resulting
+  hexagram's judgment, not six line texts; Qian/Kun → the "use the nine/six"
+  special), **always names the resulting hexagram (Zielbild)**, and adopts a
+  **middle-way tone** that may name shadow or danger as long as it is paired with a
+  constructive way forward (no longer flattening everything into the purely
+  positive). A new reader line surfaces which rule governs ("Decisive by tradition:
+  …", DE/EN). The rule function is pure and node-tested (`scripts/test-ruling.mjs`,
+  all cases 0–6 incl. the Qian/Kun special); the sweep corpus gains a 3- and a
+  5-moving-line case. BYO/remote endpoints already feed full per-line depth and are
+  unchanged.
 - **Dev-only prompt test-harness** (`web/sweep.js` + a `DEV_MODE`-gated panel):
   a curated 10-case sweep through the live text/image pipeline (paced against
   the Apple-FM throttle), exporting `{prompt, output, image}` per case to
