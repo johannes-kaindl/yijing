@@ -107,6 +107,16 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Changed
 
+- **On-device refusal retry reframes; sharper key message** (Apple FM). The
+  `FoundationModelsEngine` retry now reinforces the literary-commentary framing
+  on its *second* attempt, giving a deterministic content refusal (e.g. the
+  benign Hexagram 22 "Anmut" case) a chance to clear — the prior retry only ever
+  helped transient throttles, since it re-sent an identical input. It runs only
+  after the first attempt already refused before emitting a token, so it cannot
+  regress a working request. The guardrail-safe prompt (+ the `literary` web
+  preset mirror) sharpens the "Kernbotschaft / Key message" into a distinct
+  maxim — *not* a summary of the other sections — to reduce the Impuls↔Kernbotschaft
+  overlap. Both are prompt/engine bets that **must be validated on a device**.
 - **Target versions derive from `project.yml`.** All four iOS-family
   `Info.plist`s now read `CFBundleShortVersionString` / `CFBundleVersion` from
   the `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` build settings, so a

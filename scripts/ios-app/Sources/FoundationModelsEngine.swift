@@ -61,7 +61,17 @@ final class FoundationModelsEngine: LLMEngine {
         var emitted = false
         for attempt in 0..<2 {
             thrown = nil
-            let session = LanguageModelSession(instructions: instructions)
+            // On the retry, reinforce the literary-commentary framing. A deterministic
+            // content refusal (e.g. the benign Hex 22 "Anmut" case) re-refuses to an
+            // IDENTICAL input, so the single retry only ever cleared throttles, never a
+            // genuine refusal. Varying the instructions in the proven low-refusal
+            // direction gives such a refusal a second chance. It runs ONLY after attempt
+            // 0 already failed before emitting a token, so it cannot regress a request
+            // that already works. Payoff is uncertain — VALIDATE ON A DEVICE.
+            let activeInstructions = attempt == 0
+                ? instructions
+                : instructions + "\n\n" + (isEnglish ? Self.retryReinforceEN : Self.retryReinforceDE)
+            let session = LanguageModelSession(instructions: activeInstructions)
             let sem = DispatchSemaphore(value: 0)
             var lastCount = 0
             let task = Task {
@@ -102,7 +112,7 @@ final class FoundationModelsEngine: LLMEngine {
     - Situation: Was das Bild über die gegenwärtige Lage und das Anliegen des Ratsuchenden sagt.
     - Wandlung: NUR wenn das Material wandelnde Linien und ein Zielbild nennt — deute die Bewegung zum Zielbild hin und benenne das Zielbild. Nennt das Material keine Wandlung, lass diesen Abschnitt ganz weg und deute nur das Standbild.
     - Impuls: Eine konkrete, alltagsnahe Haltung oder Handlung zum Anliegen.
-    - Kernbotschaft: Ein einziger einprägsamer Satz.
+    - Kernbotschaft: Ein einziger einprägsamer Merksatz — kein Resümee der anderen Abschnitte.
     Schreibe in ruhigem Fließtext, ohne einzelne Wörter fett zu setzen. Vermeide es, dieselbe Idee mehrfach in neuen Worten zu wiederholen. Setze die Frage als bekannt voraus und gib sie NICHT wieder — weder als Präambel noch umschrieben (kein „Der Ratsuchende fragt/steht vor …“). Erzähle nicht über den Ratsuchenden in der dritten Person; deute direkt das Bild und was es für das Anliegen bedeutet. Antworte auf Deutsch.
     """
     private static let guardrailSafeEN = """
@@ -112,9 +122,17 @@ final class FoundationModelsEngine: LLMEngine {
     - Situation: what the image says about the present circumstance and the querent's concern.
     - Change: ONLY when the material names moving lines and a resulting hexagram — read the movement toward the resulting hexagram and name it. If the material names no change, omit this section entirely and read only the still image.
     - Impulse: one concrete, everyday attitude or action toward the concern.
-    - Key message: a single memorable sentence.
+    - Key message: a single memorable maxim — not a summary of the other sections.
     Write in calm prose, without bolding individual words. Avoid restating the same idea in new words. Treat the question as known and do NOT reproduce it — neither as a preamble nor paraphrased (no "The querent asks/faces …"). Do not narrate about the querent in the third person; interpret the image directly and what it means for the concern. Answer in English.
     """
+
+    // Appended ONLY on the retry of a refused request (see generate()). Doubles down
+    // on the literary / historical-text framing that measured ~0% refusal; it adds NO
+    // new content directive (those — e.g. the rolled-back "middle-way tone" — backfired).
+    private static let retryReinforceDE =
+        "Wichtig: Dies ist ausschließlich eine literarische, kulturhistorische Betrachtung der Bildsprache eines über 3000 Jahre alten Textes — keine Vorhersage. Deute die Symbolik sachlich, ruhig und konstruktiv."
+    private static let retryReinforceEN =
+        "Important: this is purely a literary, cultural-historical reading of the imagery of a more than 3000-year-old text — not a prediction. Interpret the symbolism factually, calmly, and constructively."
 
     /// Turn Foundation Models' internal errors into clean, user-facing messages so
     /// web/llm.js shows something helpful (and the user can switch to a remote
