@@ -117,14 +117,14 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
             completionHandler: nil)
     }
 
-    private func handleGenerateImage(scene: String, motif: String, motif2: String, modifier: String, requestId: String) {
+    private func handleGenerateImage(scene: String, motif: String, motif2: String, modifier: String, mood: String, requestId: String) {
         guard #available(iOS 18.4, macCatalyst 18.4, *) else {
             sendImageError(requestId, "Bildgenerierung wird auf diesem Gerät nicht unterstützt."); return
         }
         #if canImport(ImagePlayground)
         Task {
             do {
-                let jpeg = try await ImageGenerator.generateMeditationImage(scene: scene, motif: motif, motif2: motif2, modifier: modifier)
+                let jpeg = try await ImageGenerator.generateMeditationImage(scene: scene, motif: motif, motif2: motif2, modifier: modifier, mood: mood)
                 let url = "data:image/jpeg;base64," + jpeg.base64EncodedString()
                 await MainActor.run { self.sendImageResult(requestId, url) }
             } catch {
@@ -214,6 +214,7 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
                                 motif: body["motif"] as? String ?? "",
                                 motif2: body["motif2"] as? String ?? "",
                                 modifier: body["modifier"] as? String ?? "",
+                                mood: body["mood"] as? String ?? "neutral",
                                 requestId: body["requestId"] as? String ?? "")
         case "settings":
             // Mirror language/register into the App Group so the widget + watch

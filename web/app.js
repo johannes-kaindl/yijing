@@ -2209,6 +2209,7 @@ function requestMeditationImage() {
     motif: req.motif,
     motif2: req.motif2,
     modifier: req.modifier,
+    mood: req.mood,
     requestId,
   });
 }

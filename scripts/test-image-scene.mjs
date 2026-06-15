@@ -66,4 +66,11 @@ const n1 = composeImageRequest({ primaryMotif: "x", resultingMotif: "", question
 const n2 = composeImageRequest({ primaryMotif: "x", resultingMotif: "", question: "Q", primaryNumber: 1 });
 assert.equal(n1.scene, n2.scene, "same question+number → same scene");
 
+// mood label exposed for the native mood-aware fallback (dark scene must never
+// fall back to a sunny meadow)
+assert.equal(composeImageRequest({ primaryMotif: "x", question: "Q", primaryNumber: 29 }).mood, "dark");
+assert.equal(composeImageRequest({ primaryMotif: "x", question: "Q", primaryNumber: 14 }).mood, "bright");
+assert.equal(composeImageRequest({ primaryMotif: "x", question: "Q", primaryNumber: 1 }).mood, "neutral");
+assert.equal(composeImageRequest({ primaryMotif: "x", question: "Q" }).mood, "neutral");
+
 console.log("OK image-scene: all assertions passed");

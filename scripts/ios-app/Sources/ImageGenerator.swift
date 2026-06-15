@@ -36,13 +36,18 @@ enum ImageGenerator {
     /// Render the reading's meditation image. Model A: `scene` is one composed
     /// sentence (both motifs + atmosphere, built web-side in image-scene.js) rendered
     /// as a SINGLE Image Playground concept. On failure we shed detail: the bare
-    /// primary `motif` (+ `modifier`), then the primary alone, then a neutral scene.
-    /// `motif2` is retained for a possible future diptych fallback.
+    /// primary `motif` (+ `modifier`), then the primary alone, then a `mood`-appropriate
+    /// last-resort scene. `motif2` is retained for a possible future diptych fallback.
+    ///
+    /// `mood` ("dark"/"bright"/"neutral") steers ONLY the last resort: Image Playground
+    /// refuses some dark motifs (e.g. Hex 29 "a dark river between steep cliffs"), which
+    /// used to cascade to a sunny meadow — inverting the reading. A dark mood now falls
+    /// back to a somber scene instead.
     ///
     /// NO Apple FM for the prompt (on-device distillation refused most requests +
     /// ignored the question) and NO "ink-wash" suffix (it only pulled images toward
     /// generic mountain-water). All deterministic.
-    static func generateMeditationImage(scene: String, motif: String, motif2: String, modifier: String) async throws -> Data {
+    static func generateMeditationImage(scene: String, motif: String, motif2: String, modifier: String, mood: String) async throws -> Data {
         let scene = scene.trimmingCharacters(in: .whitespacesAndNewlines)
         let motif = motif.trimmingCharacters(in: .whitespacesAndNewlines)
         let mod = modifier.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -57,8 +62,16 @@ enum ImageGenerator {
                 return data
             }
         }
-        // Last resort, surfaced rather than swallowed.
-        return try await render([.text("a quiet meadow under a wide sky")])
+        // Last resort, surfaced rather than swallowed — mood-aware so a refused dark
+        // scene never inverts into a sunny meadow. The strings are deliberately gentle
+        // (no "dark"/"steep cliffs") so the fallback itself stays renderable.
+        let lastResort: String
+        switch mood {
+        case "dark":   lastResort = "a still pond under a grey overcast sky"
+        case "bright": lastResort = "a sunlit meadow under a clear sky"
+        default:       lastResort = "a quiet meadow under a wide sky"
+        }
+        return try await render([.text(lastResort)])
     }
 
     private static func logRender(_ label: String) {

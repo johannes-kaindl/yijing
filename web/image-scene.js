@@ -51,23 +51,30 @@ export function hashString(s) {
   return h;
 }
 
+/** Mood of the (foreground) primary hexagram, keyed on its motif's atmosphere. */
+export function moodFor(primaryNumber) {
+  return DARK_HEXAGRAMS.has(primaryNumber) ? "dark"
+    : BRIGHT_HEXAGRAMS.has(primaryNumber) ? "bright"
+    : "neutral";
+}
+
 /**
  * @param {{primaryMotif:string, resultingMotif:string, question:string, primaryNumber?:number}} input
- * @returns {{scene:string, motif:string, motif2:string, modifier:string}}
+ * @returns {{scene:string, motif:string, motif2:string, modifier:string, mood:string}}
  */
 export function composeImageRequest({ primaryMotif, resultingMotif, question, primaryNumber }) {
   const motif = (primaryMotif || "").trim() || "a still mountain lake";
   const motif2 = (resultingMotif || "").trim();
   const q = (question || "").trim();
   const h = q ? hashString(q) : 0;
-  // Mood-consistent atmosphere pool, keyed on the (foreground) primary hexagram.
-  const pool = DARK_HEXAGRAMS.has(primaryNumber)
-    ? DARK_MODIFIERS
-    : BRIGHT_HEXAGRAMS.has(primaryNumber)
-      ? BRIGHT_MODIFIERS
-      : IMAGE_MODIFIERS;
+  // Mood drives BOTH the atmosphere pool and the native last-resort fallback, so a
+  // dark scene that Image Playground refuses never inverts into a sunny meadow.
+  const mood = moodFor(primaryNumber);
+  const pool = mood === "dark" ? DARK_MODIFIERS
+    : mood === "bright" ? BRIGHT_MODIFIERS
+    : IMAGE_MODIFIERS;
   const modifier = q ? pool[h % pool.length] : "in soft daylight";
   const base = motif2 ? SCENE_RELATIONS[h % SCENE_RELATIONS.length](motif, motif2) : motif;
   const scene = modifier ? `${base}, ${modifier}` : base;
-  return { scene, motif, motif2, modifier };
+  return { scene, motif, motif2, modifier, mood };
 }
