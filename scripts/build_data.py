@@ -105,7 +105,7 @@ IMAGE_SEEDS = {
     26:  "a bull resting beneath a mountain",
     27:  "a deer grazing in a clearing",
     28:  "a willow bending low over water",
-    29:  "a dark river between steep cliffs",
+    29:  "a river winding through a deep gorge",
     30:  "a glowing lantern in darkness",
     31:  "two birds courting on a branch",
     32:  "an ancient oak standing alone",
