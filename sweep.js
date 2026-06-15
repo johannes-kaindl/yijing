@@ -143,7 +143,7 @@ function requestImageFor(bridge, req, timeoutMs) {
     bridge.postMessage({
       action: "generateImage",
       scene: req.scene, motif: req.motif, motif2: req.motif2,
-      modifier: req.modifier, requestId,
+      modifier: req.modifier, mood: req.mood, requestId,
     });
   });
 }
@@ -270,7 +270,7 @@ export async function runSweep(deps, opts = {}) {
         error = String(e?.message || e);
       }
       rec.image = {
-        scene: req.scene, motif: req.motif, motif2: req.motif2, modifier: req.modifier,
+        scene: req.scene, motif: req.motif, motif2: req.motif2, modifier: req.modifier, mood: req.mood,
         file: error ? null : file,
         ms: Math.round(performance.now() - t0),
         error,
