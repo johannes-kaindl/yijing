@@ -107,13 +107,18 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Changed
 
-- **Mood-aware meditation image scene.** Dark hexagram motifs (e.g. 29 "the
-  Abysmal — a dark river between steep cliffs") no longer get a warm sunny
-  atmosphere, and bright motifs no longer get a cold/wintry one — the
-  deterministic atmosphere modifier is now drawn from a mood-consistent pool per
-  hexagram. The resulting (change) motif is placed in the background instead of
-  fused as a transition, so it is no longer dropped from the frame. Pure
-  composition change in `web/image-scene.js`; the on-device renderer is unchanged.
+- **Mood-aware meditation image scene.** The atmosphere modifier is now drawn
+  from a mood-consistent pool per hexagram (dark hexagrams avoid warm/sunny
+  modifiers, bright ones avoid cold/wintry), the resulting (change) motif is
+  phrased as a background element rather than a fused transition, and the native
+  last-resort fallback is mood-aware so a refused dark scene can no longer cascade
+  into a sunny meadow. Hex 29's motif was reworded to a renderable "deep gorge"
+  (Image Playground refused "a dark river between steep cliffs"). *Honest scope:
+  on-device device sweeps confirmed the gross error is gone — Hex 29 now renders
+  its gorge, not a meadow — but Image Playground's sketch style renders brightly
+  regardless, so the modifier only nudges mood; truly dark imagery is a renderer
+  ceiling, not a prompt-assembly fix. Background phrasing keeps both motifs in
+  roughly half the change readings; small/hard background motifs still drop.*
 - **On-device refusal retry reframes; sharper key message** (Apple FM). The
   `FoundationModelsEngine` retry now reinforces the literary-commentary framing
   on its *second* attempt, giving a deterministic content refusal (e.g. the
