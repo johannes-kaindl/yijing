@@ -16,11 +16,13 @@ export const IMAGE_MODIFIERS = [
   "in warm golden light", "under drifting clouds",
 ];
 
-// Templates that fuse primary (a) and resulting (b) motif into one scene.
+// Templates that place the resulting (b) motif in the BACKGROUND behind the
+// primary (a). Background phrasing keeps both in one frame — a fused transition
+// ("a giving way to b") made ImageCreator drop the second motif.
 export const SCENE_RELATIONS = [
-  (a, b) => `${a}, and beyond it ${b}`,
-  (a, b) => `${a} giving way to ${b}`,
-  (a, b) => `${a}, with ${b} rising in the distance`,
+  (a, b) => `${a}, with ${b} in the background`,
+  (a, b) => `${a}, ${b} small in the distance`,
+  (a, b) => `${a}, ${b} on the horizon beyond`,
 ];
 
 // djb2 — stable across runs/devices; purely local (no cross-file contract).

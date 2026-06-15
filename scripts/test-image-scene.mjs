@@ -26,4 +26,19 @@ assert.equal(a.scene, b.scene, "same question → same scene");
 r = composeImageRequest({ primaryMotif: "", resultingMotif: "", question: "" });
 assert.equal(r.motif, "a still mountain lake");
 
+// change → motif2 phrased as background, not as a transition
+const bg = composeImageRequest({
+  primaryMotif: "a soaring eagle",
+  resultingMotif: "a wide field of golden grain",
+  question: "Where to?",
+});
+assert.ok(
+  /in the background|small in the distance|on the horizon beyond/.test(bg.scene),
+  `motif2 phrased as background, got: "${bg.scene}"`
+);
+assert.ok(
+  !/giving way to|and beyond it|rising in the distance/.test(bg.scene),
+  `no old transition phrasing, got: "${bg.scene}"`
+);
+
 console.log("OK image-scene: all assertions passed");
