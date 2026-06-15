@@ -11,7 +11,7 @@ import UIKit
 import WebKit
 import WidgetKit
 
-final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler {
+final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
     private var server: LocalServer!
     private var webView: WKWebView!
 
@@ -46,6 +46,7 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         let wv = WKWebView(frame: view.bounds, configuration: config)
         wv.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         wv.navigationDelegate = self
+        wv.uiDelegate = self  // without this, WKWebView suppresses window.confirm/alert/prompt
         wv.scrollView.contentInsetAdjustmentBehavior = .never
         // Edge-swipe back/forward: lets the user wipe back out of a hexagram the
         // reading linked into the reference reader (web-side Punkt 7 navigation).
@@ -337,6 +338,56 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         }
         let allowed: Set<String> = ["http", "https", "about"]
         decisionHandler(allowed.contains(url.scheme ?? "") ? .allow : .cancel)
+    }
+
+    // MARK: - JS dialogs (WKUIDelegate)
+    // WKWebView shows window.alert/confirm/prompt ONLY if a WKUIDelegate provides
+    // these panels. Without them confirm() returns false (so „Verlauf löschen",
+    // endpoint/preset removal silently no-op) and prompt() returns nil (presets
+    // can't be named). Each is bridged to a native UIAlertController. The message is
+    // already localized web-side; only the buttons need a language (App-Group mirror).
+
+    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completionHandler() })
+        presentDialog(alert, fallback: completionHandler)
+    }
+
+    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: cancelTitle, style: .cancel) { _ in completionHandler(false) })
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completionHandler(true) })
+        presentDialog(alert, fallback: { completionHandler(false) })
+    }
+
+    func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String,
+                 defaultText: String?, initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping (String?) -> Void) {
+        let alert = UIAlertController(title: nil, message: prompt, preferredStyle: .alert)
+        alert.addTextField { $0.text = defaultText }
+        alert.addAction(UIAlertAction(title: cancelTitle, style: .cancel) { _ in completionHandler(nil) })
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            completionHandler(alert.textFields?.first?.text)
+        })
+        presentDialog(alert, fallback: { completionHandler(nil) })
+    }
+
+    /// Present defensively: if this VC can't present (not in a window, or already
+    /// presenting), run the fallback so the JS completionHandler ALWAYS fires —
+    /// a dropped handler hangs the WKWebView's synchronous confirm()/prompt() call.
+    private func presentDialog(_ alert: UIAlertController, fallback: @escaping () -> Void) {
+        guard view.window != nil, presentedViewController == nil else { fallback(); return }
+        present(alert, animated: true)
+    }
+
+    /// Button language, mirrored from the web app into the App Group on settings
+    /// changes (see the "settings" message above). Defaults to German.
+    private var cancelTitle: String {
+        let lang = UserDefaults(suiteName: "group.page.codeberg.jkaindl.Yijing")?
+            .string(forKey: "language")
+        return lang == "en" ? "Cancel" : "Abbrechen"
     }
 
     // MARK: - Helpers

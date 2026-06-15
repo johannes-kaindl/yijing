@@ -149,6 +149,11 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Fixed
 
+- **JS dialogs in the native app** — the WKWebView had no `WKUIDelegate`, so
+  `window.confirm/alert/prompt` were silently suppressed: "Verlauf löschen" /
+  "Clear history" (and endpoint/preset removal) did nothing, and presets could not
+  be named. `WebViewController` now provides native `UIAlertController` panels and
+  sets `webView.uiDelegate`, so all five dialog call sites work on device/Catalyst.
 - **watchOS app icon** — `YijingWatch` shipped without an asset catalog, so an
   App Store build validation would reject it ("Missing App Icon"). Added
   `Watch/Assets.xcassets` (single 1024px source, no alpha — the same brand mark
