@@ -102,11 +102,19 @@ case "$MODE" in
       EXPORT_DIR="$APPDIR/build/export"
       rm -rf "$EXPORT_DIR"
       echo "→ Export für den App Store (-exportArchive, app-store-connect)…"
+      # Pass the same App Store Connect API key to the export so automatic
+      # DISTRIBUTION signing can create the „Apple Distribution" cert + App Store
+      # provisioning profiles headlessly (no Xcode GUI account needed) — the same
+      # credential altool uses for the upload below.
+      ASC_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8"
       xcodebuild -exportArchive \
         -archivePath "$APPDIR/build/Yijing.xcarchive" \
         -exportOptionsPlist "$APPDIR/exportOptions.plist" \
         -exportPath "$EXPORT_DIR" \
-        -allowProvisioningUpdates
+        -allowProvisioningUpdates \
+        -authenticationKeyPath "$ASC_KEY_PATH" \
+        -authenticationKeyID "$ASC_KEY_ID" \
+        -authenticationKeyIssuerID "$YIJING_ASC_ISSUER_ID"
       IPA="$(find "$EXPORT_DIR" -name '*.ipa' | head -1)"
       [ -f "$IPA" ] || { echo "FEHLER: keine .ipa exportiert ($EXPORT_DIR)." >&2; exit 1; }
       echo "✓ Exportiert: $IPA"
