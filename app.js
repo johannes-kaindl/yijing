@@ -2159,6 +2159,7 @@ function buildImageRequest(reading) {
     primaryMotif,
     resultingMotif,
     question: reading.question || "",
+    primaryNumber: prim?.number,
   });
 }
 
