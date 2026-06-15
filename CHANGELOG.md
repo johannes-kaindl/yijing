@@ -107,6 +107,13 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Changed
 
+- **Mood-aware meditation image scene.** Dark hexagram motifs (e.g. 29 "the
+  Abysmal — a dark river between steep cliffs") no longer get a warm sunny
+  atmosphere, and bright motifs no longer get a cold/wintry one — the
+  deterministic atmosphere modifier is now drawn from a mood-consistent pool per
+  hexagram. The resulting (change) motif is placed in the background instead of
+  fused as a transition, so it is no longer dropped from the frame. Pure
+  composition change in `web/image-scene.js`; the on-device renderer is unchanged.
 - **On-device refusal retry reframes; sharper key message** (Apple FM). The
   `FoundationModelsEngine` retry now reinforces the literary-commentary framing
   on its *second* attempt, giving a deterministic content refusal (e.g. the
