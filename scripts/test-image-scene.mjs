@@ -41,4 +41,29 @@ assert.ok(
   `no old transition phrasing, got: "${bg.scene}"`
 );
 
+// dark hexagram → mood-consistent modifier, never a warm one
+const WARM = ["in warm golden light", "in spring bloom", "in lush summer green", "under a clear blue sky", "at dawn"];
+for (let i = 0; i < 30; i++) {
+  const rr = composeImageRequest({
+    primaryMotif: "a dark river between steep cliffs", resultingMotif: "",
+    question: "Q" + i, primaryNumber: 29,
+  });
+  assert.ok(!WARM.includes(rr.modifier), `dark hex modifier must not be warm, got "${rr.modifier}" (Q${i})`);
+}
+
+// bright hexagram → never a cold/wintry modifier
+const COLD = ["under falling snow", "under a starry night sky"];
+for (let i = 0; i < 30; i++) {
+  const rr = composeImageRequest({
+    primaryMotif: "a great sun over golden hills", resultingMotif: "",
+    question: "Q" + i, primaryNumber: 14,
+  });
+  assert.ok(!COLD.includes(rr.modifier), `bright hex modifier must not be cold, got "${rr.modifier}" (Q${i})`);
+}
+
+// neutral hexagram (unknown number) → unchanged full-pool behavior, still deterministic
+const n1 = composeImageRequest({ primaryMotif: "x", resultingMotif: "", question: "Q", primaryNumber: 1 });
+const n2 = composeImageRequest({ primaryMotif: "x", resultingMotif: "", question: "Q", primaryNumber: 1 });
+assert.equal(n1.scene, n2.scene, "same question+number → same scene");
+
 console.log("OK image-scene: all assertions passed");
