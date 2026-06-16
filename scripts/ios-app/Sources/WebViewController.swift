@@ -57,6 +57,15 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         let url = URL(string: "http://localhost:\(server.port)/web/index.html")!
         wv.load(URLRequest(url: url))
 
+        // Screenshot/automation hook: a `-yijingScreen <1...64>` launch argument
+        // deep-links the reader on cold launch WITHOUT the yijing:// URL-scheme
+        // confirmation dialog that `simctl openurl` triggers (that dialog overlays
+        // and blocks the captured screen). Normally absent; harmless in release and
+        // range-gated. Applied via the existing pendingHexagram cold-launch path
+        // once the page has loaded (see webView(_:didFinish:)).
+        let screenArg = UserDefaults.standard.integer(forKey: "yijingScreen")
+        if (1...64).contains(screenArg) { pendingHexagram = screenArg }
+
         // Re-bind the loopback server on every return to the foreground: iOS tears
         // its sockets down while suspended, which left the web layer stuck on
         // „nicht erreichbar". (Skip the very first activation — the server was just

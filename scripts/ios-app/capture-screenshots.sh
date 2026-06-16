@@ -6,8 +6,9 @@
 # the upload to App Store Connect stay manual (editorial) — this just produces
 # the raw captures in the right resolutions.
 #
-# Prereq: build the app for the iOS Simulator first (it reuses that .app):
-#   scripts/ios-app/build-ios-app.sh simulator
+# Prereq: build the app for the iOS Simulator with STORE APPEARANCE first (no Dev
+# panel / build badge — see gap 1 below). It reuses that .app:
+#   YIJING_RELEASE_APPEARANCE=1 scripts/ios-app/build-ios-app.sh simulator
 #
 # Usage:
 #   scripts/ios-app/capture-screenshots.sh            # all device classes
@@ -17,21 +18,21 @@
 # NOTE: verify the captured pixel sizes against the current App Store Connect
 # spec on the upload day — Apple's required sizes drift between releases.
 #
-# KNOWN LIMITATIONS (found 2026-06-13 on a real run — NOT yet submission-ready):
-#   1. A `simulator` build is a DEV build (build tag set), so the "Prompt-Sweep
-#      (Dev)" panel + build badge show in every shot. For shipping screenshots,
-#      capture from a RELEASE-appearance build (no __BUILD__ substitution →
-#      DEV_MODE=false). TODO: add a clean-build flag to build-ios-app.sh, or
-#      strip the build tag before capture.
-#   2. `simctl openurl yijing://h/<n>` triggers iOS's "Open in Yijing?" system
-#      confirmation, which blocks navigation and overlays the shot — so the
-#      deep-link reader screens are NOT captured as intended. Reliable reader
-#      navigation needs a different path (XCUITest taps, or in-app hash nav),
-#      or manual capture + curation.
-# The boot / install / device-matrix / correct-sizing scaffolding below is
-# sound and reusable; the two gaps above are what a screenshot session must fix.
-# TODO(watch): the watchOS app needs its own watchsimulator + watch build;
-# add a watch pass once the phone/iPad matrix is curated.
+# The two gaps found on the 2026-06-13 run are now CLOSED:
+#   1. Dev panel / build badge — fixed by building with YIJING_RELEASE_APPEARANCE=1
+#      (keeps the __BUILD__ placeholder → DEV_MODE=false, App-Store optics). If you
+#      forget the flag, the shots show the "Prompt-Sweep (Dev)" panel + badge.
+#   2. The "Open in Yijing?" openurl dialog — fixed by navigating via the app's
+#      `-yijingScreen <n>` launch argument (WebViewController reads it on cold
+#      launch and deep-links the reader), instead of `simctl openurl yijing://`.
+#      No system dialog, no overlay.
+# NOTE: the Simulator has no Apple-Intelligence / Image Playground, so AI
+# interpretation (MockEngine) and the meditation image do NOT render here — the
+# "hero" AI/image shots must be captured on a real device. Everything captured
+# below (cast UI, the Wilhelm reader) is faithful to the device.
+# TODO(watch): the watchOS app needs its own watchsimulator + watch build; capture
+# it separately (YijingWatch scheme) — the watch app is offline/AI-free, so
+# simulator captures are faithful to the device.
 set -euo pipefail
 
 REPO="$(git rev-parse --show-toplevel)"
@@ -52,9 +53,11 @@ DEVICES=(
   "ipad-13|iPad Pro 13-inch (M4)"
 )
 
-# Screens to capture. "home" = just launch; "h/<n>" = deep-link to the reader
-# on hexagram n (yijing://h/<n>). Hex 1 (Qian), 22 (Anmut/Grace), 29 (Abgrund).
-SCREENS=("home" "h/1" "h/22" "h/29")
+# Screens to capture. "home" = just launch (the cast entry); "h/<n>" = the reader
+# on hexagram n, reached via the -yijingScreen launch arg (no openurl dialog).
+# Picked for variety: 1 Qian (The Creative), 2 Kun (The Receptive),
+# 22 Bi (Grace), 52 Gen (Keeping Still).
+SCREENS=("home" "h/1" "h/2" "h/22" "h/52")
 
 shot_device() {
   local label="$1" dtype="$2"
@@ -70,9 +73,15 @@ shot_device() {
   xcrun simctl install "$udid" "$APP"
   mkdir -p "$OUT/$label"
   for s in "${SCREENS[@]}"; do
-    xcrun simctl launch "$udid" "$BUNDLE" >/dev/null 2>&1 || true
-    [ "$s" != "home" ] && xcrun simctl openurl "$udid" "yijing://$s"
-    sleep 4   # let the WKWebView + web app render the screen
+    # Cold-launch each screen: terminate first so the -yijingScreen launch arg is
+    # read fresh (WebViewController applies it via pendingHexagram on page load).
+    xcrun simctl terminate "$udid" "$BUNDLE" >/dev/null 2>&1 || true
+    if [ "$s" = "home" ]; then
+      xcrun simctl launch "$udid" "$BUNDLE" >/dev/null 2>&1 || true
+    else
+      xcrun simctl launch "$udid" "$BUNDLE" -yijingScreen "${s#h/}" >/dev/null 2>&1 || true
+    fi
+    sleep 6   # let the loopback server + WKWebView + web app render the screen
     xcrun simctl io "$udid" screenshot "$OUT/$label/${s//\//-}.png" >/dev/null
     echo "  ✓ $label/${s//\//-}.png"
   done

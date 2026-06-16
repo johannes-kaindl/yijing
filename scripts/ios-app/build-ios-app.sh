@@ -46,13 +46,17 @@ git -C "$REPO" archive HEAD web data sw.js | tar -x -C "$STAGE"
 # Build-Kennung (Commit + Zeit) NUR in Dev-Builds in die gestagte app.js setzen —
 # sie aktiviert das Dev-Tooling (Build-Badge, Bild-Signatur, Test-Verlauf). Im
 # archive-Build (App Store) bleibt der __BUILD__-Platzhalter → DEV_MODE = false,
-# das Dev-Tooling ist aus.
-if [ "$MODE" != "archive" ]; then
+# das Dev-Tooling ist aus. Mit YIJING_RELEASE_APPEARANCE=1 bleibt der Platzhalter
+# auch im simulator-Build erhalten → App-Store-Optik (keine Dev-Panel/Badge),
+# z.B. für die Screenshot-Aufnahme (scripts/ios-app/capture-screenshots.sh).
+if [ "$MODE" != "archive" ] && [ -z "${YIJING_RELEASE_APPEARANCE:-}" ]; then
   BUILD_TAG="$(git -C "$REPO" rev-parse --short HEAD)·$(git -C "$REPO" log -1 --format=%cd --date=format:%d.%m.\ %H:%M)"
   sed -i '' "s|__BUILD__|$BUILD_TAG|" "$STAGE/web/app.js"
   echo "→ Build-Kennung gesetzt (Dev): $BUILD_TAG"
-else
+elif [ "$MODE" = "archive" ]; then
   echo "→ archive-Build: keine Build-Kennung (Dev-Tooling aus)"
+else
+  echo "→ YIJING_RELEASE_APPEARANCE: keine Build-Kennung (Dev-Tooling aus, Store-Optik im Simulator)"
 fi
 
 echo "→ Xcode-Projekt generieren (xcodegen)…"
