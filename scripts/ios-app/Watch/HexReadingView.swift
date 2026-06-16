@@ -16,6 +16,7 @@ struct HexReadingView: View {
     let settings: OracleSettings
     var showImage: Bool = false
     var showLines: Bool = false
+    var showAllLines: Bool = false   // reference: show all 6; cast: only `changing`
     var revealStagger: Double? = nil
     var textOpacity: Double = 1
     var fallbackNumber: Int = 0
@@ -52,9 +53,9 @@ struct HexReadingView: View {
                     }
 
                     if showLines, let lines = hex.lines {
-                        let idxs = changing.isEmpty ? Array(lines.indices) : changing.sorted()
+                        let idxs = showAllLines ? Array(lines.indices) : changing.sorted()
                         if !idxs.isEmpty {
-                            Text(changing.isEmpty ? str.lines : str.changingLines)
+                            Text(showAllLines ? str.lines : str.changingLines)
                                 .font(.caption).foregroundStyle(Brand.gold).padding(.top, 4)
                             ForEach(idxs, id: \.self) { i in
                                 if lines.indices.contains(i) {

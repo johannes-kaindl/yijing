@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Johannes Kaindl
 //
-// "Werfen" — full three-coin cast with changing lines + resulting hexagram.
-// The figure reveals bottom→top (mirrors the iPhone cast), then the text fades
-// in; Reduce Motion renders instantly.
+// "Orakel befragen" — full three-coin cast with changing lines + the resulting
+// (future) hexagram. The cast figure reveals bottom→top (mirrors the iPhone),
+// then the text + resulting hexagram fade in; Reduce Motion renders instantly.
 
 import SwiftUI
 import OracleKit
@@ -26,6 +26,7 @@ struct CastView: View {
                     Text("易經").font(.system(size: glyph)).foregroundStyle(Brand.ink)
                     Button(WatchStrings(lang: s.lang).cast) { lines = Casting.cast() }
                         .buttonStyle(.borderedProminent)
+                        .tint(Brand.gold)
                 }
             }
         }
@@ -51,18 +52,28 @@ struct ReadingView: View {
         let stagger: Double? = reduceMotion ? nil : 0.28
 
         ScrollView {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Primary (cast) hexagram — figure animates, then text + changing lines fade in.
                 HexReadingView(binary: primaryBin, changing: changing, hex: hex, settings: settings,
                                showLines: true, revealStagger: stagger,
                                textOpacity: textShown ? 1 : 0, fallbackNumber: n)
+
+                // Resulting (future) hexagram — full figure + name + Judgment, like the app.
                 if let targetHex {
-                    Text("\(str.becomes) \(Texts.name(targetHex, settings))")
-                        .font(.footnote).foregroundStyle(Brand.inkSoft).padding(.top, 4)
-                        .opacity(textShown ? 1 : 0)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label(str.becomes, systemImage: "arrow.down")
+                            .font(.caption).foregroundStyle(Brand.gold)
+                            .frame(maxWidth: .infinity)
+                        HexReadingView(binary: targetHex.binary, hex: targetHex, settings: settings,
+                                       fallbackNumber: targetHex.number)
+                    }
+                    .opacity(textShown ? 1 : 0)
                 }
+
                 Button(str.again, action: recast)
                     .buttonStyle(.bordered)
-                    .padding(.top, 8)
+                    .tint(Brand.gold)
+                    .padding(.top, 4)
                     .frame(maxWidth: .infinity)
                     .opacity(textShown ? 1 : 0)
             }

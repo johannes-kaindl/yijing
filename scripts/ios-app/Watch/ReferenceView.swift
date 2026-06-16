@@ -38,7 +38,7 @@ struct ReferenceDetailView: View {
     var body: some View {
         ScrollView {
             HexReadingView(binary: hex.binary, hex: hex, settings: settings,
-                           showImage: true, showLines: true, fallbackNumber: hex.number)
+                           showImage: true, showLines: true, showAllLines: true, fallbackNumber: hex.number)
         }
         .navigationTitle("\(hex.number)")
     }
