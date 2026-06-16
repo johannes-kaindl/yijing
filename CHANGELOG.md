@@ -12,6 +12,22 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **Apple Watch app — brand polish (build 2).** OLED-native brand palette (gold
+  accent + warm ink on black); Dynamic Type (text and the hexagram figure scale
+  with the watchOS text-size setting); a cast animation on "Orakel befragen" (the
+  hexagram builds bottom→top, then the text fades in; respects Reduce Motion); the
+  resulting/future hexagram shown after the changing lines; section headers
+  (Das Urteil / Das Bild / Linien); and a new **Nachschlagen** reference mode
+  (browse all 64 → full reader with Judgment, Image and line texts). Wordmark
+  "易經 Yijing"; descriptive menu labels.
+- **Home-Screen widget — brand palette** (warm-dark background + ink/gold). The
+  Lock-Screen accessory widgets stay system-tinted (the system renders them
+  monochrome/vibrant — not overridable).
+- **OracleKit `Texts.image`** — a language/register-aware accessor for the Wilhelm
+  "Image" text (parity with `judgment`), with unit tests.
+- **Reproducible App Store screenshots** — a `YIJING_RELEASE_APPEARANCE` build flag
+  (no dev panel/badge) plus `-yijingScreen` launch-arg reader navigation (no
+  openurl dialog) close the two gaps the capture script had documented.
 - **Privacy policy** — a standalone, self-contained bilingual `web/privacy.html`
   (DE/EN toggle; both render with JS off), linked from the in-app About section.
   States the actual data behaviour: everything stays on-device, no collection /
