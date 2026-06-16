@@ -25,7 +25,8 @@ struct WatchStrings {
     var changingLines: String { lang == .en ? "Changing lines" : "Wandelnde Linien" }
     var becomes: String { lang == .en ? "becomes" : "wird zu" }
     var again: String { lang == .en ? "Cast again" : "Neu werfen" }
-    var image: String { lang == .en ? "Image" : "Bild" }
+    var judgment: String { lang == .en ? "The Judgment" : "Das Urteil" }
+    var image: String { lang == .en ? "The Image" : "Das Bild" }
     var lines: String { lang == .en ? "Lines" : "Linien" }
     var reference: String { lang == .en ? "Reference" : "Nachschlagen" }
 }

@@ -41,6 +41,7 @@ struct HexReadingView: View {
                     .multilineTextAlignment(.center)
 
                 if let hex {
+                    Text(str.judgment).font(.caption).foregroundStyle(Brand.gold)
                     Text(Texts.judgment(hex, settings))
                         .font(.body).foregroundStyle(Brand.ink)
 
