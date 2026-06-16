@@ -44,36 +44,45 @@ struct DailyHexWidgetView: View {
     let entry: DailyEntry
 
     var body: some View {
-        switch family {
-        case .accessoryInline:
-            Text(entry.name)
-        case .accessoryCircular:
-            HexFigureView(binary: entry.binary, lineHeight: 3, spacing: 2).padding(6)
-        case .accessoryRectangular:
-            HStack(spacing: 8) {
-                HexFigureView(binary: entry.binary, lineHeight: 3, spacing: 2).frame(width: 20)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(entry.name).font(.headline).lineLimit(1)
-                    Text(entry.lead).font(.caption2).lineLimit(2)
+        Group {
+            switch family {
+            case .accessoryInline:
+                Text(entry.name)
+            case .accessoryCircular:
+                HexFigureView(binary: entry.binary, lineHeight: 3, spacing: 2).padding(6)
+            case .accessoryRectangular:
+                HStack(spacing: 8) {
+                    HexFigureView(binary: entry.binary, lineHeight: 3, spacing: 2).frame(width: 20)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(entry.name).font(.headline).lineLimit(1)
+                        Text(entry.lead).font(.caption2).lineLimit(2)
+                    }
                 }
-            }
-        case .systemSmall:
-            VStack(spacing: 8) {
-                HexFigureView(binary: entry.binary).frame(maxWidth: 56)
-                Text(entry.name).font(.caption).fontWeight(.semibold)
-                    .multilineTextAlignment(.center).lineLimit(2)
-            }
-            .padding()
-        default: // systemMedium and any future families
-            HStack(spacing: 16) {
-                HexFigureView(binary: entry.binary).frame(width: 60)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(entry.name).font(.headline).lineLimit(2)
-                    Text(entry.lead).font(.caption).foregroundStyle(.secondary).lineLimit(4)
+            case .systemSmall:
+                VStack(spacing: 8) {
+                    HexFigureView(binary: entry.binary, tint: Brand.ink).frame(maxWidth: 56)
+                    Text(entry.name).font(.caption).fontWeight(.semibold)
+                        .foregroundStyle(Brand.ink)
+                        .multilineTextAlignment(.center).lineLimit(2)
                 }
-                Spacer(minLength: 0)
+                .padding()
+            default: // systemMedium and any future families
+                HStack(spacing: 16) {
+                    HexFigureView(binary: entry.binary, tint: Brand.ink).frame(width: 60)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(entry.name).font(.headline).foregroundStyle(Brand.ink).lineLimit(2)
+                        Text(entry.lead).font(.caption).foregroundStyle(Brand.inkSoft).lineLimit(4)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding()
             }
-            .padding()
+        }
+        .containerBackground(for: .widget) {
+            switch family {
+            case .systemSmall, .systemMedium: Brand.widgetBg
+            default: Color.clear
+            }
         }
     }
 }
@@ -83,7 +92,6 @@ struct DailyHexWidget: Widget {
         StaticConfiguration(kind: "DailyHexWidget", provider: DailyProvider()) { entry in
             DailyHexWidgetView(entry: entry)
                 .widgetURL(URL(string: "yijing://h/\(entry.number)"))
-                .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Tages-Hexagramm")
         .description("Das Hexagramm des Tages — tippen öffnet das Nachschlagewerk.")

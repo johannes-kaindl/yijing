@@ -81,6 +81,7 @@ targets:
     platform: iOS
     supportedDestinations: [iOS, macCatalyst]
     sources:
+      - path: Shared/BrandColors.swift
       - path: Widgets/HexFigureView.swift
       - path: Widgets/DailyHexWidget.swift
       - path: Widgets/WidgetBundle.swift
@@ -106,7 +107,10 @@ targets:
     platform: watchOS
     deploymentTarget: "10.0"
     sources:
+      - path: Shared/BrandColors.swift
       - path: Watch/YijingWatchApp.swift
+      - path: Watch/HexReadingView.swift
+      - path: Watch/ReferenceView.swift
       - path: Watch/TodayView.swift
       - path: Watch/CastView.swift
       - path: Watch/WatchHexFigure.swift
@@ -136,6 +140,7 @@ targets:
     platform: watchOS
     deploymentTarget: "10.0"
     sources:
+      - path: Shared/BrandColors.swift
       - path: WatchWidgets/ComplicationWidget.swift
       - path: Watch/WatchHexFigure.swift
       - path: WatchWidgets/PrivacyInfo.xcprivacy

@@ -25,6 +25,9 @@ struct WatchStrings {
     var changingLines: String { lang == .en ? "Changing lines" : "Wandelnde Linien" }
     var becomes: String { lang == .en ? "becomes" : "wird zu" }
     var again: String { lang == .en ? "Cast again" : "Neu werfen" }
+    var image: String { lang == .en ? "Image" : "Bild" }
+    var lines: String { lang == .en ? "Lines" : "Linien" }
+    var reference: String { lang == .en ? "Reference" : "Nachschlagen" }
 }
 
 struct RootView: View {
@@ -38,8 +41,12 @@ struct RootView: View {
                 NavigationLink { CastView() } label: {
                     Label(WatchStrings(lang: s.lang).cast, systemImage: "circle.hexagonpath")
                 }
+                NavigationLink { ReferenceListView() } label: {
+                    Label(WatchStrings(lang: s.lang).reference, systemImage: "book")
+                }
             }
             .navigationTitle("易經")
         }
+        .tint(Brand.gold)
     }
 }
