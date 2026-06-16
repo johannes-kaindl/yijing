@@ -20,6 +20,15 @@ public enum Texts {
         }
     }
 
+    public static func image(_ h: Hexagram, _ s: OracleSettings) -> String {
+        switch (s.lang, s.register) {
+        case (.de, .neutral):     return h.image_neutral ?? h.image ?? ""
+        case (.de, .historical):  return h.image ?? ""
+        case (.en, .neutral):     return h.image_en_neutral ?? h.image_en ?? ""
+        case (.en, .historical):  return h.image_en ?? ""
+        }
+    }
+
     /// The "Kernsatz" — the FIRST paragraph of the judgment (the oracular Judgment
     /// line itself; Wilhelm's commentary follows after a blank line). Verse newlines
     /// collapsed; an unusually long single paragraph falls back to its first sentence.
