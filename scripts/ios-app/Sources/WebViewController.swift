@@ -64,7 +64,7 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         // range-gated. Applied via the existing pendingHexagram cold-launch path
         // once the page has loaded (see webView(_:didFinish:)).
         let screenArg = UserDefaults.standard.integer(forKey: "yijingScreen")
-        if (1...64).contains(screenArg) { pendingHexagram = screenArg }
+        if (1...64).contains(screenArg) { pendingHexagram = screenArg; screenshotScroll = true }
 
         // Re-bind the loopback server on every return to the foreground: iOS tears
         // its sockets down while suspended, which left the web layer stuck on
@@ -85,6 +85,7 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
     private var imageGenAvailable = false
     private var pageLoaded = false
     private var pendingHexagram: Int?
+    private var screenshotScroll = false  // -yijingScreen launch arg only (capture)
 
     @objc private func appDidBecomeActive() {
         // The app is now guaranteed active → safe to probe Image Playground
@@ -250,6 +251,18 @@ final class WebViewController: UIViewController, WKNavigationDelegate, WKScriptM
         pageLoaded = true
         injectImageGenFlag()
         if let n = pendingHexagram { pendingHexagram = nil; navigateToHexagram(n) }
+        if screenshotScroll {
+            screenshotScroll = false
+            // Screenshot-only: after the deep-link renders the reader, scroll the
+            // hexagram card into view so the capture shows the actual reading
+            // (lines + Wilhelm text), not the index grid above it. No effect on the
+            // production widget/complication deep-link path (which never sets this).
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+                self?.webView?.evaluateJavaScript(
+                    "var c=document.getElementById('readerCard'); if(c){c.scrollIntoView({block:'start'});}",
+                    completionHandler: nil)
+            }
+        }
     }
 
     // MARK: - Widget deep link → Nachschlagewerk
