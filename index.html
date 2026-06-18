@@ -129,6 +129,14 @@
              noch kein LLM-Endpoint konfiguriert ist (z. B. am Handy / HTTPS-Web).
              Rein informativ — kein aktiver Deuten-Button → sauber degradiert. -->
         <div class="interp-setup" id="interpSetup" hidden>
+          <button type="button" class="interp-setup-close" id="interpSetupDismiss"
+                  data-i18n-aria="llm.setup.dismiss" aria-label="Hinweis ausblenden">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+          </button>
           <svg class="interp-setup-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -309,6 +317,10 @@
           Lokale Modelle via <strong>Ollama</strong> (Standardport <code>11434</code>) oder
           <strong>OpenAI-kompatibel</strong> (MLX, LM Studio …). CORS auf dem Server muss erlaubt sein —
           für Ollama z.&nbsp;B. <code>OLLAMA_ORIGINS=*</code>.
+        </p>
+        <p class="hint">
+          <a class="ghost-link" href="https://codeberg.org/jkaindl/Yijing/src/branch/main/docs/LLM.md"
+             target="_blank" rel="noopener noreferrer" data-i18n="llm.setup.guide">Anleitung</a>
         </p>
         <label class="row-inline">
           <span data-i18n="settings.activeEndpoint">Für Deutung:</span>

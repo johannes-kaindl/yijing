@@ -89,6 +89,7 @@ const STRINGS = {
       "Die KI-Interpretation braucht einen eigenen LLM-Endpoint — lokal am Desktop (Ollama/MLX) oder erreichbar als Remote-Endpoint. Würfeln und Nachschlagewerk funktionieren auch ohne.",
     "llm.setup.configure": "In Einstellungen einrichten",
     "llm.setup.guide": "Anleitung",
+    "llm.setup.dismiss": "Hinweis ausblenden",
 
     "image.generate": "Meditationsbild",
     "image.regenerate": "Neues Bild",
@@ -371,6 +372,7 @@ const STRINGS = {
       "AI interpretation needs its own LLM endpoint — local on the desktop (Ollama/MLX) or reachable as a remote endpoint. Casting and the reference reader work without it.",
     "llm.setup.configure": "Set up in settings",
     "llm.setup.guide": "Guide",
+    "llm.setup.dismiss": "Dismiss hint",
 
     "image.generate": "Meditation image",
     "image.regenerate": "New image",

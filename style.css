@@ -840,6 +840,7 @@ button.ghost:hover {
 
 /* Dezenter Einrichtungs-Hinweis (0 Endpoints) — informativ, kein toter Button */
 .interp-setup {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -850,6 +851,28 @@ button.ghost:hover {
    schlägt das UA-display:none) — explizit zurücksetzen. */
 .interp-setup[hidden] {
   display: none;
+}
+
+/* Schließen-Button oben rechts: blendet den Hinweis dauerhaft aus (localStorage). */
+.interp-setup-close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.interp-setup-close:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .interp-setup-icon {
