@@ -1075,7 +1075,7 @@ function renderReaderTexts(hex) {
   // Trigramm-HTML enthält strukturelle Zeilenumbrüche — Container auf normal
   // stellen (wie #trigramText im Orakel), sonst rendert pre-wrap große Lücken.
   html += details("reading.trigrams", trigramDetailsHTML(hex), false, "reader-trigrams");
-  html += `<h2 class="section-title">${escapeHTML(t("reading.allLines"))}</h2>`;
+  html += `<h2 class="section-title">${escapeHTML(t("reader.allLines"))}</h2>`;
   html += (hex.lines || []).map(readerLineHTML).join("");
   const notes = hex.notes || [];
   if (notes.length) {
