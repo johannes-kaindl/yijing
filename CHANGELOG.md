@@ -12,6 +12,11 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **Dismissable AI-setup hint.** On devices without an on-device model (older
+  iPhones/iPads without Apple Intelligence) the AI-interpretation panel showed a
+  setup hint on every cast. It can now be dismissed permanently via an "×"
+  (persisted in `localStorage`); the setup-guide link is additionally surfaced in
+  Settings → LLM endpoints, so the path stays reachable after dismissing.
 - **Apple Watch app — brand polish (build 2).** OLED-native brand palette (gold
   accent + warm ink on black); Dynamic Type (text and the hexagram figure scale
   with the watchOS text-size setting); a cast animation on "Orakel befragen" (the

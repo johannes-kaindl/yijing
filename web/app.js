@@ -158,6 +158,7 @@ const els = {
   interpActive: document.getElementById("interpActive"),
   interpSetup: document.getElementById("interpSetup"),
   interpSetupConfigure: document.getElementById("interpSetupConfigure"),
+  interpSetupDismiss: document.getElementById("interpSetupDismiss"),
   endpointSelect: document.getElementById("endpointSelect"),
   modelSelect: document.getElementById("modelSelect"),
   interpretBtn: document.getElementById("interpretBtn"),
@@ -1181,11 +1182,21 @@ function closeReader() {
  * autoDiscover() und nach Endpoint-Änderungen in den Settings — so wandert die
  * Sichtbarkeit reaktiv mit, statt erst bei der nächsten Lesung.
  */
+// Der Einrichtungs-Hinweis lässt sich auf Geräten ohne eigenen Endpoint (z. B.
+// ohne On-Device-Modell) dauerhaft per „×“ wegklicken. Der Einrichtungs-Pfad
+// bleibt über die Einstellungen (inkl. Anleitung-Link) erreichbar.
+const INTERP_SETUP_DISMISSED_KEY = "yijing-interp-setup-dismissed-v1";
+function isInterpSetupDismissed() {
+  return localStorage.getItem(INTERP_SETUP_DISMISSED_KEY) === "true";
+}
+
 function refreshInterpretationVisibility() {
   const hasReading = CURRENT_READING !== null;
   const hasEndpoint = Endpoints.list().length > 0;
   els.interpretation.hidden = !hasReading;
-  if (els.interpSetup) els.interpSetup.hidden = hasEndpoint;
+  // Setup-Hinweis nur ohne Endpoint — und nur, solange nicht weggeklickt.
+  if (els.interpSetup)
+    els.interpSetup.hidden = hasEndpoint || isInterpSetupDismissed();
   if (els.interpActive) els.interpActive.hidden = !hasEndpoint;
   setInterpPlaceholder(); // Hinweis-Text an Endpunkt-Anzahl anpassen (Punkt 4)
 }
@@ -1896,6 +1907,10 @@ els.clearHistoryBtn.addEventListener("click", () => {
 els.openSettingsBtn.addEventListener("click", openSettings);
 els.closeSettingsBtn.addEventListener("click", closeSettings);
 els.interpSetupConfigure?.addEventListener("click", openSettings);
+els.interpSetupDismiss?.addEventListener("click", () => {
+  localStorage.setItem(INTERP_SETUP_DISMISSED_KEY, "true");
+  refreshInterpretationVisibility();
+});
 els.settingsModal.addEventListener("close", persistSettings);
 // Klick auf den Dialog-Hintergrund (außerhalb des Formulars) schließt + speichert.
 els.settingsModal.addEventListener("click", (e) => {

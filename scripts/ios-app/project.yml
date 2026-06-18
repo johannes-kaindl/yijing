@@ -23,7 +23,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "3"
+    CURRENT_PROJECT_VERSION: "4"
     SWIFT_VERSION: "5.0"
     # Signing is supplied at build time (env / xcodebuild flags), mirroring the
     # macOS build's opt-in signing. Leave DEVELOPMENT_TEAM empty here.
