@@ -1193,11 +1193,14 @@ function isInterpSetupDismissed() {
 function refreshInterpretationVisibility() {
   const hasReading = CURRENT_READING !== null;
   const hasEndpoint = Endpoints.list().length > 0;
-  els.interpretation.hidden = !hasReading;
   // Setup-Hinweis nur ohne Endpoint — und nur, solange nicht weggeklickt.
-  if (els.interpSetup)
-    els.interpSetup.hidden = hasEndpoint || isInterpSetupDismissed();
+  const showSetup = !hasEndpoint && !isInterpSetupDismissed();
+  if (els.interpSetup) els.interpSetup.hidden = !showSetup;
   if (els.interpActive) els.interpActive.hidden = !hasEndpoint;
+  // Den Container nur zeigen, wenn es eine Lesung gibt UND er Inhalt hat
+  // (Hinweis ODER aktive Controls) — sonst bliebe nach dem Wegklicken auf
+  // einem Gerät ohne Endpoint ein leerer Kasten stehen.
+  els.interpretation.hidden = !hasReading || (!showSetup && !hasEndpoint);
   setInterpPlaceholder(); // Hinweis-Text an Endpunkt-Anzahl anpassen (Punkt 4)
 }
 
