@@ -5,6 +5,11 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+> **Submitted to the App Store on 2026-06-19** — the universal native family
+> (iOS / iPadOS / watchOS) **v1.0, build 4** is in App Review. iPhone/iPad/Watch
+> only (macOS Catalyst deferred); China mainland excluded from distribution
+> (no publishing licence).
+
 > **Two version tracks.** The legacy macOS AppKit DMG continues on the **1.5.x**
 > line; the new universal native family (iOS / iPadOS / Mac Catalyst / watchOS)
 > starts independently at **1.0.x**. The skew is deliberate — two separate
