@@ -5,10 +5,13 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
-> **Submitted to the App Store on 2026-06-19** — the universal native family
-> (iOS / iPadOS / watchOS) **v1.0, build 4** is in App Review. iPhone/iPad/Watch
-> only (macOS Catalyst deferred); China mainland excluded from distribution
-> (no publishing licence).
+> **App Store, 2026-06-19** — the universal native family (iOS / iPadOS /
+> watchOS) was submitted as **v1.0, build 4** and rejected under Guideline 4
+> (Design): the watchOS app icon's near-black background made it look
+> non-circular on the watch (watchOS masks icons into a circle). **Build 5**
+> resolves this with a lighter watch-icon background and is being resubmitted.
+> iPhone/iPad/Watch only (macOS Catalyst deferred); China mainland excluded
+> from distribution (no publishing licence).
 
 > **Two version tracks.** The legacy macOS AppKit DMG continues on the **1.5.x**
 > line; the new universal native family (iOS / iPadOS / Mac Catalyst / watchOS)
@@ -180,6 +183,12 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Fixed
 
+- **watchOS app icon — circular legibility (App Review Guideline 4, build 5).**
+  The watch icon's near-black background made it look non-circular on the watch's
+  black home screen (watchOS masks app icons into a circle). The watch icon now
+  uses a lighter "parchment" background with a dark-bronze foreground — high
+  contrast, classic I-Ching look, unmistakably circular. The iOS/iPadOS icon is
+  unchanged (dark icons are allowed there; only the watch was flagged).
 - **JS dialogs in the native app** — the WKWebView had no `WKUIDelegate`, so
   `window.confirm/alert/prompt` were silently suppressed: "Verlauf löschen" /
   "Clear history" (and endpoint/preset removal) did nothing, and presets could not
