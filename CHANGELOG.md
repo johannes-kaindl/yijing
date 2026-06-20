@@ -3,15 +3,16 @@
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [SemVer](https://semver.org/).
 
-## [Unreleased]
+## [1.0.0] — 2026-06-20
 
-> **App Store, 2026-06-19** — the universal native family (iOS / iPadOS /
-> watchOS) was submitted as **v1.0, build 4** and rejected under Guideline 4
-> (Design): the watchOS app icon's near-black background made it look
-> non-circular on the watch (watchOS masks icons into a circle). **Build 5**
-> resolves this with a lighter watch-icon background and is being resubmitted.
-> iPhone/iPad/Watch only (macOS Catalyst deferred); China mainland excluded
-> from distribution (no publishing licence).
+> **Released on the App Store, 2026-06-20** — the universal native family
+> (iPhone / iPad / Apple Watch) is live as **v1.0 (build 5)**:
+> <https://apps.apple.com/app/yijing-i-ching/id6780668644>. The road there:
+> build 4 was rejected under Guideline 4 (Design) because the watchOS app
+> icon's near-black background looked non-circular on the watch (watchOS masks
+> icons into a circle); **build 5** fixed it with a lighter watch-icon
+> background and was approved. iPhone/iPad/Watch only (macOS Catalyst
+> deferred); China mainland excluded from distribution (no publishing licence).
 
 > **Two version tracks.** The legacy macOS AppKit DMG continues on the **1.5.x**
 > line; the new universal native family (iOS / iPadOS / Mac Catalyst / watchOS)

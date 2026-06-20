@@ -51,6 +51,8 @@ body:
         - Markdown renderer
         - Data (hexagrams.json / trigrams.json)
         - Build script (build_data.py)
+        - iOS / iPadOS app (Swift / WKWebView shell)
+        - Widgets / Watch / complication (OracleKit)
         - macOS app (Swift)
         - Documentation
         - Other

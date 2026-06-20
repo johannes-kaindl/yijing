@@ -10,12 +10,17 @@ clear architectural decisions — the most important ones are in
 [`AGENTS.md`](AGENTS.md) and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 Please read them before making larger changes.
 
+The iPhone / iPad / Apple Watch app is **live on the App Store**:
+<https://apps.apple.com/app/yijing-i-ching/id6780668644>. The build steps below
+reproduce it locally.
+
 ## What goes over well
 
 - **Bugfixes** with a small, clearly scoped diff
 - **Data improvements** (clean Wilhelm sources, better Pīnyīn
   transliterations, trigram master data)
-- **UI translations** (currently German only)
+- **UI translations** (the app ships **DE + EN**; further languages welcome —
+  every new UI string needs both dict entries in `web/i18n.js`)
 - **Cleaner print styles** for PDF export
 - **More LLM backend adapters** (vLLM, llama.cpp HTTP server, etc.)
 - **A11y improvements** (ARIA labels, keyboard navigation, screen reader)

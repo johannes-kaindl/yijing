@@ -48,6 +48,8 @@ body:
       options:
         - Web (Codeberg Pages live demo)
         - Web (local via ./serve.sh)
+        - iOS / iPadOS app (App Store)
+        - Apple Watch app
         - macOS app (Yijing.app)
         - Other / not sure
     validations:
@@ -56,8 +58,8 @@ body:
     id: version
     attributes:
       label: Version
-      description: For the macOS app, in the "About Yijing" menu — for web, see the footer.
-      placeholder: v1.3.0
+      description: For the App Store app, Settings → About; for the macOS DMG, the "About Yijing" menu; for web, see the footer.
+      placeholder: v1.0.0 (build 5) / v1.5.0 / web
   - type: input
     id: browser
     attributes:

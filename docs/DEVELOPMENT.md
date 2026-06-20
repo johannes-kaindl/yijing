@@ -130,9 +130,9 @@ optional `YIJING_DEVICE_ID` to install+launch. The build embeds the
 *committed* `web/` + `data/` (`git archive HEAD`) — so **commit before
 building**.
 
-The family ships at **1.0.0 / build 1** and versions **independently of
-the macOS 1.5.x app** (two deliberate, separate version tracks). On a
-version bump, keep these in sync:
+The family shipped to the App Store at **1.0.0 / build 5** and versions
+**independently of the macOS 1.5.x app** (two deliberate, separate version
+tracks). On a version bump, keep these in sync:
 
 - `scripts/ios-app/project.yml` — `MARKETING_VERSION` **and**
   `CURRENT_PROJECT_VERSION`

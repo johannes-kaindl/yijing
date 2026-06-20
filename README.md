@@ -9,6 +9,7 @@
 [![Platform: macOS](https://img.shields.io/badge/macOS-11%2B%20·%20Universal-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/MACOS-APP.md)
 [![Platform: iOS](https://img.shields.io/badge/iOS%20·%20iPadOS-17%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
 [![Platform: watchOS](https://img.shields.io/badge/watchOS-10%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
+[![App Store](https://img.shields.io/badge/App_Store-live-success?style=flat-square&logo=apple&logoColor=white)](https://apps.apple.com/app/yijing-i-ching/id6780668644)
 [![PWA](https://img.shields.io/badge/PWA-installable-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://jkaindl.codeberg.page/Yijing/)
 [![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#why-no-build-pipeline)
 
@@ -22,12 +23,14 @@ in Wilhelm's style, with classic I Ching vocabulary). Vanilla JavaScript,
 no build step, no backend, offline-capable as a PWA.
 
 Beyond the static site and the legacy macOS app, there is now a **universal
-native app for iOS, iPadOS and Mac (Catalyst)** built for the App Store. It
-hosts the same web app in a WebView and adds Apple-platform extras:
-**on-device AI interpretation** (Apple Foundation Models), **on-device
-meditation-image generation** (Apple Image Playground), a **daily-hexagram
-Home- and Lock-Screen widget**, and a **standalone Apple Watch app with
-complication**.
+native app for iPhone, iPad and Apple Watch**, [live on the App
+Store](https://apps.apple.com/app/yijing-i-ching/id6780668644). It hosts the
+same web app in a WebView and adds Apple-platform extras: **on-device AI
+interpretation** (Apple Foundation Models), **on-device meditation-image
+generation** (Apple Image Playground), a **daily-hexagram Home- and
+Lock-Screen widget**, and a **standalone Apple Watch app with complication**.
+The same project also builds for Mac via Mac Catalyst — the long-term Mac
+path, not yet part of the published listing.
 
 <p align="center">
   <a href="https://jkaindl.codeberg.page/Yijing/">
@@ -35,6 +38,7 @@ complication**.
   </a>
 </p>
 
+[![Download on the App Store](https://img.shields.io/badge/Download_on_the_App_Store-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://apps.apple.com/app/yijing-i-ching/id6780668644)
 [![Download for macOS](https://img.shields.io/badge/Download_for_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.5.0/Yijing.dmg)
 [![Open live demo](https://img.shields.io/badge/Open_live_demo-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
 
@@ -108,8 +112,10 @@ Line Tools (`xcode-select --install`). Details:
 
 ## As an iOS / iPadOS / Mac (Catalyst) app
 
-The universal native family (iOS 17 / iPadOS / Mac Catalyst + watchOS 10)
-lives under `scripts/ios-app/`. It is an [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+The iPhone / iPad / Apple Watch app is **live on the App Store**:
+<https://apps.apple.com/app/yijing-i-ching/id6780668644>. To build it
+yourself: the universal native family (iOS 17 / iPadOS / Mac Catalyst +
+watchOS 10) lives under `scripts/ios-app/`. It is an [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 project — the `.xcodeproj` is generated, not committed. Prerequisites: the
 full **Xcode** (not just the Command Line Tools) and `brew install xcodegen`.
 Build with:
@@ -127,7 +133,8 @@ and the build script reference: [`scripts/ios-app/README.md`](scripts/ios-app/RE
 and [`docs/IOS-APP.md`](docs/IOS-APP.md).
 
 Version tracks are deliberately separate: the macOS AppKit DMG is on the
-**1.5.x** line, the iOS/watch family on its own **1.0.x** line.
+**1.5.x** line, the iOS/watch family on its own **1.0.x** line — now live on
+the App Store as v1.0 (build 5).
 
 ## Features
 
@@ -305,6 +312,7 @@ Full notes per release: [`CHANGELOG.md`](CHANGELOG.md).
 
 | Version | Date | Headline |
 |---|---|---|
+| [v1.0.0 (App Store)](https://apps.apple.com/app/yijing-i-ching/id6780668644) | 2026-06-20 | **Live on the App Store** — the universal native family (iPhone / iPad / Apple Watch) shipped as v1.0 (build 5): on-device AI interpretation (Apple Foundation Models), on-device meditation images (Apple Image Playground), a daily-hexagram Home-/Lock-Screen widget, and a standalone Apple Watch app with complication. macOS Catalyst deferred. *(iOS 1.0.x line)* |
 | [v1.5.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.5.0) | 2026-06-01 | **Read-through reference + complete gender-neutral edition** — browse all 64 hexagrams (8×8 index, prev/next, deep links) with their full Wilhelm text, independent of casting; bilingual and register-aware. Every generic gendered person-reference is de-gendered across all dimensions in both DE and EN, verified leak-free; OCR scan artifacts in the source text fixed |
 | [v1.4.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.1) | 2026-06-01 | **Notarized macOS app** — the release DMG is now Developer ID-signed and Apple-notarized, so it launches with no Gatekeeper warning (the old “Open Anyway” / `xattr` workaround is gone). Opt-in signing pipeline in `build-macos-app.sh` (`YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE`); README, INSTALL and `docs/MACOS-APP.md` updated for macOS 15/26 Gatekeeper |
 | [v1.4.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.0) | 2026-06-01 | **Data correctness + gender-neutral edition + export repair** — Wilhelm texts re-sourced from Projekt-Gutenberg (filled the empty meanings, restored hexagram 2’s image, added footnotes and the all-lines-moving oracle for hexagrams 1 & 2, removed line-contamination from the image fields, fixed OCR glitches), a gender-neutral text variant on by default with a settings toggle to the verbatim 1924 wording (DE + EN), and a working Markdown/PDF export in the macOS app via a native WKWebView bridge with two PDF modes (print B/W and full-bleed app design) |

@@ -10,7 +10,7 @@ automated sessions.
 
 ## Offene Konventions-Punkte
 
-- [ ] CORE-META-03 — Hero-Bild in `docs/images/` ergaenzen + Screenshots reproduzierbar per Skript erzeugen (aktuell nur `docs/screenshots/`, kein Skript).
+- [ ] CORE-META-03 — Hero-Bild in `docs/images/` ergaenzen + Screenshots reproduzierbar per Skript erzeugen (App-Store-Screenshots + Preview-Video existieren bereits als archivierte Launch-Assets, commit `69a34b5`; offen bleibt nur das reproduzierbare Skript + ein `docs/images/`-Hero-Bild).
 - [ ] CORE-GIT-01 — GitHub-Mirror-Remote `github` einrichten (derzeit nur `origin` = Codeberg).
 - [ ] PROF-WEB-03 — `node --check`-Gate-Skript anlegen, das `<script>` aus HTML extrahiert und syntaktisch prueft.
 - [ ] PROF-NAT-01 — Add a separate `scripts/package-native-app.sh` (sign + notarize) for the **macOS AppKit DMG**. *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
@@ -189,6 +189,10 @@ slated to be superseded.
 A universal native family under `scripts/ios-app/` (iOS 17 / iPadOS /
 Mac Catalyst + watchOS 10), on its own **1.0.x** version line — deliberately
 separate from the macOS AppKit DMG's **1.5.x** line (two version tracks).
+As of 2026-06-20 this family is **live on the App Store** as v1.0.0 (build 5):
+<https://apps.apple.com/app/yijing-i-ching/id6780668644> (iPhone / iPad / Apple
+Watch; Mac Catalyst is the deferred long-term Mac path, not part of the shipped
+build).
 The project is generated with **XcodeGen** from `scripts/ios-app/project.yml`;
 there is **no committed `.xcodeproj`**. Details: `scripts/ios-app/README.md`
 and `docs/IOS-APP.md`.

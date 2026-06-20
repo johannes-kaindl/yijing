@@ -9,12 +9,16 @@ engine exposed as an OpenAI-compatible endpoint — so `web/llm.js` is
 consumed **unchanged**. No browser, no Python, no command-line tools on
 the user's side.
 
-This is a separate, deliberately younger track from the legacy AppKit
-macOS app (see [macOS app](MACOS-APP.md)). The two carry **independent
-version lines** — the AppKit DMG is `1.5.x`, this universal family is
-`1.0.x`. The skew is a decision, not drift. Long-term the **Mac Catalyst**
-build here (`build-ios-app.sh catalyst`) is the Mac path and is slated to
-**supersede** the AppKit app.
+> **Live on the App Store** (iPhone / iPad / Apple Watch):
+> <https://apps.apple.com/app/yijing-i-ching/id6780668644>. macOS Catalyst is
+> the deferred long-term Mac path, not part of the published listing.
+
+This is a separate track from the legacy AppKit macOS app (see [macOS
+app](MACOS-APP.md)). The two carry **independent version lines** — the
+AppKit DMG is `1.5.x`, this universal family **shipped to the App Store at
+`1.0.x`**. The skew is a decision, not drift. Long-term the **Mac Catalyst**
+build here (`build-ios-app.sh catalyst`) is **still slated to** supersede the
+AppKit app (deferred, not yet shipped).
 
 The build components live versioned under `scripts/ios-app/`. There is
 **no committed `.xcodeproj`** — it is generated from `project.yml` by
@@ -25,7 +29,8 @@ XcodeGen.
 - **Web app / PWA** — the served origin; the shared truth.
 - **Legacy macOS AppKit app** — `Yijing.app` / `Yijing.dmg`, self-distributed.
 - **Universal native family** (this doc) — iOS 17 / iPadOS / Mac Catalyst 14
-  + watchOS 10. The App-Store target.
+  + watchOS 10. **Live on the App Store** (iPhone / iPad / Apple Watch; Mac
+  Catalyst deferred).
 
 The Mac Catalyst build is verified to run natively (arm64), serve the web
 UI on the loopback port, and reach Apple Foundation Models on macOS 26
@@ -254,7 +259,10 @@ paired Apple Watch.
 `Inline` / `Rectangular` / `Circular`, plus `accessoryCorner` guarded
 behind `#if os(watchOS)`). It bundles only the slim slice.
 
-## App-Store readiness
+## App-Store compliance (shipped in v1.0)
+
+v1.0 (build 5) passed App Review and is live. The configuration that got it
+accepted:
 
 - **Entitlements** — App Sandbox on all four targets; the app adds
   `network.server` + `network.client` (for the loopback shim and outbound

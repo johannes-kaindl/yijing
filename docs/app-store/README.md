@@ -1,7 +1,10 @@
 # App Store assets
 
-Marketing assets for the native Apple family **v1.0 (build 4)**, submitted to App
-Review on 2026-06-19 (iPhone / iPad / Apple Watch; macOS Catalyst deferred).
+Marketing assets for the native Apple family **v1.0 (build 5)**, **published to
+the App Store on 2026-06-20** (iPhone / iPad / Apple Watch; macOS Catalyst
+deferred) — <https://apps.apple.com/app/yijing-i-ching/id6780668644>. Build 4
+was rejected under Guideline 4 (watch-icon circular mask); build 5 fixed it and
+was approved.
 
 These are kept for re-submissions and future updates. App Store Connect has strict,
 non-obvious requirements — note the specs below before re-uploading.

@@ -11,6 +11,11 @@ over a loopback `LocalServer` + an OpenAI-compatible shim, so `web/llm.js` is co
 **unchanged**; on-device AI runs through Apple Foundation Models by default. Widgets,
 the watch app and a complication run **offline, no AI**, off the shared core.
 
+> **Status:** v1.0.0 (build 5) is **live on the App Store** —
+> <https://apps.apple.com/app/yijing-i-ching/id6780668644> (iPhone / iPad /
+> Apple Watch). Mac Catalyst remains the deferred long-term Mac path, not part
+> of the shipped listing.
+
 Version line **1.0.x** — independent of the legacy macOS AppKit DMG (1.5.x). Two
 deliberate, separate version tracks; the skew is intentional, not drift.
 
@@ -173,10 +178,12 @@ the device.
 
 ## Versions & hardening
 
-- **Version policy.** Native family = **1.0.x** (`project.yml` `MARKETING_VERSION 1.0.0`
-  / `CURRENT_PROJECT_VERSION 1`; `CFBundleShortVersionString 1.0.0` /
-  `CFBundleVersion 1` in the Resources/Widgets/Watch/WatchWidgets Info.plist). The
-  legacy macOS AppKit DMG stays on 1.5.x — two separate tracks by design.
+- **Version policy.** Native family = **1.0.x**, live on the App Store at build 5
+  (`project.yml` `MARKETING_VERSION 1.0.0` / `CURRENT_PROJECT_VERSION 5`; the
+  `CFBundleShortVersionString` / `CFBundleVersion` in the
+  Resources/Widgets/Watch/WatchWidgets Info.plist derive from those build
+  settings). The legacy macOS AppKit DMG stays on 1.5.x — two separate tracks
+  by design.
 - **Pre-App-Store hardening** (commit `a425a46`): `markdown.js` `escapeHTML()` now
   also escapes `"` and `'` (stored-XSS fix); web a11y/WCAG pass; streaming-markdown
   render O(n²)→O(n) via `requestAnimationFrame`; cast/re-cast token-race guard;
@@ -208,7 +215,13 @@ Tracked outputs: `data/hexagrams.json`, `data/hexagrams.en.json`,
 `data/trigrams.json`, `data/widget-hexagrams.json`.
 (`image_association` is **2/64** — hexagrams 1 and 64.)
 
-## App Review (don't treat as pre-cleared)
+## App Review (the arguments that landed)
+
+v1.0 (build 5) was **approved** and is live. Build 4 was rejected under
+Guideline 4 (the watch icon's near-black background read as non-circular under
+the watchOS circular mask); build 5 fixed it (commit `117c58a`). The 4.2 /
+4.3(b) arguments below are what carried the approval — keep them for any
+resubmission.
 
 - **4.2** (web-wrapper): lean on native share/export, native nav, the widgets +
   watch app + complication, and substantive on-device AI as the "beyond a

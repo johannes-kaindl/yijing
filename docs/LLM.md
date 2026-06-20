@@ -81,8 +81,8 @@ The oracle calls the model server **directly from the browser**. That
 works great on a desktop where Ollama/MLX runs on the same machine —
 but two situations have no local server reachable that way:
 
-- **Mobile** (the installed PWA, a future store build): a phone has no
-  `localhost` Ollama.
+- **Mobile** (the installed PWA, or the App Store app on devices without an
+  on-device engine): a phone has no `localhost` Ollama.
 - **The hosted https site:** a page served over **https** can only fetch
   **https** endpoints. A plain `http://…` endpoint (other than
   `localhost`/`127.0.0.1`, which browsers exempt) is blocked as
