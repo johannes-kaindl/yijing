@@ -23,7 +23,7 @@ const STRINGS = {
     // ——— Document / SEO ———
     "doc.title": "Yijing Orakel",
     "doc.description":
-      "I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und optionaler KI-Deutung über lokale LLM-Server (Ollama / MLX / LM Studio). Vanilla JS, offline-fähig, mit nativer macOS-App.",
+      "I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und optionaler KI-Deutung über lokale LLM-Server (Ollama / MLX / LM Studio). Vanilla JS, offline-fähig, auch als App für iPhone, iPad und Apple Watch im App Store.",
     "og.description":
       "I-Ging-Orakel als Static-Site — Drei-Münzen-Methode, Wilhelm-Übersetzung, optionale KI-Deutung über lokale LLM-Server. Offline-fähig als PWA.",
     "og.locale": "de_DE",
@@ -209,6 +209,8 @@ const STRINGS = {
       '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) · <a href="https://codeberg.org/jkaindl/Yijing">Quellcode</a>',
     "settings.about.privacy":
       '<a href="privacy.html">Datenschutzerklärung</a>',
+    "settings.about.appstore":
+      '<a href="https://apps.apple.com/app/yijing-i-ching/id6780668644">Im App Store laden</a>',
     "settings.about.disclaimer":
       "Yijing ist ein Werkzeug zur Reflexion und Kontemplation — keine Vorhersage der Zukunft.",
 
@@ -306,7 +308,7 @@ const STRINGS = {
     // ——— Document / SEO ———
     "doc.title": "Yijing Oracle",
     "doc.description":
-      "Static-site I Ching oracle with Wilhelm translation and optional AI interpretation via local LLM servers (Ollama / MLX / LM Studio). Vanilla JS, offline-capable, with a native macOS app.",
+      "Static-site I Ching oracle with Wilhelm translation and optional AI interpretation via local LLM servers (Ollama / MLX / LM Studio). Vanilla JS, offline-capable, also on the App Store for iPhone, iPad and Apple Watch.",
     "og.description":
       "Static-site I Ching oracle — three-coin method, Wilhelm translation, optional AI interpretation via local LLM servers. Offline-capable PWA.",
     "og.locale": "en_US",
@@ -492,6 +494,8 @@ const STRINGS = {
       '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (docs) · <a href="https://codeberg.org/jkaindl/Yijing">Source</a>',
     "settings.about.privacy":
       '<a href="privacy.html">Privacy Policy</a>',
+    "settings.about.appstore":
+      '<a href="https://apps.apple.com/app/yijing-i-ching/id6780668644">Get it on the App Store</a>',
     "settings.about.disclaimer":
       "Yijing is a tool for reflection and contemplation — not a prediction of the future.",
 
