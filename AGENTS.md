@@ -1,8 +1,9 @@
 # AGENTS.md
 
-> **Workspace-Standards:** Die verbindliche Leitkonvention steht in `_docs/CONVENTIONS.md`
-> (am Workspace-Root `/Users/Shared/code/`), Modell comply-or-explain. Offene Punkte fuer
-> dieses Repo siehe Abschnitt "Offene Konventions-Punkte".
+> **Workspace-Standards (maintainer-lokal):** Die verbindliche Leitkonvention steht in `_docs/CONVENTIONS.md`
+> im Multi-Projekt-Workspace des Maintainers, `../_docs` relativ zu diesem Repo — nicht Teil dieses Repos,
+> ignorieren falls im Klon nicht vorhanden. Modell comply-or-explain. Offene Punkte fuer dieses Repo
+> siehe Abschnitt "Offene Konventions-Punkte".
 
 Conventions for AI agents (Claude Code, Codex, Cursor, …) working on this
 repository. Humans benefit too — but this is primarily aimed at
@@ -336,3 +337,14 @@ port is bit-identical to `web/app.js` `BINARY_TO_KING_WEN` and
 `build_data.py` `KING_WEN_BINARY` (mirrors `scripts/test-kingwen.mjs`).
 
 For larger changes, add a short note to `CHANGELOG.md`.
+
+## Memory
+
+- **SDD artifacts (since 2026-07-16): cockpit, not repo** — specs/plans/task reports live in the
+  maintainer's coding cockpit (`$VAULT/25_Coding/yijing/_SDD/`, CORE-META-14, maintainer-local).
+  They carry working context (vault paths, sister-repo internals) that is useless to anyone in a
+  public repo. The repo keeps the design essence in this file + `CHANGELOG.md`.
+- **Legacy stock:** `docs/superpowers/{specs,plans}/` is frozen — do not add anything new there.
+- **Never in the repo:** absolute paths outside the repo (`/Users/…`, vault paths) — use
+  placeholders (`$VAULT/…`, `~/…`, repo-relative). Provenance references as repo name +
+  `file:line` are welcome, though.

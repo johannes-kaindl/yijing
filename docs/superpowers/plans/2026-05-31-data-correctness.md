@@ -50,7 +50,7 @@ scripts/sources/review.html
 
 - [ ] **Step 2: Verify the cache is ignored but the dir is keepable**
 
-Run: `git -C /Users/Shared/code/yijing check-ignore scripts/sources/.html_cache/chapter3.html`
+Run (from the repo root): `git check-ignore scripts/sources/.html_cache/chapter3.html`
 Expected: prints the path (ignored).
 
 - [ ] **Step 3: Commit**
@@ -237,7 +237,7 @@ if __name__ == "__main__":
         _selftest()
 ```
 
-Run: `cd /Users/Shared/code/yijing/scripts && python3 scrape_gutenberg.py --selftest`
+Run (from the repo root): `cd scripts && python3 scrape_gutenberg.py --selftest`
 Expected first run: **FAIL** on an assertion (parser not yet exact) — iterate on `parse_page` against the fixture until it passes. (This is the TDD core: the assertions are fixed; the parser is tuned to satisfy them.)
 
 - [ ] **Step 3: Tune parser until self-test passes**
@@ -384,7 +384,7 @@ if __name__ == "__main__":
 
 - [ ] **Step 2: Run the full scrape (uses cache; fetches the 62 not-yet-cached pages once)**
 
-Run: `cd /Users/Shared/code/yijing/scripts && python3 scrape_gutenberg.py`
+Run (from the repo root): `cd scripts && python3 scrape_gutenberg.py`
 Expected: fetches chapters 4..66 (≈1s each, polite), then `OK: 64 hexagrams → scripts/sources/gutenberg_iging.json`. If a page fails validation, fix `parse_page` for that page's quirk and re-run.
 
 - [ ] **Step 3: Sanity-check the output**
@@ -461,7 +461,7 @@ and in the appended dict use `meaning`, `judgment`, `image`, `lines`, plus add:
 
 - [ ] **Step 3: Run the build**
 
-Run: `cd /Users/Shared/code/yijing && python3 scripts/build_data.py`
+Run (from the repo root): `python3 scripts/build_data.py`
 Expected: `OK: 64 Hexagramme → data/hexagrams.json` and no WARN lines.
 
 - [ ] **Step 4: Assert the gaps are filled**
@@ -999,7 +999,7 @@ git commit -m "docs: DATA.md — Gutenberg provenance, notes field, resolved gap
 - [ ] **Step 1: Run all automated gates**
 
 ```bash
-cd /Users/Shared/code/yijing
+cd "$(git rev-parse --show-toplevel)"  # repo root
 python3 scripts/scrape_gutenberg.py --selftest
 python3 scripts/build_data.py
 python3 scripts/build_review.py
