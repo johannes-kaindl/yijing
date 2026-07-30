@@ -79,7 +79,7 @@ if grep -q '\.\./' "$OUT"/app.js; then
     exit 1
 fi
 
-echo "→ rsync nach $DEST…"
+echo "→ rsync nach ${DEST} …"
 "$RSYNC" -az --delete --chmod=D755,F644 \
     --exclude='.DS_Store' --exclude='Thumbs.db' --exclude='*.swp' \
     "$OUT"/ "$DEST"
