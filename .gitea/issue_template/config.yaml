@@ -3,8 +3,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Security report
-    url: https://codeberg.org/jkaindl/Yijing/src/branch/main/SECURITY.md
+    url: https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/SECURITY.md
     about: Please do not report security-relevant problems publicly — see SECURITY.md.
   - name: Question about usage / Wilhelm text
-    url: https://codeberg.org/jkaindl/Yijing/src/branch/main/README.md
+    url: https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/README.md
     about: Check the README and docs/ first — it's often already documented.

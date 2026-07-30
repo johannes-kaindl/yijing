@@ -72,7 +72,7 @@ local endpoints (11434, 8080/v1, 1234/v1) on its own — if something
 responds, the endpoint is created automatically. Auto-discovery only
 runs when the page itself is served over **http** (the macOS app's
 internal loopback server, the local dev server). On an **https** origin
-(e.g. the hosted Codeberg Pages site) it is skipped, because a secure
+(e.g. the hosted pages.jkaindl.de site) it is skipped, because a secure
 page cannot reach a plain-`http://localhost` server anyway (see below).
 
 ## Remote endpoint for mobile / the hosted web app

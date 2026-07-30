@@ -67,5 +67,5 @@ Just close the window or press Cmd+Q. That fully quits the app.
   Enjoy the oracle.
 
   Yijing Oracle · © 2026 Johannes Kaindl · License: AGPL-3.0-or-later
-  Source code: https://codeberg.org/jkaindl/Yijing
+  Source code: https://git.jkaindl.de/jkaindl/Yijing
 ════════════════════════════════════════════════════════════════════

@@ -92,7 +92,7 @@ On startup (`Yijing.swift`):
 5. When the app quits, the listener is stopped — all open
    connections close, since they are loopback-only.
 
-External links (footer: Codeberg, licenses) open in the default browser,
+External links (footer: source, licenses) open in the default browser,
 not in the app window.
 
 ## Export bridge (Markdown / PDF)

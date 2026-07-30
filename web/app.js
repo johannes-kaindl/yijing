@@ -1205,7 +1205,7 @@ function refreshInterpretationVisibility() {
 }
 
 /**
- * Mixed-Content-Realität: eine über HTTPS ausgelieferte Seite (Codeberg Pages,
+ * Mixed-Content-Realität: eine über HTTPS ausgelieferte Seite (pages.jkaindl.de,
  * künftige Mobile-Shells) kann keinen http://-Endpoint erreichen — außer
  * localhost (Browser-Sonderfall). Warnt nicht-blockierend; der Endpoint wird
  * trotzdem gespeichert, falls der/die Nutzer:in weiß, was er/sie tut.

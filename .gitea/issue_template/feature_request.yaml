@@ -10,7 +10,7 @@ body:
     attributes:
       value: |
         Before you type — Yijing is deliberately **lean** and has clear
-        guardrails (see [`AGENTS.md`](https://codeberg.org/jkaindl/Yijing/src/branch/main/AGENTS.md)):
+        guardrails (see [`AGENTS.md`](https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/AGENTS.md)):
 
         - **no** framework (React/Vue/Svelte)
         - **no** build step (Webpack/Vite/esbuild)
@@ -61,7 +61,7 @@ body:
     attributes:
       label: Pre-flight checks
       options:
-        - label: I searched [existing issues](https://codeberg.org/jkaindl/Yijing/issues) for duplicates.
+        - label: I searched [existing issues](https://git.jkaindl.de/jkaindl/Yijing/issues) for duplicates.
           required: true
         - label: I understand that the architectural guardrails from AGENTS.md apply.
           required: true

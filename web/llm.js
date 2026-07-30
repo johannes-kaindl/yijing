@@ -416,7 +416,7 @@ export const Endpoints = {
   async autoDiscover() {
     // Localhost-Probes nur auf http-Origins (macOS-App-Loopback, Dev-Server,
     // später iOS-On-Device-Shim als http://localhost:<port>/v1). Auf HTTPS
-    // (Codeberg Pages) wären sie Mixed-Content/blockiert und sinnlos — und
+    // (pages.jkaindl.de) wären sie Mixed-Content/blockiert und sinnlos — und
     // würden nur Konsolen-Fehler erzeugen.
     if (typeof location !== "undefined" && location.protocol !== "http:") return;
     const probes = [

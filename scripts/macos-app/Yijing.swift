@@ -107,7 +107,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         }
     }
 
-    // Externe Links (Footer: Codeberg, Lizenzen) im Standard-Browser öffnen.
+    // Externe Links (Footer: Quellcode, Lizenzen) im Standard-Browser öffnen.
     func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
