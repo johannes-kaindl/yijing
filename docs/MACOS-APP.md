@@ -231,13 +231,13 @@ New app version:
    `./scripts/build-macos-app.sh` again — for an official release with the
    `YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE` variables set (see
    [Signing & notarization](#signing--notarization-developer-id)).
-3. Create a new release with a new tag on Codeberg and upload the fresh
+3. Create a new release with a new tag in the repo and upload the fresh
    `dist/Yijing.dmg` as an attachment.
 4. Update the **direct download links** to the new tag:
    the link in `README.md` and the `href` of the `#macDownload` button in
-   `web/index.html` (then `pages` sync). They point to a
-   versioned URL (`releases/download/<tag>/Yijing.dmg`) — Codeberg
-   knows no `latest` alias for direct asset links.
+   `web/index.html` (then deploy the page). They point to a
+   versioned URL (`releases/download/<tag>/Yijing.dmg`) — there is
+   no `latest` alias for direct asset links.
 
 The server's `no-store` header prevents users from seeing stale
 states after an update.

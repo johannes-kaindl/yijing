@@ -206,7 +206,7 @@ const STRINGS = {
     "settings.presets.removeConfirm": "Vorlage „{name}“ löschen?",
     "settings.about": "Über",
     "settings.about.copyright":
-      '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) · <a href="https://codeberg.org/jkaindl/Yijing">Quellcode</a>',
+      '© 2026 Johannes Kaindl · <a href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) · <a href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) · <a href="https://git.jkaindl.de/jkaindl/Yijing">Quellcode</a>',
     "settings.about.privacy":
       '<a href="privacy.html">Datenschutzerklärung</a>',
     "settings.about.appstore":
@@ -491,7 +491,7 @@ const STRINGS = {
     "settings.presets.removeConfirm": "Delete template “{name}”?",
     "settings.about": "About",
     "settings.about.copyright":
-      '© 2026 Johannes Kaindl · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (code) · <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (docs) · <a href="https://codeberg.org/jkaindl/Yijing">Source</a>',
+      '© 2026 Johannes Kaindl · <a href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (code) · <a href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (docs) · <a href="https://git.jkaindl.de/jkaindl/Yijing">Source</a>',
     "settings.about.privacy":
       '<a href="privacy.html">Privacy Policy</a>',
     "settings.about.appstore":

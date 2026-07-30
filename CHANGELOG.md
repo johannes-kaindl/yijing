@@ -3,6 +3,31 @@
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- **Home moved to `git.jkaindl.de`, live demo to `pages.jkaindl.de`.** The repo
+  is now hosted on the maintainer's own Forgejo instance
+  (<https://git.jkaindl.de/jkaindl/Yijing>), and the live demo is deployed there
+  from `main` via `scripts/deploy-page.sh` (rsync, flat layout) instead of the
+  former `pages` branch on Codeberg Pages. All links in README (EN/DE),
+  `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `docs/` and the web app
+  (`og:url`, footer, privacy policy) now point at the new locations; all nine
+  historical releases are available on the new host. The **bundle identifiers
+  stay `page.codeberg.jkaindl.*`** — they are the App Store identity and cannot
+  change.
+- The `pages` branch and `scripts/sync-pages.sh` are gone; `scripts/deploy-page.sh`
+  replaces them.
+
+### Added
+
+- **Gender-neutral additions from the `yijing-oracle` Obsidian plugin.** Six new
+  English neutral variants (line interpretations for hexagrams 1, 13 ×2, 42, 47
+  and the judgment for hexagram 37) plus a combined variant for hexagram 1's
+  `meaning`. Source seed kept as provenance under
+  `scripts/sources/from-yijing-oracle-plugin/`.
+
 ## [1.0.0] — 2026-06-20
 
 > **Released on the App Store, 2026-06-20** — the universal native family

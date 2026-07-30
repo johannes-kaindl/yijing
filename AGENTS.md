@@ -12,7 +12,7 @@ automated sessions.
 ## Offene Konventions-Punkte
 
 - [ ] CORE-META-03 — Hero-Bild in `docs/images/` ergaenzen + Screenshots reproduzierbar per Skript erzeugen (App-Store-Screenshots + Preview-Video existieren bereits als archivierte Launch-Assets, commit `69a34b5`; offen bleibt nur das reproduzierbare Skript + ein `docs/images/`-Hero-Bild).
-- [ ] CORE-GIT-01 — GitHub-Mirror-Remote `github` einrichten (derzeit nur `origin` = Codeberg).
+- [ ] CORE-GIT-01 — GitHub-Mirror-Remote `github` einrichten (derzeit nur `origin` = `git.jkaindl.de`).
 - [ ] PROF-WEB-03 — `node --check`-Gate-Skript anlegen, das `<script>` aus HTML extrahiert und syntaktisch prueft.
 - [ ] PROF-NAT-01 — Add a separate `scripts/package-native-app.sh` (sign + notarize) for the **macOS AppKit DMG**. *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
 - [x] PROF-NAT-02 — All four target `Info.plist`s now derive `CFBundleShortVersionString` / `CFBundleVersion` from `project.yml`'s `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` (build-setting expansion). A version bump is two lines in `project.yml`, in lockstep by construction — no script needed (done 2026-06-13).
@@ -137,26 +137,34 @@ Tracked outputs (all **belong to the commit** — primary data assets, not
 strict build artifacts): `data/hexagrams.json`, `data/hexagrams.en.json`,
 `data/trigrams.json`, `data/widget-hexagrams.json`.
 
-## Branches: `main` and `pages`
+## Branch and deployment
 
-The repo has two branches:
+There is a **single branch, `main`**. `index.html` lives in the subfolder
+`web/`, the data in `data/` (from `web/`: `../data/`).
 
-- **`main`** — the development branch. `index.html` lives in the subfolder
-  `web/`, the data in `data/` (from `web/`: `../data/`).
-- **`pages`** — the deployment for Codeberg Pages
-  (`https://jkaindl.codeberg.page/Yijing/`). **Flat layout:** the
-  contents of `web/` live directly in the branch root, `data/` next to it.
+The live demo <https://pages.jkaindl.de/yijing/> is deployed with
+`./scripts/deploy-page.sh` — from the repo root, on `main`, with a clean
+working tree. The script snapshots the **committed** state
+(`git archive HEAD` — so commit before deploying), builds the **flat layout**
+in a temp dir (contents of `web/` at the root, `data/` and `sw.js` next to it),
+patches the paths in `app.js` (`../data/` → `data/`, `../sw.js` → `sw.js`),
+verifies no `../` path survived, and rsyncs to the pages host.
 
-Every change to `web/`, `sw.js` or the data must be carried over to
-`pages` — there is `./scripts/sync-pages.sh` for that. The
-script automatically creates a worktree, mirrors `web/` into the
-pages root, copies `data/` and `sw.js`, patches the paths in `app.js`
-(`../data/` → `data/`, `../sw.js` → `sw.js`), commits and pushes with
-an SSH retry. No-op if `pages` is already up to date.
+Every change to `web/`, `sw.js` or the data needs a deploy run to become
+visible on the live demo.
 
-`index.html`, `style.css`, `manifest.webmanifest` and `sw.js` are
-identical in both branches; `app.js` differs only in the
-paths (`data/`, `sw.js` instead of `../data/`, `../sw.js`).
+> Two things the script is deliberate about, both load-bearing on macOS:
+> it calls **`/opt/homebrew/bin/rsync`** explicitly (Apple's `openrsync` is
+> incompatible with the server-side `rrsync` wrapper and may come first on
+> `PATH`), and it passes **`--chmod=D755,F644`** (a `mktemp` staging dir is
+> `0700`, and `rsync -a` would propagate that to the target — the web server
+> then answers 403).
+
+**Historical note:** until 2026-07-30 the deployment was a second branch,
+`pages`, synced by `scripts/sync-pages.sh` to Codeberg Pages. Both are gone —
+the branch is not maintained any more, and the repo now lives on
+`git.jkaindl.de`. Older entries in `CHANGELOG.md` still mention the old path;
+that is history, not current convention.
 
 ## PWA, Service Worker, Theme
 

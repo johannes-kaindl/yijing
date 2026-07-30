@@ -36,21 +36,20 @@ reproduce it locally.
 
 ## Branches
 
-The repo has two branches:
+There is a single branch: **`main`** — PRs always go in here.
 
-- **`main`** — development. PRs always go in here.
-- **`pages`** — the deployment for [Codeberg Pages](https://jkaindl.codeberg.page/Yijing/).
-  Has a flat layout (contents of `web/` directly in the root) and is pulled
-  in manually from `main` by the maintainer. **As a contributor you do not
-  need to touch `pages` yourself** — focus on `main`.
+The [live demo](https://pages.jkaindl.de/yijing/) is deployed from `main` by
+the maintainer (`scripts/deploy-page.sh` mirrors `web/` into a flat layout and
+rsyncs it to the pages host). **As a contributor you do not need to deploy
+anything** — focus on `main`.
 
-Details on the sync convention are in [`AGENTS.md`](AGENTS.md).
+Details on the deploy convention are in [`AGENTS.md`](AGENTS.md).
 
 ## Issue or PR?
 
 - **Issue first** for larger changes, new features, architecture
   questions — use the templates under
-  [New issue → choose template](https://codeberg.org/jkaindl/Yijing/issues/new/choose).
+  [New issue → choose template](https://git.jkaindl.de/jkaindl/Yijing/issues/new/choose).
 - **PR directly** for typos, small data corrections, obvious
   bugfixes.
 - **Security topics** → never a public issue, but see
@@ -59,7 +58,7 @@ Details on the sync convention are in [`AGENTS.md`](AGENTS.md).
 ## Local setup
 
 ```bash
-git clone https://codeberg.org/jkaindl/Yijing.git yijing
+git clone https://git.jkaindl.de/jkaindl/Yijing.git yijing
 cd yijing
 ./serve.sh                   # opens http://localhost:8765/web/index.html
 ```
@@ -91,7 +90,7 @@ embedded watchOS app).
       `node scripts/test-kingwen.mjs`
 - [ ] `CHANGELOG.md` updated (`[Unreleased]` section)
 - [ ] For changes to `web/`, `sw.js` or `data/`: note briefly in the PR
-      comment so that the `pages` sync is not forgotten after the merge
+      comment so that the page deploy is not forgotten after the merge
       (the maintainer does it)
 - [ ] Commit messages meaningful (why, not what)
 

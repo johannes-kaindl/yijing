@@ -37,7 +37,7 @@ If you are not sure whether something fits: better to report it.
 ## What does not belong here
 
 - General bug reports (no security relevance) — please file as a
-  public issue: <https://codeberg.org/jkaindl/Yijing/issues>.
+  public issue: <https://git.jkaindl.de/jkaindl/Yijing/issues>.
 - Security topics in **external LLM servers** (Ollama, MLX,
   LM Studio, vLLM, OpenClaw) — these belong in their own projects.
 - General hardening suggestions without a concrete attack scenario —
@@ -45,12 +45,12 @@ If you are not sure whether something fits: better to report it.
 
 ## How to report
 
-**Preferred:** a private Codeberg issue in the repo, or a PM via Codeberg to
-[@jkaindl](https://codeberg.org/jkaindl). Codeberg supports private
+**Preferred:** a private issue in the repo, or a PM to
+[@jkaindl](https://git.jkaindl.de/jkaindl). The forge supports private
 issues — tick the privacy checkbox when creating one.
 
 **Alternatively:** email to the address listed in the
-[Codeberg profile](https://codeberg.org/jkaindl). If
+[profile](https://git.jkaindl.de/jkaindl). If
 none is visible, send a short PM asking for the email address —
 then without details that should stay confidential in the first
 step.

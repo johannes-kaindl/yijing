@@ -6,23 +6,23 @@
   <title data-i18n="doc.title">Yijing Orakel</title>
   <meta name="description" data-i18n-content="doc.description" content="I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und optionaler KI-Deutung über lokale LLM-Server (Ollama / MLX / LM Studio). Vanilla JS, offline-fähig, auch als App für iPhone, iPad und Apple Watch im App Store." />
 
-  <!-- Open Graph / Social Preview. Hero-Bild bei Codeberg-Pages absolut
+  <!-- Open Graph / Social Preview. Hero-Bild im Pages-Deploy absolut
        verlinkt (relativ funktioniert beim Crawler von Social-Sites meist
        nicht); im web/-Layout zeigt es auf die gleiche Asset-URL. -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" data-i18n-content="doc.title" content="Yijing Orakel" />
   <meta property="og:title" data-i18n-content="doc.title" content="Yijing Orakel" />
   <meta property="og:description" data-i18n-content="og.description" content="I-Ging-Orakel als Static-Site — Drei-Münzen-Methode, Wilhelm-Übersetzung, optionale KI-Deutung über lokale LLM-Server. Offline-fähig als PWA." />
-  <meta property="og:url" content="https://jkaindl.codeberg.page/Yijing/" />
+  <meta property="og:url" content="https://pages.jkaindl.de/yijing/" />
   <meta property="og:locale" data-i18n-content="og.locale" content="de_DE" />
-  <meta property="og:image" content="https://jkaindl.codeberg.page/Yijing/assets/og-image.png" />
+  <meta property="og:image" content="https://pages.jkaindl.de/yijing/assets/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Yijing Orakel — stilisiertes Hexagramm 1 (Das Schöpferische) mit chinesischem Schriftzeichen 易經" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" data-i18n-content="doc.title" content="Yijing Orakel" />
   <meta name="twitter:description" data-i18n-content="og.description" content="I-Ging-Orakel als Static-Site — Drei-Münzen-Methode, Wilhelm-Übersetzung, optionale KI-Deutung über lokale LLM-Server." />
-  <meta name="twitter:image" content="https://jkaindl.codeberg.page/Yijing/assets/og-image.png" />
+  <meta name="twitter:image" content="https://pages.jkaindl.de/yijing/assets/og-image.png" />
 
   <!-- Theme sofort setzen — vermeidet Flackern beim Laden. -->
   <script>
@@ -48,7 +48,7 @@
   <link rel="stylesheet" href="style.css" />
 
   <!-- PWA: Manifest, Icons, Theme-Color. Pfade relativ — identisch nutzbar
-       im web/-Layout (main) wie im flachen Layout (pages-Branch). -->
+       im web/-Layout (main) wie im flachen Layout des Pages-Deploys. -->
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
@@ -148,7 +148,7 @@
           <div class="interp-setup-actions">
             <button type="button" id="interpSetupConfigure" data-i18n="llm.setup.configure">In Einstellungen einrichten</button>
             <a id="interpSetupGuide" class="ghost-link"
-               href="https://codeberg.org/jkaindl/Yijing/src/branch/main/docs/LLM.md"
+               href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/docs/LLM.md"
                target="_blank" rel="noopener noreferrer"
                data-i18n="llm.setup.guide">Anleitung</a>
           </div>
@@ -319,7 +319,7 @@
           für Ollama z.&nbsp;B. <code>OLLAMA_ORIGINS=*</code>.
         </p>
         <p class="hint">
-          <a class="ghost-link" href="https://codeberg.org/jkaindl/Yijing/src/branch/main/docs/LLM.md"
+          <a class="ghost-link" href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/docs/LLM.md"
              target="_blank" rel="noopener noreferrer" data-i18n="llm.setup.guide">Anleitung</a>
         </p>
         <label class="row-inline">
@@ -392,9 +392,9 @@
         </p>
         <p class="hint about-copyright" data-i18n-html="settings.about.copyright">
           © 2026 Johannes Kaindl ·
-          <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) ·
-          <a href="https://codeberg.org/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) ·
-          <a href="https://codeberg.org/jkaindl/Yijing">Quellcode</a>
+          <a href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/LICENSE">AGPL-3.0-or-later</a> (Code) ·
+          <a href="https://git.jkaindl.de/jkaindl/Yijing/src/branch/main/LICENSE-DOCS">CC BY-SA 4.0</a> (Doku) ·
+          <a href="https://git.jkaindl.de/jkaindl/Yijing">Quellcode</a>
         </p>
         <p class="hint" data-i18n-html="settings.about.privacy">
           <a href="privacy.html">Datenschutzerklärung</a>

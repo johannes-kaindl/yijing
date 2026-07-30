@@ -267,10 +267,10 @@ for a release (using `v1.1.1` as an example):
    The script pulls the committed state (`git archive HEAD`), not
    the working directory — so push the tag first, otherwise an
    untagged state ends up in the app.
-5. **Create a Codeberg release** (UI or API):
+5. **Create a release** (UI or API — the forge speaks the Gitea API):
    ```bash
    TOKEN=…
-   curl -X POST "https://codeberg.org/api/v1/repos/jkaindl/Yijing/releases" \
+   curl -X POST "https://git.jkaindl.de/api/v1/repos/jkaindl/Yijing/releases" \
      -H "Authorization: token $TOKEN" \
      -H "Content-Type: application/json" \
      -d '{"tag_name":"v1.1.1","name":"v1.1.1 — <Headline>",
@@ -286,13 +286,13 @@ for a release (using `v1.1.1` as an example):
 7. **Update the download links to the new tag.** The button in
    `README.md` and the `href` of the `#macDownload` button in
    `web/index.html` point to a versioned URL
-   (`releases/download/<tag>/Yijing.dmg`) — Codeberg has no
+   (`releases/download/<tag>/Yijing.dmg`) — there is no
    `latest` alias for direct asset links. The README status badge
    for the release version updates automatically via
    `shields.io/gitea/v/release`.
-8. **Pages sync.** When `web/`, `sw.js` or `data/` were affected:
+8. **Deploy the page.** When `web/`, `sw.js` or `data/` were affected:
    ```bash
-   ./scripts/sync-pages.sh
+   ./scripts/deploy-page.sh
    ```
    The script automatically creates a worktree, mirrors `web/` into
    the pages root, copies `data/` and `sw.js`, patches the paths in

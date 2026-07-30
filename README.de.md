@@ -4,13 +4,13 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue?style=flat-square)](LICENSE)
 [![Docs: CC BY-SA 4.0](https://img.shields.io/badge/Docs-CC_BY--SA_4.0-lightgrey?style=flat-square)](LICENSE-DOCS)
-[![Codeberg-Release](https://img.shields.io/gitea/v/release/jkaindl/Yijing?gitea_url=https%3A%2F%2Fcodeberg.org&label=codeberg&color=green&style=flat-square)](https://codeberg.org/jkaindl/Yijing/releases)
-[![Status: aktiv](https://img.shields.io/badge/status-aktiv-success?style=flat-square)](https://codeberg.org/jkaindl/Yijing/commits/branch/main)
+[![Release](https://img.shields.io/gitea/v/release/jkaindl/Yijing?gitea_url=https%3A%2F%2Fgit.jkaindl.de&label=release&color=green&style=flat-square)](https://git.jkaindl.de/jkaindl/Yijing/releases)
+[![Status: aktiv](https://img.shields.io/badge/status-aktiv-success?style=flat-square)](https://git.jkaindl.de/jkaindl/Yijing/commits/branch/main)
 [![Platform: macOS](https://img.shields.io/badge/macOS-11%2B%20·%20Universal-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/MACOS-APP.md)
 [![Platform: iOS](https://img.shields.io/badge/iOS%20·%20iPadOS-17%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
 [![Platform: watchOS](https://img.shields.io/badge/watchOS-10%2B-lightgrey?style=flat-square&logo=apple&logoColor=white)](docs/IOS-APP.md)
 [![App Store](https://img.shields.io/badge/App_Store-live-success?style=flat-square&logo=apple&logoColor=white)](https://apps.apple.com/app/yijing-i-ching/id6780668644)
-[![PWA](https://img.shields.io/badge/PWA-installierbar-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://jkaindl.codeberg.page/Yijing/)
+[![PWA](https://img.shields.io/badge/PWA-installierbar-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://pages.jkaindl.de/yijing/)
 [![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#warum-keine-build-pipeline)
 
 Ein schlankes I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und
@@ -35,14 +35,14 @@ auch via Mac Catalyst für den Mac — der langfristige Mac-Weg, noch nicht Teil
 des veröffentlichten Listings.
 
 <p align="center">
-  <a href="https://jkaindl.codeberg.page/Yijing/">
+  <a href="https://pages.jkaindl.de/yijing/">
     <img src="web/assets/og-image.png" alt="Yijing Orakel — stilisiertes Hexagramm 1 (Das Schöpferische) mit dem chinesischen Schriftzeichen 易經" width="720" />
   </a>
 </p>
 
 [![Laden im App Store](https://img.shields.io/badge/Laden_im_App_Store-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://apps.apple.com/app/yijing-i-ching/id6780668644)
-[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://codeberg.org/jkaindl/Yijing/releases/download/v1.5.0/Yijing.dmg)
-[![Live-Demo öffnen](https://img.shields.io/badge/Live--Demo_%C3%B6ffnen-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://jkaindl.codeberg.page/Yijing/)
+[![Download für macOS](https://img.shields.io/badge/Download_f%C3%BCr_macOS-c79a4a?style=for-the-badge&logo=apple&logoColor=1a1814)](https://git.jkaindl.de/jkaindl/Yijing/releases/download/v1.5.0/Yijing.dmg)
+[![Live-Demo öffnen](https://img.shields.io/badge/Live--Demo_%C3%B6ffnen-8a6a30?style=for-the-badge&logo=pwa&logoColor=ece4d3)](https://pages.jkaindl.de/yijing/)
 
 Disk-Image öffnen, „Yijing" in den Programme-Ordner ziehen — fertig.
 Die App ist **Developer-ID-signiert und Apple-notarisiert** und startet
@@ -54,7 +54,7 @@ sofort, ohne Gatekeeper-Warnung. Hintergrund und die Signatur-Pipeline:
 ## Inhalt
 
 - [Live-Demo](#live-demo)
-- [Schnellstart](#schnellstart)
+- [Verwendung](#verwendung)
 - [Als macOS-App](#als-macos-app)
 - [Als iOS- / iPadOS- / Mac-(Catalyst-)App](#als-ios---ipados---mac-catalyst-app)
 - [Features](#features)
@@ -75,20 +75,20 @@ sofort, ohne Gatekeeper-Warnung. Hintergrund und die Signatur-Pipeline:
 
 ## Live-Demo
 
-<https://jkaindl.codeberg.page/Yijing/> — funktioniert ohne lokales
+<https://pages.jkaindl.de/yijing/> — funktioniert ohne lokales
 Setup für Hexagramm-Wurf und Wilhelm-Text. Die KI-Deutung erfordert
 einen lokal laufenden LLM-Server (Ollama oder MLX), siehe
-[Schnellstart](#schnellstart).
+[Verwendung](#verwendung).
 
 Beim ersten Besuch installiert sich der Service Worker im Hintergrund
 — danach läuft die Seite vollständig offline. Über den
 „App-installieren"-Knopf des Browsers landet sie als PWA im Dock oder
 auf dem Homescreen.
 
-## Schnellstart
+## Verwendung
 
 ```bash
-git clone https://codeberg.org/jkaindl/Yijing.git yijing
+git clone https://git.jkaindl.de/jkaindl/Yijing.git yijing
 cd yijing
 ./serve.sh
 ```
@@ -282,7 +282,7 @@ yijing/
 │       ├── Widgets/           #   Tages-Hexagramm-Widget
 │       └── Watch/             #   Apple-Watch-App + Komplikation
 ├── docs/                      # Architektur, Daten, LLM, Entwicklung, macOS- + iOS-App
-├── .gitea/                    # Issue-Vorlagen für Codeberg
+├── .gitea/                    # Issue-Vorlagen für die Forge
 ├── _archiv/                   # alte Anläufe — per .gitignore ausgeschlossen
 ├── sw.js                      # Service Worker (Offline-Caching)
 ├── AGENTS.md                  # Konventionen für KI-Coding-Sessions
@@ -317,15 +317,15 @@ Vollständige Notes pro Release: [`CHANGELOG.md`](CHANGELOG.md).
 | Version | Datum | Headline |
 |---|---|---|
 | [v1.0.0 (App Store)](https://apps.apple.com/app/yijing-i-ching/id6780668644) | 2026-06-20 | **Live im App Store** — die universelle native Familie (iPhone / iPad / Apple Watch) ist als v1.0 (Build 5) erschienen: KI-Deutung on-device (Apple Foundation Models), Meditationsbilder on-device (Apple Image Playground), ein Tages-Hexagramm-Widget für Home-/Sperrbildschirm und eine eigenständige Apple-Watch-App mit Komplikation. macOS Catalyst zurückgestellt. *(iOS-1.0.x-Linie)* |
-| [v1.5.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.5.0) | 2026-06-01 | **Nachschlagewerk + vollständige geschlechtsneutrale Fassung** — alle 64 Hexagramme durchblättern (8×8-Übersicht, Vor/Zurück, Deep-Links) mit vollständigem Wilhelm-Text, unabhängig vom Wurf; bilingual und register-bewusst. Jeder generische geschlechtsbezogene Personenbezug in DE + EN neutralisiert, leak-frei verifiziert; OCR-Scan-Fehler im Quelltext korrigiert |
-| [v1.4.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.1) | 2026-06-01 | **Notarisierte macOS-App** — die Release-DMG ist jetzt Developer-ID-signiert und Apple-notarisiert und startet ohne Gatekeeper-Warnung (der alte „Trotzdem öffnen"-/`xattr`-Workaround entfällt). Opt-in-Signatur-Pipeline in `build-macos-app.sh` (`YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE`); README, INSTALL und `docs/MACOS-APP.md` für macOS-15/26-Gatekeeper aktualisiert |
-| [v1.4.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.4.0) | 2026-06-01 | **Daten-Korrektheit + geschlechtsneutrale Fassung + Export-Reparatur** — Wilhelm-Texte aus Projekt-Gutenberg neu bezogen (leere Bedeutungen gefüllt, Hexagramm-2-Bild ergänzt, Fußnoten + „alle Linien wandeln"-Spruch für Hex 1 & 2, Linien-Kontamination aus den Bild-Feldern entfernt, OCR-Patzer korrigiert), eine standardmäßig geschlechtsneutrale Textfassung mit Settings-Umschalter auf den historischen Wortlaut von 1924 (DE + EN), und ein funktionierender Markdown-/PDF-Export in der macOS-App über eine native WKWebView-Bridge mit zwei PDF-Modi (Druck S/W und randloses App-Design) |
-| [v1.3.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.3.0) | 2026-05-28 | **UI-Politur + zweisprachige README** — sichtbarer Sprach-Umschalter im Footer, minimalistische Inline-SVG-Header-Icons (Lucide) statt Unicode-Glyphen, 2-stufiger Theme-Toggle mit Zustands-Icon. README in EN (kanonisch) + DE gesplittet, App-Bundle-Version auf 1.3.0 nachgezogen |
-| [v1.2.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.1) | 2026-05-27 | **Patch-Release** — Hero-Bild + `og:image` für Social-Preview, StaticServer-Connection-Limit, `serve.py`-Tot-Code raus, EN-Übersetzungs-Stichproben-QA (君子-Vokabel konsistent als „noble one", Hex 11 + 49 Polish) |
-| [v1.2.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.2.0) | 2026-05-27 | **Zweisprachig DE/EN** — i18n-Layer für die komplette UI (Settings-Toggle, Browser-Sprache als Default), eigene Wilhelm→EN-Übersetzung aller 64 Hexagramme im Wilhelm-Stil. Plus Pages-Sync-Skript, King-Wen-Sanity-Test, Open-Graph-Tags, `.editorconfig` |
-| [v1.1.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.1.1) | 2026-05-25 | **Audit-Sweep-Patch** — Stream-Reader-Lock-Fix, HTML-Escape-Härtung, NWListener-Race weg, Pfad-Traversal-Guard, deterministisches Daten-Build |
-| [v1.1](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.1) | 2026-05-24 | **macOS-App ohne Python** — Swift-interner Static-Server, keine CLT-Abhängigkeit mehr, kleineres DMG |
-| [v1.0](https://codeberg.org/jkaindl/Yijing/releases/tag/v1.0) | 2026-05-22 | **Initial Release** — Drei-Münzen-Methode, Wilhelm-Texte, LLM-Adapter (Ollama/OpenAI-kompatibel), PWA, Service Worker, macOS-App-Build |
+| [v1.5.0](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.5.0) | 2026-06-01 | **Nachschlagewerk + vollständige geschlechtsneutrale Fassung** — alle 64 Hexagramme durchblättern (8×8-Übersicht, Vor/Zurück, Deep-Links) mit vollständigem Wilhelm-Text, unabhängig vom Wurf; bilingual und register-bewusst. Jeder generische geschlechtsbezogene Personenbezug in DE + EN neutralisiert, leak-frei verifiziert; OCR-Scan-Fehler im Quelltext korrigiert |
+| [v1.4.1](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.4.1) | 2026-06-01 | **Notarisierte macOS-App** — die Release-DMG ist jetzt Developer-ID-signiert und Apple-notarisiert und startet ohne Gatekeeper-Warnung (der alte „Trotzdem öffnen"-/`xattr`-Workaround entfällt). Opt-in-Signatur-Pipeline in `build-macos-app.sh` (`YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE`); README, INSTALL und `docs/MACOS-APP.md` für macOS-15/26-Gatekeeper aktualisiert |
+| [v1.4.0](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.4.0) | 2026-06-01 | **Daten-Korrektheit + geschlechtsneutrale Fassung + Export-Reparatur** — Wilhelm-Texte aus Projekt-Gutenberg neu bezogen (leere Bedeutungen gefüllt, Hexagramm-2-Bild ergänzt, Fußnoten + „alle Linien wandeln"-Spruch für Hex 1 & 2, Linien-Kontamination aus den Bild-Feldern entfernt, OCR-Patzer korrigiert), eine standardmäßig geschlechtsneutrale Textfassung mit Settings-Umschalter auf den historischen Wortlaut von 1924 (DE + EN), und ein funktionierender Markdown-/PDF-Export in der macOS-App über eine native WKWebView-Bridge mit zwei PDF-Modi (Druck S/W und randloses App-Design) |
+| [v1.3.0](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.3.0) | 2026-05-28 | **UI-Politur + zweisprachige README** — sichtbarer Sprach-Umschalter im Footer, minimalistische Inline-SVG-Header-Icons (Lucide) statt Unicode-Glyphen, 2-stufiger Theme-Toggle mit Zustands-Icon. README in EN (kanonisch) + DE gesplittet, App-Bundle-Version auf 1.3.0 nachgezogen |
+| [v1.2.1](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.2.1) | 2026-05-27 | **Patch-Release** — Hero-Bild + `og:image` für Social-Preview, StaticServer-Connection-Limit, `serve.py`-Tot-Code raus, EN-Übersetzungs-Stichproben-QA (君子-Vokabel konsistent als „noble one", Hex 11 + 49 Polish) |
+| [v1.2.0](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.2.0) | 2026-05-27 | **Zweisprachig DE/EN** — i18n-Layer für die komplette UI (Settings-Toggle, Browser-Sprache als Default), eigene Wilhelm→EN-Übersetzung aller 64 Hexagramme im Wilhelm-Stil. Plus Pages-Sync-Skript, King-Wen-Sanity-Test, Open-Graph-Tags, `.editorconfig` |
+| [v1.1.1](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.1.1) | 2026-05-25 | **Audit-Sweep-Patch** — Stream-Reader-Lock-Fix, HTML-Escape-Härtung, NWListener-Race weg, Pfad-Traversal-Guard, deterministisches Daten-Build |
+| [v1.1](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.1) | 2026-05-24 | **macOS-App ohne Python** — Swift-interner Static-Server, keine CLT-Abhängigkeit mehr, kleineres DMG |
+| [v1.0](https://git.jkaindl.de/jkaindl/Yijing/releases/tag/v1.0) | 2026-05-22 | **Initial Release** — Drei-Münzen-Methode, Wilhelm-Texte, LLM-Adapter (Ollama/OpenAI-kompatibel), PWA, Service Worker, macOS-App-Build |
 
 ## Mitmachen
 
@@ -333,7 +333,7 @@ Issues, PRs und Übersetzungen sind willkommen. Bitte vorher
 [`CONTRIBUTING.md`](CONTRIBUTING.md) lesen — es gibt klare
 Architektur-Leitplanken (kein Framework, kein Build-Step, kein TypeScript).
 Für Bug-Reports und Feature-Requests gibt es Vorlagen unter
-[Codeberg → Neue Issue](https://codeberg.org/jkaindl/Yijing/issues/new/choose).
+[Neue Issue](https://git.jkaindl.de/jkaindl/Yijing/issues/new/choose).
 
 ### Warum keine Build-Pipeline?
 
@@ -348,7 +348,7 @@ wächst, splitten wir Code; wir führen kein Toolchain ein.
 
 Sicherheitsrelevante Probleme bitte **nicht öffentlich als Issue
 posten**. Stattdessen siehe [`SECURITY.md`](SECURITY.md) — kurzer Weg
-über Codeberg-DM oder E-Mail.
+über eine DM auf der Forge oder E-Mail.
 
 ## Lizenz
 
@@ -410,7 +410,7 @@ ausschließlich für lokale Server gedacht.
 
 ---
 
-<sub>Repository: <https://codeberg.org/jkaindl/Yijing> · Live:
-<https://jkaindl.codeberg.page/Yijing/> · Issues:
-<https://codeberg.org/jkaindl/Yijing/issues> · Releases:
-<https://codeberg.org/jkaindl/Yijing/releases></sub>
+<sub>Repository: <https://git.jkaindl.de/jkaindl/Yijing> · Live:
+<https://pages.jkaindl.de/yijing/> · Issues:
+<https://git.jkaindl.de/jkaindl/Yijing/issues> · Releases:
+<https://git.jkaindl.de/jkaindl/Yijing/releases></sub>
