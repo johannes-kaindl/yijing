@@ -63,7 +63,10 @@ def main() -> None:
 
 def _write(path: Path, data) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    # Abschließendes \n wie sync_image_seeds_to_en.py / build_widget_slice.py —
+    # ohne das nimmt ein Lauf hier der en.json die Newline wieder weg, die der
+    # spätere Pipeline-Schritt gesetzt hat (Diff-Rauschen bei jedem Re-Apply).
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     tmp.replace(path)
 
 
