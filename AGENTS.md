@@ -161,10 +161,11 @@ visible on the live demo.
 > then answers 403).
 
 **Historical note:** until 2026-07-30 the deployment was a second branch,
-`pages`, synced by `scripts/sync-pages.sh` to Codeberg Pages. Both are gone —
-the branch is not maintained any more, and the repo now lives on
-`git.jkaindl.de`. Older entries in `CHANGELOG.md` still mention the old path;
-that is history, not current convention.
+`pages`, synced by `scripts/sync-pages.sh` to Codeberg Pages. The script has
+been removed; the `pages` branch still exists (locally and as `origin/pages`)
+but is not maintained any more, and the repo now lives on `git.jkaindl.de`.
+Older entries in `CHANGELOG.md` still mention the old path; that is history,
+not current convention.
 
 ## PWA, Service Worker, Theme
 
@@ -312,7 +313,7 @@ or offer a migration.
 
 ## When you split the code
 
-`app.js` is, at ~2100 lines, well past the comfortable upper end of what
+`app.js` is well past the comfortable upper end of what
 belongs in a single file. As it grows further, only split when a concrete feature
 can be cleanly isolated — not prophylactically. Sensible cuts
 would be:
@@ -338,8 +339,8 @@ something:
 
 **OracleKit is the one sanctioned exception to the
 "[no new test frameworks](#what-you-should-not-do)" rule.** It ships an
-XCTest suite (9 tests in `Tests/OracleKitTests/` — `CastingTests.swift`,
-`DailyTests.swift`). Run `swift test` from `scripts/ios-app/OracleKit/`.
+XCTest suite (`Tests/OracleKitTests/` — `CastingTests.swift`,
+`DailyTests.swift`, `TextsTests.swift`). Run `swift test` from `scripts/ios-app/OracleKit/`.
 It is the King-Wen / daily-determinism **parity gate**: it proves the Swift
 port is bit-identical to `web/app.js` `BINARY_TO_KING_WEN` and
 `build_data.py` `KING_WEN_BINARY` (mirrors `scripts/test-kingwen.mjs`).
