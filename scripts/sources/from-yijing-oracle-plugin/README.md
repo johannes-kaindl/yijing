@@ -1,6 +1,6 @@
 # Seed aus dem yijing-oracle-Obsidian-Plugin
 
-**Herkunft:** `/Users/Shared/code/obsidian-plugins/yijing-oracle` (2026-07-12).
+**Herkunft:** Repo `yijing-oracle` (Obsidian-Plugin, 2026-07-12).
 **Zweck:** geschlechtsneutrale (personen-neutrale) Varianten, die im Plugin erzeugt/verifiziert
 wurden und in der App noch fehlen — v.a. das **`meaning`**-Feld (Bedeutung/Kommentar), das
 `neutral_overrides.json` bisher nicht abdeckt.
