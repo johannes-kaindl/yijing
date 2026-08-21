@@ -7,6 +7,15 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **Reproducible README screenshots** — `scripts/capture-web-shots.mjs`
+  re-shoots `docs/screenshots/*.png` from the running app instead of by hand
+  (CORE-META-03). It starts `scripts/serve.py`, drives the installed Google
+  Chrome over CDP through Node's built-in WebSocket — no npm, no bundled
+  browser — and pins language, theme, `Math.random` and `crypto.randomUUID`
+  so two runs produce byte-identical files. CSS transitions are frozen for
+  the capture; without that no two runs matched. Every shot asserts what it
+  must show, so a wrong frame fails the run rather than quietly replacing a
+  README image.
 - **Syntax gate `scripts/check-syntax.mjs`** (PROF-WEB-03). Parses every file
   that ships to the browser — `sw.js`, all `web/*.js` modules and the inline
   `<script>` blocks of `web/*.html`, which a plain `node --check` never sees.

@@ -11,7 +11,7 @@ automated sessions.
 
 ## Offene Konventions-Punkte
 
-- [ ] CORE-META-03 — Hero-Bild in `docs/images/` ergaenzen + Screenshots reproduzierbar per Skript erzeugen (App-Store-Screenshots + Preview-Video existieren bereits als archivierte Launch-Assets, commit `69a34b5`; offen bleibt nur das reproduzierbare Skript + ein `docs/images/`-Hero-Bild).
+- [ ] CORE-META-03 — **Screenshots done, hero image open.** `scripts/capture-web-shots.mjs` re-shoots the four README screenshots from the running app (see "[Tests / verification](#tests--verification)"); what is still missing is a hero image in `docs/images/`. (App Store screenshots + preview video already exist as archived launch assets, commit `69a34b5`.)
 - [x] CORE-GIT-01 — GitHub mirror wired up as the `github` remote (`github.com/johannes-kaindl/Yijing`, SSH). The mirror already existed and was up to date; only the local remote was missing. Measured at the far end per CORE-GIT-01(a) — `git ls-remote` against **each** remote separately, not `@{u}`: `main` and all 9 tags identical on `origin`, `github` and locally (2026-08-21). When re-pushing by hand, use `--follow-tags` (the mirror prunes).
 - [x] PROF-WEB-03 — `scripts/check-syntax.mjs` parses the whole shipped surface (`sw.js`, every `web/*.js`, and the inline `<script>` blocks of every `web/*.html`) — 10 blocks today. See "[Tests / verification](#tests--verification)".
 - [ ] PROF-NAT-01 — Add a separate `scripts/package-native-app.sh` (sign + notarize) for the **macOS AppKit DMG**. *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
@@ -343,6 +343,13 @@ something:
    endpoints (Ollama + MLX)
 3. For data changes: `python3 scripts/build_data.py` must run through
    without errors, the counters in the output consistent
+4. If the change is visible in the UI: `node scripts/capture-web-shots.mjs`
+   re-shoots the four README screenshots (`docs/screenshots/`) from the running
+   app — it starts `serve.py`, drives the installed Chrome over CDP, and pins
+   language, theme and `Math.random` so runs are byte-identical. Each shot
+   asserts what it must show (language, dark theme, index grid open, resulting
+   hexagram present), so a wrong frame fails the run instead of landing in the
+   README. Needs Google Chrome, nothing else — no npm.
 
 **OracleKit is the one sanctioned exception to the
 "[no new test frameworks](#what-you-should-not-do)" rule.** It ships an

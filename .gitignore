@@ -45,3 +45,5 @@ scripts/sources/.en_work/
 scripts/sources/neutral_draft.json
 scripts/sources/neutral_diff_report.md
 scripts/sources/.export_test/
+# Chrome-Profil des Screenshot-Laufs (scripts/capture-web-shots.mjs)
+scripts/.chrome-shot-profile/
