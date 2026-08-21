@@ -30,7 +30,7 @@ import {
   makeClient,
   buildUserPrompt,
   testThinkingMode,
-  LLMError,
+  describeLlmError,
 } from "./llm.js";
 import { renderMarkdown } from "./markdown.js";
 import { initI18n, applyI18n, setLang, getLang, t, localeTag } from "./i18n.js";
@@ -1461,7 +1461,7 @@ async function runInterpretation() {
     if (e?.name === "AbortError") {
       els.interpStatus.textContent = t("llm.status.aborted");
     } else {
-      const msg = e instanceof LLMError ? e.message : String(e?.message || e);
+      const msg = describeLlmError(e);
       els.interpStatus.textContent = t("llm.status.error", { message: msg });
       console.error(e);
     }
@@ -1574,7 +1574,7 @@ function renderEndpointList() {
           })
         );
       } catch (e) {
-        status.innerHTML = escapeHTML(t("settings.endpoints.testError", { message: e.message || String(e) }));
+        status.innerHTML = escapeHTML(t("settings.endpoints.testError", { message: describeLlmError(e) }));
       }
     });
     li.querySelector('[data-act="thinkTest"]').addEventListener("click", async () => {
@@ -1610,7 +1610,7 @@ function renderEndpointList() {
           </div>
         `;
       } catch (e) {
-        status.innerHTML = escapeHTML(t("settings.endpoints.testError", { message: e.message || String(e) }));
+        status.innerHTML = escapeHTML(t("settings.endpoints.testError", { message: describeLlmError(e) }));
       }
     });
     els.endpointList.appendChild(li);

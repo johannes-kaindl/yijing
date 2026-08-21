@@ -1,0 +1,8 @@
+{
+  "source": "code-kit",
+  "tag": null,
+  "sha": "8849c9180a96dd156ca30ffe746df3b5ec6925ea",
+  "version": "0.1.0+llm-stream",
+  "vendored": "pure: sse; web: llm-stream",
+  "note": "Verbatim copies of code-kit/src/ts. Never edit here — re-vendor from the pinned sha. DEVIATION from the plain contract, decided 2026-08-22: this repo ships native ES modules to a browser and has no package.json, while code-kit is TypeScript — 'byte-identical' and 'loadable' cannot both hold in one file. So both hold in two: the .ts files are the byte-identical copies the code-kit gate hashes, and the .js files next to them are GENERATED from those .ts by `node scripts/build-vendor.mjs` (Node's own module.stripTypeScriptTypes, mode 'transform' — no npm, no network; 'transform' is required because llm-stream.ts uses TypeScript parameter properties). The .js are what web/llm.js imports; the build rewrites the kit's extensionless relative imports to explicit .js specifiers. A hand-maintained JS copy was rejected: it would be the same logic filed twice and would drift. Tracked, so serving and deploying still need nothing but a static file server. yijing is registered in code-kit's consumers.json; the gate compares the .ts pairs only, so the generated .js and this file do not trip it. Pinned to a sha, not a tag: llm-stream is unreleased (post-0.1.0)."
+}

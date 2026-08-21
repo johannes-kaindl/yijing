@@ -5,6 +5,38 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The LLM transport now comes from `code-kit`, vendored** — the two backend
+  clients, the streaming loop and the error class left `web/llm.js` and live in
+  `web/vendor/code-kit/` (pin: `VENDOR.json`). `web/llm.js` keeps everything
+  that is this app's own: endpoint and prompt persistence, the presets,
+  `buildUserPrompt`, `testThinkingMode`, the i18n binding — and a thin
+  `makeClient()` that adapts the kit to this app's endpoint schema. Both
+  dialects, the reasoning translation and the abort behaviour are unchanged; the
+  native iOS/macOS apps talk to their loopback shim exactly as before. The
+  generated `.js` files are built from the byte-identical `.ts` copies by
+  `node scripts/build-vendor.mjs` — Node's own type stripping, no npm and no
+  network, and nothing to install in order to serve or deploy the app.
+- **Behaviour that came along with the kit, previously untested here:**
+  `parseSSE` now reads reasoning deltas from three field variants
+  (`reasoning_content` → `reasoning` → `thinking`) and falls back to
+  `choices[0].message` for servers that send full messages despite
+  `stream: true` — so reasoning that this app silently dropped before can now
+  appear. It also treats an *empty* reasoning delta as a value; `makeClient()`
+  filters those out, because unfiltered they popped the thinking `<details>`
+  block open with nothing in it.
+- **Local LLM discovery no longer gives up on HTTPS pages.** `autoDiscover()`
+  used to return immediately unless the page was served over plain `http:`,
+  on the assumption that a loopback request from HTTPS is blocked mixed
+  content. Chromium and Firefox have since replaced that with a Local Network
+  Access *permission*: the first probe raises the prompt, and one grant covers
+  the whole site — so the hosted demo can now find a local Ollama or LM Studio.
+  Safari still blocks outright and has no opt-in; there the probes simply fail
+  and are swallowed, as they are for any port that has nothing listening.
+  Probing waits longer on non-`http:` origins, because the permission dialog
+  sits between the request and its answer and waits for a human.
+
 ### Added
 
 - **`scripts/package-macos-app.sh`** (PROF-NAT-01) — the macOS AppKit build is

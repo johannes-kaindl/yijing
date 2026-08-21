@@ -35,11 +35,23 @@ import { fileURLToPath } from 'url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-// Files that ship to the browser, relative to the repo root.
-const jsFiles = ['sw.js', ...fs.readdirSync(path.join(root, 'web'))
-  .filter((f) => f.endsWith('.js'))
-  .sort()
-  .map((f) => `web/${f}`)];
+// Files that ship to the browser, relative to the repo root. Recursive, so the
+// generated modules under web/vendor/ are gated too — they are shipped code
+// like any other, and the fact that a script wrote them is no reason to trust
+// them less. The .ts sources next to them are NOT parsed here: they are
+// byte-identical vendor copies that never reach a browser, and `node --check`
+// would reject their type annotations.
+function shippedJs(dir) {
+  const out = [];
+  for (const entry of fs.readdirSync(path.join(root, dir)).sort()) {
+    const rel = `${dir}/${entry}`;
+    if (fs.statSync(path.join(root, rel)).isDirectory()) out.push(...shippedJs(rel));
+    else if (entry.endsWith('.js')) out.push(rel);
+  }
+  return out;
+}
+
+const jsFiles = ['sw.js', ...shippedJs('web')];
 
 const htmlFiles = fs.readdirSync(path.join(root, 'web'))
   .filter((f) => f.endsWith('.html'))

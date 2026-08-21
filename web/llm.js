@@ -1,205 +1,101 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Johannes Kaindl
 /**
- * LLM-Adapter für lokale Modell-Server.
+ * LLM-Anbindung für lokale Modell-Server — alles außer dem Transport.
  *
- * Unterstützt zwei Backend-Typen mit einheitlicher Schnittstelle:
+ * Der Transport (die beiden Backend-Dialekte, das Streaming, die
+ * Fehlerklasse) wohnt seit 2026-08-22 nicht mehr hier, sondern als
+ * vendorierte Kopie in `vendor/code-kit/web/llm-stream.js` — dorthin
+ * extrahiert, weil ein zweites Repo denselben Code brauchte. `makeClient()`
+ * unten ist die dünne Anpassung an das Endpunkt-Schema dieser App; die
+ * Dialekte selbst sind unverändert:
  *
  *  - "ollama"  → native Ollama-API (/api/tags, /api/chat als ND-JSON-Stream)
  *  - "openai"  → OpenAI-kompatibel (/v1/models, /v1/chat/completions als SSE)
  *                Nutzbar für Ollama-OpenAI-Endpunkt, MLX (mlx_lm.server),
- *                LM Studio, vLLM, OpenClaw u.ä.
- *
- * Beide Clients implementieren:
- *  - listModels(): Promise<string[]>
- *  - chatStream({ model, messages, thinking, onToken, onThinking, signal }): Promise<void>
+ *                LM Studio, vLLM, OpenClaw u.ä. — und für den Loopback-Shim
+ *                der nativen App, der genau diesen Dialekt spricht.
  *
  * Reasoning/Thinking wird über `thinking: true|false|null` gesteuert und
  * je nach Backend in die passende Schnittstelle übersetzt:
  *  - Ollama-native: `think` + großzügiges `num_predict`
  *  - OpenAI-kompatibel: `reasoning_effort` + `chat_template_kwargs.enable_thinking`
  *
- * Persistenz von Endpunkten und System-Prompt erfolgt in localStorage.
+ * Hier bleiben: Endpunkt- und Prompt-Persistenz (localStorage), die
+ * Vorlagen, `buildUserPrompt`, `testThinkingMode` und die i18n-Anbindung.
  */
 
 import { t, getLang } from "./i18n.js";
+import { makeLlmClient, LlmHttpError } from "./vendor/code-kit/web/llm-stream.js";
 
-export class LLMError extends Error {
-  constructor(msg, cause) {
-    super(msg);
-    this.name = "LLMError";
-    this.cause = cause;
-  }
-}
-
-function trimSlash(s) {
-  return (s || "").replace(/\/+$/, "");
-}
+export { LlmHttpError };
 
 /**
- * Endpoint-Schema:
+ * Endpoint-Schema (localStorage):
  * {
  *   id, name, type: "ollama" | "openai",
  *   baseUrl, apiKey, defaultModel
  * }
  */
 
+// Ein Endpunkt ohne baseUrl meint den jeweiligen Standard-Port — der
+// vendorierte Client kennt diese Konvention nicht (er würde relativ zur Seite
+// auflösen), also wird sie hier aufgelöst, bevor er ihn zu sehen bekommt.
+const DEFAULT_BASE_URL = {
+  ollama: "http://localhost:11434",
+  openai: "http://localhost:8080/v1",
+};
+
+/**
+ * Client für einen gespeicherten Endpunkt.
+ *
+ * Der Transport selbst liegt seit 2026-08-22 in `vendor/code-kit` und wird
+ * hier nur noch an das Endpunkt-Schema und an die UI angepasst:
+ *
+ *  - baseUrl-Default (s.o.),
+ *  - `fetch` wird injiziert statt importiert (Kit-Konvention),
+ *  - leere Token werden verschluckt: `parseSSE` liefert einen Reasoning-Delta
+ *    auch dann, wenn er der leere String ist (`typeof === "string"` statt
+ *    truthy). Ungefiltert klappte in app.js der Thinking-`<details>`-Block auf,
+ *    ohne dass je Reasoning kam. Der ND-JSON-Zwilling `parseOllamaChat` filtert
+ *    leere Werte selbst — die Asymmetrie ist im Kit, der Guard hier deckt beide.
+ */
 export function makeClient(endpoint) {
-  if (!endpoint) throw new LLMError("No endpoint selected");
-  if (endpoint.type === "ollama") return new OllamaClient(endpoint);
-  if (endpoint.type === "openai") return new OpenAIClient(endpoint);
-  throw new LLMError(`Unknown endpoint type: ${endpoint.type}`);
+  if (!endpoint) throw new Error("No endpoint selected");
+  const baseUrl = (endpoint.baseUrl || "").replace(/\/+$/, "") || DEFAULT_BASE_URL[endpoint.type];
+  if (!baseUrl) throw new Error(`Unknown endpoint type: ${endpoint.type}`);
+  const client = makeLlmClient(
+    { type: endpoint.type, baseUrl, apiKey: endpoint.apiKey },
+    fetch.bind(globalThis)
+  );
+  return {
+    listModels: () => client.listModels(),
+    chatStream: ({ onToken, onThinking, ...rest }) =>
+      client.chatStream({
+        ...rest,
+        onToken: (tok) => {
+          if (tok) onToken(tok);
+        },
+        onThinking: onThinking ? (tok) => { if (tok) onThinking(tok); } : undefined,
+      }),
+  };
 }
 
-class OllamaClient {
-  constructor(ep) {
-    this.ep = ep;
-    this.base = trimSlash(ep.baseUrl) || "http://localhost:11434";
+/**
+ * Anzeigetext für einen Fehler aus dem Transport.
+ *
+ * `LlmHttpError` trägt Status und rohen Body getrennt (statt des früher
+ * vorinterpolierten Strings), also wird die Meldung hier zusammengesetzt.
+ * Netzwerkfehler (CORS, Safari-Mixed-Content-Block, Chromium-LNA-Ablehnung)
+ * kommen absichtlich unverpackt als `TypeError` an — sie behalten ihren
+ * eigenen Wortlaut.
+ */
+export function describeLlmError(e) {
+  if (e instanceof LlmHttpError) {
+    const body = e.body?.trim();
+    return body ? `${e.message} ${body.slice(0, 300)}` : e.message;
   }
-
-  async listModels() {
-    const res = await fetch(`${this.base}/api/tags`);
-    if (!res.ok) throw new LLMError(`Ollama /api/tags: HTTP ${res.status}`);
-    const data = await res.json();
-    return (data.models || []).map((m) => m.name).sort();
-  }
-
-  /**
-   * Streamt Chat-Tokens via /api/chat (ND-JSON).
-   * messages: [{role, content}]
-   * thinking: true | false | null  (null = Modell-Default)
-   * onToken:    (text) => void
-   * onThinking: (text) => void
-   * signal: AbortSignal
-   */
-  async chatStream({ model, messages, thinking = null, onToken, onThinking, signal }) {
-    const body = { model, messages, stream: true };
-    if (thinking !== null) {
-      body.think = thinking === true;
-      // Reasoning-Mode braucht großzügiges Token-Budget, sonst wird die
-      // sichtbare Antwort nach dem Denken abgeschnitten.
-      body.options = { num_predict: thinking ? 32768 : 4096 };
-    }
-    const res = await fetch(`${this.base}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal,
-    });
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new LLMError(`Ollama /api/chat: HTTP ${res.status} ${txt}`);
-    }
-    if (!res.body) throw new LLMError("Ollama: empty stream body");
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buf = "";
-    try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        let nl;
-        while ((nl = buf.indexOf("\n")) >= 0) {
-          const line = buf.slice(0, nl).trim();
-          buf = buf.slice(nl + 1);
-          if (!line) continue;
-          try {
-            const obj = JSON.parse(line);
-            const msg = obj?.message || {};
-            if (msg.thinking && onThinking) onThinking(msg.thinking);
-            if (msg.content) onToken(msg.content);
-            if (obj.done) return;
-          } catch {
-            /* unvollständiger JSON-Chunk – ignorieren */
-          }
-        }
-      }
-    } finally {
-      // Wichtig: Reader explizit freigeben, sonst bleibt der Stream-Lock
-      // nach AbortError bestehen und der nächste Request scheitert mit
-      // „ReadableStream is locked".
-      reader.cancel().catch(() => {});
-    }
-  }
-}
-
-class OpenAIClient {
-  constructor(ep) {
-    this.ep = ep;
-    this.base = trimSlash(ep.baseUrl) || "http://localhost:8080/v1";
-  }
-
-  async listModels() {
-    const headers = {};
-    if (this.ep.apiKey) headers["Authorization"] = `Bearer ${this.ep.apiKey}`;
-    const res = await fetch(`${this.base}/models`, { headers });
-    if (!res.ok) throw new LLMError(`OpenAI /models: HTTP ${res.status}`);
-    const data = await res.json();
-    return (data.data || []).map((m) => m.id).sort();
-  }
-
-  /** Server-Sent-Events Streaming via /chat/completions */
-  async chatStream({ model, messages, thinking = null, onToken, onThinking, signal }) {
-    const headers = { "Content-Type": "application/json" };
-    if (this.ep.apiKey) headers["Authorization"] = `Bearer ${this.ep.apiKey}`;
-    const body = { model, messages, stream: true };
-    if (thinking !== null) {
-      // Doppelt belegen, damit es bei Ollama-OpenAI-Endpunkt UND MLX greift:
-      //  - Ollama-OpenAI:   `reasoning_effort` (übersetzt intern auf think)
-      //  - MLX mlx_lm.server: `chat_template_kwargs.enable_thinking`
-      body.reasoning_effort = thinking ? "low" : "none";
-      body.chat_template_kwargs = { enable_thinking: thinking === true };
-      body.max_tokens = thinking ? 32768 : 4096;
-    }
-    const res = await fetch(`${this.base}/chat/completions`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-      signal,
-    });
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new LLMError(`OpenAI /chat/completions: HTTP ${res.status} ${txt}`);
-    }
-    if (!res.body) throw new LLMError("OpenAI: empty stream body");
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buf = "";
-    try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        let sep;
-        while ((sep = buf.indexOf("\n")) >= 0) {
-          const raw = buf.slice(0, sep).replace(/\r$/, "");
-          buf = buf.slice(sep + 1);
-          if (!raw.startsWith("data:")) continue;
-          const data = raw.slice(5).trim();
-          if (data === "[DONE]") return;
-          if (!data) continue;
-          try {
-            const obj = JSON.parse(data);
-            const choice = obj?.choices?.[0] || {};
-            const delta = choice.delta || choice.message || {};
-            // reasoning_content (DeepSeek-Stil), thinking (manche Forks),
-            // reasoning (MLX mlx_lm.server)
-            const reason = delta.reasoning_content || delta.reasoning || delta.thinking;
-            if (reason && onThinking) onThinking(reason);
-            if (delta.content) onToken(delta.content);
-          } catch {
-            /* ignorieren */
-          }
-        }
-      }
-    } finally {
-      // Reader-Lock freigeben (siehe OllamaClient.chatStream).
-      reader.cancel().catch(() => {});
-    }
-  }
+  return String(e?.message || e);
 }
 
 // ——— Endpunkt-Speicher (localStorage) ———
@@ -414,11 +310,20 @@ export const Endpoints = {
    * und legt erreichbare automatisch an, sofern noch nicht vorhanden.
    */
   async autoDiscover() {
-    // Localhost-Probes nur auf http-Origins (macOS-App-Loopback, Dev-Server,
-    // später iOS-On-Device-Shim als http://localhost:<port>/v1). Auf HTTPS
-    // (pages.jkaindl.de) wären sie Mixed-Content/blockiert und sinnlos — und
-    // würden nur Konsolen-Fehler erzeugen.
-    if (typeof location !== "undefined" && location.protocol !== "http:") return;
+    // Bis 2026-08-22 stieg diese Funktion auf Nicht-http-Origins sofort aus:
+    // von HTTPS aus galt ein Localhost-Probe als aussichtslose Mixed-Content-
+    // Anfrage. Das ist überholt (Messung 2026-08-21 gegen die echten Engines):
+    // Chromium und Firefox regeln Loopback-Zugriffe inzwischen über eine
+    // Local-Network-Access-BERECHTIGUNG — der erste Probe löst den Prompt aus,
+    // ein Ja gilt für die ganze Site, danach erreicht die HTTPS-Seite Ollama
+    // und LM Studio wirklich. Safari blockt weiterhin hart und ohne Opt-in;
+    // dort ist der Probe-Fehler das Ergebnis und wird still geschluckt.
+    const overHttp = typeof location === "undefined" || location.protocol === "http:";
+    // Auf http antwortet ein laufender Server sofort — 1,5 s trennen dort
+    // „läuft nicht" von „läuft". Auf HTTPS liegt der Berechtigungs-Dialog
+    // dazwischen, und der wartet auf einen Menschen: mit 1,5 s würde der
+    // Timeout die Antwort verwerfen, die der Nutzer gerade erlaubt hat.
+    const probeTimeoutMs = overHttp ? 1500 : 30000;
     const probes = [
       { type: "ollama", name: t("discover.ollama"), baseUrl: "http://localhost:11434" },
       { type: "openai", name: t("discover.mlx"), baseUrl: "http://localhost:8080/v1" },
@@ -432,7 +337,7 @@ export const Endpoints = {
         const client = makeClient({ ...p, id: "probe", apiKey: "", defaultModel: "" });
         const models = await Promise.race([
           client.listModels(),
-          new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 1500)),
+          new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), probeTimeoutMs)),
         ]);
         if (models && models.length) {
           this.add({
@@ -443,7 +348,16 @@ export const Endpoints = {
           });
         }
       } catch {
-        /* nicht erreichbar — überspringen */
+        // Jeder Fehlschlag wird still übersprungen — auch auf HTTPS. Der
+        // naheliegende Kurzschluss „ein `TypeError` ist die origin-weite
+        // Sperre, also können die übrigen Ports nur dasselbe ergeben" ist
+        // falsch und war beim Messen am 2026-08-22 sofort sichtbar: ein Port,
+        // auf dem schlicht nichts lauscht, wirft in Chrome denselben
+        // `TypeError: Failed to fetch` wie eine verweigerte LNA-Berechtigung.
+        // Wer daraufhin abbricht, findet LM Studio auf 1234 nie mehr, sobald
+        // auf 8080 kein MLX läuft. Die Sperre kostet dadurch drei stille
+        // Fehlversuche statt einem — ein Dialog bleibt es trotzdem, denn die
+        // Berechtigung wird pro Origin erteilt, nicht pro Port.
       }
     }
     // Wenn jetzt mindestens einer da ist und keiner ausgewählt: ersten wählen

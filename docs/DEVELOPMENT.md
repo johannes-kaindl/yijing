@@ -11,7 +11,9 @@
   building the iOS/iPadOS/Catalyst/watchOS family
   (`scripts/ios-app/build-ios-app.sh`)
 
-No npm dependencies, no build tools.
+No npm dependencies, no build tools. (`scripts/build-vendor.mjs` regenerates
+the vendored code-kit modules and needs only Node, which the syntax gate needs
+anyway — and only when those copies change.)
 
 ## Starting
 
@@ -74,7 +76,8 @@ yijing/
 ├── serve.sh               # Wrapper for serve.py + auto-open
 ├── web/
 │   ├── app.js             # UI, cast, history, settings, theme
-│   ├── llm.js             # Ollama/OpenAI adapter
+│   ├── llm.js             # Endpoints, prompts, adapter to the transport
+│   ├── vendor/code-kit/   # vendored LLM transport (.ts pin + generated .js)
 │   ├── markdown.js        # Streaming MD→HTML
 │   ├── index.html         # Single-page app
 │   ├── style.css          # Theme (dark/light) + print layout

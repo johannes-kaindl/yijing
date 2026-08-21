@@ -391,8 +391,11 @@ of theoretical coherence: what was published as a contribution to the
 commons should stay in the commons — even if that limits adoption by
 actors whose business model rests on re-privatizing those contributions.
 
-yijing has no external code dependencies — no npm, no build step, no
-third-party JS libraries. The AGPL obligations apply fully to the shipped
+yijing pulls in no package dependencies — no npm, no bundler, no third-party
+JS libraries. The one piece of code that comes from elsewhere is vendored, not
+installed: `web/vendor/code-kit/` holds verbatim copies of two modules from the
+author's own `code-kit`, under the same AGPL-3.0-or-later licence, pinned in
+`VENDOR.json`. The AGPL obligations apply fully to the shipped
 JavaScript code, which is directly inspectable in the browser anyway.
 External LLM servers (Ollama, MLX) are called via HTTP API — no code
 linking; their licenses apply separately.

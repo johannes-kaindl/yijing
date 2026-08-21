@@ -29,8 +29,11 @@ reproduce it locally.
 ## What does not fit well
 
 - **Frameworks** (React/Vue/Svelte/…) — we deliberately stay Vanilla
-- **Build steps** (Webpack/Vite/…) — no npm in the repo
-- **TypeScript** — JSDoc is enough
+- **Build steps** (Webpack/Vite/…) — no npm in the repo. (`scripts/build-vendor.mjs`
+  transpiles the vendored code-kit modules with Node's own type stripping; it
+  needs no install and is not an invitation to add a toolchain.)
+- **TypeScript** — JSDoc is enough. The only `.ts` files are verbatim vendored
+  copies under `web/vendor/code-kit/`
 - **Backend services** — the app is a static site
 - **Cloud LLM connections without a clear opt-in** — the default is local models
 

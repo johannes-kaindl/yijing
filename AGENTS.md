@@ -34,7 +34,7 @@ layers, FastAPI wrappers). This attempt is intentionally different.
 | Principle | Consequence |
 |---|---|
 | **Static site** | No application server, no backend. Pure HTML/CSS/JS, served via `python3 -m http.server`. |
-| **Zero Dependencies** | No npm, no Webpack, no TypeScript build. Vanilla ES modules with native `<script type="module">`. |
+| **Zero Dependencies** | No npm, no bundler, no framework — nothing to install in order to run, serve or deploy the app. Vanilla ES modules with native `<script type="module">`. The one qualification is the vendored code-kit copy, which arrives as TypeScript and is transpiled by `scripts/build-vendor.mjs` using Node's own type stripping — see "[Vendored code (code-kit)](#vendored-code-code-kit)". |
 | **Data as the source** | Hexagram texts and trigram reference data live as static JSON in `data/`. The build script (`scripts/build_data.py`) reads from `_archiv/` and produces the JSONs. |
 | **Local LLMs only** | The default endpoints are Ollama (11434) and MLX/LM-Studio (8080/v1, 1234/v1). No cloud API keys in the code. |
 | **Persistence in the browser** | History, endpoints, system prompt in `localStorage`. No database, no server-side state. |
@@ -42,9 +42,14 @@ layers, FastAPI wrappers). This attempt is intentionally different.
 ## What you should NOT do
 
 - **Do not introduce a framework** (React/Vue/Svelte). Vanilla stays vanilla.
-- **Do not introduce a build step** (Webpack/Vite/esbuild). If ES modules
-  are not enough, that is a hint to simplify, not to upgrade.
-- **No TypeScript**. JSDoc is enough for type hints.
+- **Do not introduce a build step** (Webpack/Vite/esbuild) **for this repo's
+  own code**. If ES modules are not enough, that is a hint to simplify, not to
+  upgrade. `scripts/build-vendor.mjs` is not a counter-example and not a
+  precedent: it exists solely because the vendored code-kit modules arrive as
+  TypeScript, it uses nothing but Node itself, and its output is tracked.
+- **No TypeScript** for code written here. JSDoc is enough for type hints.
+  The `.ts` files under `web/vendor/code-kit/` are the exception and are not
+  ours to rewrite — they are byte-identical copies of their upstream.
 - **No backend** for LLM routing. The browser calls the local servers directly.
 - **`_archiv/`** is **read-only**, never written back to. Not even
   "cleaned up". It is intentionally raw.
@@ -277,6 +282,53 @@ re-attempted):
 - **Widget/complication bundle only `data/widget-hexagrams.json`** (memory
   budget); the **watch** bundles the full `hexagrams.json` + `.en.json`.
 
+## Vendored code (code-kit)
+
+`web/vendor/code-kit/` holds the LLM **transport** — the two backend dialects,
+the streaming loop, the SSE/ND-JSON parsers and `LlmHttpError`. It came out of
+this repo's own `web/llm.js` and now lives in
+`code-kit`, the maintainer's cross-project source library, because a second
+repo needed the same code. code-kit is **not published** as of 2026-08-22 — it
+exists only in the maintainer's workspace, so a clone of this repo cannot fetch
+it. That is fine: the vendored copies here are complete and self-contained, and
+nothing in the build reaches for the upstream. It does mean a contributor
+cannot verify the pin, and that upstream fixes arrive only when the maintainer
+re-vendors them. yijing is a registered consumer in code-kit's
+`consumers.json`; a gate there hashes these copies against the pin.
+
+**Never edit anything under `web/vendor/`.** A fix belongs upstream in code-kit,
+followed by a re-vendor here — otherwise the next re-vendor silently throws the
+fix away, and every other consumer keeps the bug.
+
+The folder holds each module twice, and that is deliberate:
+
+| File | Role |
+|---|---|
+| `*.ts` | The **byte-identical** copy code-kit's gate compares against. Never loaded by a browser. |
+| `*.js` | **Generated** from the `.ts` next to it. This is what `web/llm.js` imports. |
+
+The two demands — "byte-identical" and "loadable in a browser" — cannot both
+hold in one file, because code-kit is TypeScript and this repo ships native ES
+modules. So they hold in two. `node scripts/build-vendor.mjs` does the
+transpiling with **Node's own** `module.stripTypeScriptTypes` (`mode:
+"transform"`, which is required: the kit uses TypeScript parameter properties,
+and those are code generation, not annotations). No npm, no network, nothing to
+install; `--check` fails if a generated file is out of date. The build also
+rewrites the kit's extensionless relative imports to explicit `.js` specifiers.
+
+To re-vendor: copy the module(s) from a code-kit checkout, update `sha`/`vendored`
+in `VENDOR.json`, run `node scripts/build-vendor.mjs`, and commit **everything**
+the run touched (`git status --short` — a vendor script tends to move more than
+the file you asked for). Then read code-kit's `CHANGELOG` for what the new copy
+does differently, and carry anything a user would notice into `CHANGELOG.md`
+here: a kit adoption brings exactly the behaviour that was never tested locally.
+
+**What stayed in `web/llm.js`** and belongs to this app: endpoint and prompt
+persistence (`localStorage`), the built-in prompt presets, `buildUserPrompt`,
+`testThinkingMode`, the i18n binding — plus `makeClient()`, the thin adapter
+that maps this app's endpoint schema onto the kit and filters empty deltas, and
+`describeLlmError()` for the display text.
+
 ## CORS — important setup note
 
 The browser calls the LLM servers directly. Both must allow CORS for the origin
@@ -293,7 +345,8 @@ do not set a restrictive `--allowed-origins` flag.
 
 ## Reasoning modes
 
-The LLM adapter (`web/llm.js`) translates `thinking: true|false|null` into:
+The vendored transport (`web/vendor/code-kit/`, reached via `makeClient()` in
+`web/llm.js`) translates `thinking: true|false|null` into:
 
 | Backend | Parameter |
 |---|---|
@@ -306,8 +359,13 @@ Reasoning output arrives in different fields depending on the server:
 - MLX (`mlx_lm.server`): `choices[0].delta.reasoning`
 - DeepSeek style: `reasoning_content`
 
-`llm.js` parses all three, calls `onThinking(text)` separately from `onToken(text)`
-— the UI shows reasoning in its own, dimmed `<details>` block.
+The vendored `pure/sse.js` reads the OpenAI-shaped variants in a fixed order
+(`reasoning_content` → `reasoning` → `thinking`, one per delta) and falls back
+to `choices[0].message` when a server sends whole messages despite
+`stream: true`; the ND-JSON sibling reads `message.thinking`. Either way the
+text reaches `onThinking(text)`, separate from `onToken(text)` — the UI shows
+reasoning in its own, dimmed `<details>` block. Empty deltas are dropped by
+`makeClient()`, so the block does not open on nothing.
 
 ## History, deep links
 
@@ -354,7 +412,12 @@ something:
    asserts what it must show (language, dark theme, index grid open, resulting
    hexagram present), so a wrong frame fails the run instead of landing in the
    README. Needs Google Chrome, nothing else — no npm.
-5. For changes to the macOS AppKit app or its two build scripts:
+5. For changes under `web/vendor/`: `node scripts/build-vendor.mjs --check` must
+   pass — it fails when a generated `.js` no longer matches the `.ts` beside it.
+   `check-syntax.mjs` parses the generated files too (it walks `web/`
+   recursively), but a stale generated file parses just fine, so the two checks
+   answer different questions.
+6. For changes to the macOS AppKit app or its two build scripts:
    `./scripts/package-macos-app.sh` must run through and produce a mountable
    `dist/Yijing.dmg` (app + `INSTALL.txt` + Applications alias). The signed
    path — `YIJING_SIGN_IDENTITY=auto` without a notary profile — is the cheap

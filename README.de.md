@@ -395,8 +395,11 @@ wurde, sollte in der Allmende bleiben — auch wenn das die Adoption
 durch Akteure einschränkt, deren Geschäftsmodell auf der
 Re-Privatisierung dieser Beiträge basiert.
 
-yijing hat keine externen Code-Abhängigkeiten — kein npm, kein
-Build-Step, keine Drittanbieter-JS-Bibliotheken. Die AGPL-Verpflichtungen
+yijing zieht keine Paket-Abhängigkeiten — kein npm, kein Bundler, keine
+Drittanbieter-JS-Bibliotheken. Der einzige Code von anderswo ist vendoriert,
+nicht installiert: `web/vendor/code-kit/` enthält wortgleiche Kopien zweier
+Module aus dem `code-kit` desselben Autors, unter derselben Lizenz
+AGPL-3.0-or-later, gepinnt in `VENDOR.json`. Die AGPL-Verpflichtungen
 gelten vollständig auf den ausgelieferten JavaScript-Code, der im
 Browser ohnehin direkt einsehbar ist. Externe LLM-Server (Ollama, MLX)
 werden via HTTP-API aufgerufen — kein Code-Linking; deren Lizenzen

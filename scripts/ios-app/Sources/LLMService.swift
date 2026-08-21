@@ -3,8 +3,10 @@
 //
 // LLMService — the loopback OpenAI-compatible surface. Parses an incoming
 // /v1/chat/completions request, runs the on-device engine on a background queue,
-// and emits OpenAI-spec SSE chunks that web/llm.js's OpenAIClient parses
+// and emits OpenAI-spec SSE chunks that the web layer's OpenAI client parses
 // unchanged (it reads choices[0].delta.content and terminates on [DONE]).
+// That client lives in web/vendor/code-kit/web/llm-stream.js since 2026-08-22
+// (vendored out of web/llm.js); nothing about the wire format changed.
 //
 // UNVERIFIED scaffold — not compiled here.
 

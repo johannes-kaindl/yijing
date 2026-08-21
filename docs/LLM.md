@@ -127,8 +127,11 @@ of everything above — it does **not** replace the browser-side
 Ollama/MLX/LM-Studio/remote endpoints, it complements them. The app hosts
 the same web app in a WebView and exposes a loopback **OpenAI-compatible
 shim** (`GET /v1/models`, `POST /v1/chat/completions` SSE) right next to
-the page, so `web/llm.js` consumes it **unchanged** — to the web layer it
-looks like any other OpenAI-compatible endpoint.
+the page, so the web layer consumes it **unchanged** — to it the shim looks
+like any other OpenAI-compatible endpoint. (Since 2026-08-22 the client that
+speaks that dialect is the vendored `web/vendor/code-kit/web/llm-stream.js`,
+reached through `makeClient()` in `web/llm.js`; the dialect itself, the SSE
+parsing and the `[DONE]` handling are unchanged.)
 
 ### Default: Apple Foundation Models (on-device)
 

@@ -9,15 +9,17 @@ An overview of the structure and data flow of the Yijing oracle.
 │                        Browser                              │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐    │
 │  │   app.js     │   │   llm.js     │   │ markdown.js  │    │
-│  │  (UI, Cast,  │◀──│   (Ollama,   │   │  (Markdown→  │    │
-│  │   History)   │   │   OpenAI)    │   │    HTML)     │    │
+│  │  (UI, Cast,  │◀──│  (Endpoints, │   │  (Markdown→  │    │
+│  │   History)   │   │   Prompts)   │   │    HTML)     │    │
 │  └──────┬───────┘   └──────┬───────┘   └──────────────┘    │
 │         │                  │                                │
 │         ▼                  ▼                                │
 │  ┌──────────────┐   ┌──────────────┐                       │
-│  │ localStorage │   │  fetch() →   │                       │
-│  │  (History,   │   │  Streaming   │                       │
-│  │  Endpoints)  │   └──────┬───────┘                       │
+│  │ localStorage │   │ vendor/      │                       │
+│  │  (History,   │   │ code-kit     │                       │
+│  │  Endpoints)  │   │ fetch() →    │                       │
+│  │              │   │ Streaming    │                       │
+│  │              │   └──────┬───────┘                       │
 │  └──────────────┘          │                                │
 └────────────────────────────┼────────────────────────────────┘
                              │                  ▲
@@ -61,22 +63,35 @@ Main frontend module. Contains:
 - **Theme:** `applyTheme()` / `initTheme()` — dark/light/system switching
   via `data-theme`; also the service-worker registration
 
-### `web/llm.js`
+### `web/vendor/code-kit/` — the transport
 
-LLM adapter with two backend classes:
+Vendored from `code-kit` (the maintainer's cross-project source library, not
+published), pinned in `VENDOR.json`, **never edited here** (see AGENTS.md).
+The copies are self-contained — nothing here fetches the upstream. Two backend clients behind
+one interface:
 
-- `OllamaClient` — uses Ollama's native API. Streaming via ND-JSON
-  (one JSON line per token).
-- `OpenAIClient` — OpenAI-compatible `/v1/chat/completions` schema.
-  Streaming via Server-Sent Events (SSE).
+- Ollama's native API — streaming via ND-JSON, one JSON object per line.
+- OpenAI-compatible `/chat/completions` — streaming via Server-Sent Events,
+  parsed by `pure/sse.js`.
 
 Both implement the same `chatStream({ model, messages, thinking,
 onToken, onThinking, signal })` interface. Thinking/reasoning tokens
 are routed separately to `onThinking()`, so the UI can show them in a
-dedicated block.
+dedicated block. A non-2xx response throws `LlmHttpError` carrying the status
+and the raw body; network-layer failures stay unwrapped so the caller can tell
+a blocked request from a rejecting server.
 
-Also in the module:
+Each module is present as a byte-identical `.ts` (what the upstream gate
+compares) and a generated `.js` (what the browser loads) — see AGENTS.md
+"Vendored code (code-kit)".
 
+### `web/llm.js`
+
+Everything around the transport that belongs to this app:
+
+- `makeClient()` — the thin adapter: resolves the default base URL, injects
+  `fetch`, and swallows empty deltas before they reach the UI
+- `describeLlmError()` — display text for a transport error
 - `Endpoints` — manages the endpoint list in `localStorage`
 - `SystemPrompt` — system prompt for the interpretation (default rooted in
   the Wilhelm tradition)
