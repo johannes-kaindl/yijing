@@ -12,8 +12,8 @@ automated sessions.
 ## Offene Konventions-Punkte
 
 - [ ] CORE-META-03 — Hero-Bild in `docs/images/` ergaenzen + Screenshots reproduzierbar per Skript erzeugen (App-Store-Screenshots + Preview-Video existieren bereits als archivierte Launch-Assets, commit `69a34b5`; offen bleibt nur das reproduzierbare Skript + ein `docs/images/`-Hero-Bild).
-- [ ] CORE-GIT-01 — GitHub-Mirror-Remote `github` einrichten (derzeit nur `origin` = `git.jkaindl.de`).
-- [ ] PROF-WEB-03 — `node --check`-Gate-Skript anlegen, das `<script>` aus HTML extrahiert und syntaktisch prueft.
+- [x] CORE-GIT-01 — GitHub mirror wired up as the `github` remote (`github.com/johannes-kaindl/Yijing`, SSH). The mirror already existed and was up to date; only the local remote was missing. Measured at the far end per CORE-GIT-01(a) — `git ls-remote` against **each** remote separately, not `@{u}`: `main` and all 9 tags identical on `origin`, `github` and locally (2026-08-21). When re-pushing by hand, use `--follow-tags` (the mirror prunes).
+- [x] PROF-WEB-03 — `scripts/check-syntax.mjs` parses the whole shipped surface (`sw.js`, every `web/*.js`, and the inline `<script>` blocks of every `web/*.html`) — 10 blocks today. See "[Tests / verification](#tests--verification)".
 - [ ] PROF-NAT-01 — Add a separate `scripts/package-native-app.sh` (sign + notarize) for the **macOS AppKit DMG**. *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
 - [x] PROF-NAT-02 — All four target `Info.plist`s now derive `CFBundleShortVersionString` / `CFBundleVersion` from `project.yml`'s `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` (build-setting expansion). A version bump is two lines in `project.yml`, in lockstep by construction — no script needed (done 2026-06-13).
 
@@ -77,7 +77,7 @@ layers, FastAPI wrappers). This attempt is intentionally different.
 - **In German string literals, never use straight `"…"` for inner
   quotation marks.** Set them typographically: `„…"`. Otherwise
   JavaScript closes the string prematurely — see commit `a164aba` ff.
-- **After every JS edit:** run `node --check <file>`.
+- **After every JS edit:** run `node --check <file>` — or `node scripts/check-syntax.mjs`, which covers every shipped file plus the inline `<script>` blocks that `node --check` cannot see.
 - **When editing `app.js`:** test with a browser tab hard-reload (Cmd+Shift+R).
   The dev server does set `Cache-Control: no-store`, but some browsers
   still cache ES module imports.
@@ -331,7 +331,11 @@ Otherwise, better leave it.
 There is no unit test suite **for the web app**. Accepted. If you change
 something:
 
-1. `node --check web/<file>.js` for syntax
+1. `node scripts/check-syntax.mjs` — the syntax gate over the whole deployable
+   surface (`sw.js`, `web/*.js`, inline `<script>` in `web/*.html`). It exists
+   for the straight-quote trap in German string literals (commit `a164aba` ff.),
+   which is a parse error. `node --check web/<file>.js` still works for a single
+   file.
 2. In the browser hard-reload, make a reading, test "Interpret" with both
    endpoints (Ollama + MLX)
 3. For data changes: `python3 scripts/build_data.py` must run through

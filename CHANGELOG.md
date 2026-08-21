@@ -5,6 +5,18 @@ Versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Syntax gate `scripts/check-syntax.mjs`** (PROF-WEB-03). Parses every file
+  that ships to the browser — `sw.js`, all `web/*.js` modules and the inline
+  `<script>` blocks of `web/*.html`, which a plain `node --check` never sees.
+  Each block is parsed by `node --check` over stdin, with `--input-type=module`
+  where the source is an ES module, so syntax is validated without executing
+  and the module/script mode is stated instead of guessed. It exists for the
+  trap this repo has hit before: straight `"…"` inside a German string literal
+  closes the string early (commit `a164aba` ff.) — a parse error, and now a
+  failing gate rather than a broken deploy.
+
 ### Changed
 
 - **Home moved to `git.jkaindl.de`, live demo to `pages.jkaindl.de`.** The repo
