@@ -107,7 +107,7 @@ For handing it to users without terminal experience, the oracle can be
 bundled as a double-clickable macOS app:
 
 ```bash
-./scripts/build-macos-app.sh
+./scripts/package-macos-app.sh
 ```
 
 This produces `dist/Yijing.dmg` — a disk image in which `Yijing.app` is
@@ -278,7 +278,8 @@ yijing/
 ├── data/                      # 64 hexagrams + 8 trigrams as JSON
 │   └── widget-hexagrams.json  # slim per-hexagram slice for widget/watch
 ├── scripts/                   # build and dev-server scripts
-│   ├── build-macos-app.sh     # legacy AppKit macOS app (1.5.x)
+│   ├── build-macos-app.sh     # legacy AppKit macOS app (1.5.x): build + sign
+│   ├── package-macos-app.sh   #   … notarize + wrap it in the DMG
 │   └── ios-app/               # universal iOS/iPadOS/Mac-Catalyst app (1.0.x)
 │       ├── OracleKit/         #   shared Swift core (casting, daily, data)
 │       ├── Widgets/           #   daily-hexagram widget

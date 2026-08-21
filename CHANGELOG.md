@@ -7,6 +7,18 @@ Versioning follows [SemVer](https://semver.org/).
 
 ### Added
 
+- **`scripts/package-macos-app.sh`** (PROF-NAT-01) — the macOS AppKit build is
+  split in two: `build-macos-app.sh` compiles and (opt-in) Developer-ID-signs
+  `dist/Yijing.app`, the new packaging script notarizes and staples it, wraps it
+  in `dist/Yijing.dmg` and signs, notarizes and staples that. Notarization has to
+  live in the packaging half: the app's ticket must be stapled *before* the disk
+  image is built from it. Both variables (`YIJING_SIGN_IDENTITY`,
+  `YIJING_NOTARY_PROFILE`) are still opt-in and are passed through unchanged;
+  without them an unsigned DMG remains a valid result for contributors without a
+  certificate. `./scripts/package-macos-app.sh` replaces
+  `./scripts/build-macos-app.sh` as the command in README, `docs/MACOS-APP.md`,
+  `docs/DEVELOPMENT.md` and `CONTRIBUTING.md`.
+
 - **Reproducible README screenshots** — `scripts/capture-web-shots.mjs`
   re-shoots `docs/images/*.png` from the running app instead of by hand
   (CORE-META-03). It starts `scripts/serve.py`, drives the installed Google
@@ -25,6 +37,20 @@ Versioning follows [SemVer](https://semver.org/).
   trap this repo has hit before: straight `"…"` inside a German string literal
   closes the string early (commit `a164aba` ff.) — a parse error, and now a
   failing gate rather than a broken deploy.
+
+### Fixed
+
+- **Signature checks that were false exactly when they matched** — both scripts
+  tested `codesign … | grep -q …`. `grep -q` exits at the first match, `codesign`
+  dies of SIGPIPE (141), and `set -o pipefail` passes that status on. The
+  pre-existing "secure timestamp missing" guard therefore stayed silent in the
+  very situation it guards. Both checks now collect the output first and test it
+  with `[[ … == *…* ]]`.
+- **`YIJING_SIGN_IDENTITY="auto"` reaching `codesign` unresolved** — the keyword
+  is resolved in the build script, i.e. in a subprocess, so the packaging half
+  saw the literal word `auto` (`auto: no identity found`). It now reads the
+  resolved identity back out of the signed app, which also guarantees the DMG
+  carries the same signature as the app it contains.
 
 ### Changed
 

@@ -6,7 +6,7 @@
 - Optional: Node.js (only for `node --check` as a syntax linter)
 - Optional: Ollama or MLX for the AI interpretation
 - Optional: Xcode Command Line Tools — only for building the macOS app
-  (`scripts/build-macos-app.sh`), see [`MACOS-APP.md`](MACOS-APP.md)
+  (`scripts/package-macos-app.sh`), see [`MACOS-APP.md`](MACOS-APP.md)
 - Optional: full Xcode + iOS SDK and `brew install xcodegen` — only for
   building the iOS/iPadOS/Catalyst/watchOS family
   (`scripts/ios-app/build-ios-app.sh`)
@@ -60,7 +60,8 @@ yijing/
 │   └── widget-hexagrams.json # slim slice for widget/complication
 ├── scripts/
 │   ├── build_data.py      # Consolidate data from _archiv/
-│   ├── build-macos-app.sh # builds the macOS app into dist/
+│   ├── build-macos-app.sh # builds (and signs) the macOS app into dist/
+│   ├── package-macos-app.sh # notarizes it and wraps it in dist/Yijing.dmg
 │   ├── macos-app/         # Building blocks for the app build
 │   ├── ios-app/           # Native iOS/iPadOS/Catalyst/watchOS family
 │   │   ├── project.yml    # XcodeGen project (no committed .xcodeproj)
@@ -261,7 +262,7 @@ for a release (using `v1.1.1` as an example):
    ```
 4. **Build the DMG.**
    ```bash
-   ./scripts/build-macos-app.sh
+   ./scripts/package-macos-app.sh
    # → dist/Yijing.dmg
    ```
    The script pulls the committed state (`git archive HEAD`), not

@@ -82,8 +82,9 @@ embedded watchOS app).
 - [ ] For data changes: `python3 scripts/build_data.py` runs without
       errors, counters in the output consistent (64/64 hexagrams, 64/64
       characters)
-- [ ] For macOS app changes: `./scripts/build-macos-app.sh` builds
-      through, app starts, shows content, exits cleanly
+- [ ] For macOS app changes: `./scripts/package-macos-app.sh` builds
+      through (it calls `build-macos-app.sh`), app starts, shows content,
+      exits cleanly
 - [ ] For iOS/watch/OracleKit changes: `scripts/ios-app/build-ios-app.sh`
       builds through AND the OracleKit XCTest suite is green (`swift test`
       — King Wen completeness + daily determinism), mirroring

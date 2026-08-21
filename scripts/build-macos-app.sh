@@ -2,27 +2,22 @@
 #
 # build-macos-app.sh — baut Yijing.app als macOS-App-Bundle nach dist/.
 #
-# Bettet den committeten Repo-Stand (git archive HEAD) ein, kompiliert die
-# native Swift-App (universal arm64 + x86_64) und erzeugt ein verteilbares
-# Disk-Image (Yijing.dmg). Details: docs/MACOS-APP.md.
+# Bettet den committeten Repo-Stand (git archive HEAD) ein und kompiliert die
+# native Swift-App (universal arm64 + x86_64). Das verteilbare Disk-Image baut
+# scripts/package-macos-app.sh — es ruft dieses Skript auf. Details:
+# docs/MACOS-APP.md.
 #
-# Voraussetzung: Xcode Command Line Tools (swiftc, sips, iconutil, hdiutil).
+# Voraussetzung: Xcode Command Line Tools (swiftc, sips, iconutil).
 #
-# Optionales Code-Signing + Notarisierung (Opt-in ueber Umgebungsvariablen):
+# Optionales Code-Signing (Opt-in ueber Umgebungsvariable):
 #
 #   YIJING_SIGN_IDENTITY  "Developer ID Application: NAME (TEAMID)"  oder  "auto"
-#   YIJING_NOTARY_PROFILE notarytool-Keychain-Profil (siehe docs/MACOS-APP.md)
 #
-#   - beide ungesetzt -> unsignierter Build wie bisher (Default fuer Mitwirkende
-#     ohne Apple-Developer-Account).
-#   - nur YIJING_SIGN_IDENTITY -> App + DMG werden Developer-ID-signiert
-#     (Hardened Runtime), aber NICHT notarisiert (lokaler Signatur-Test).
-#   - beide gesetzt -> volle Pipeline: signieren -> notarisieren -> staplen
-#     fuer App und DMG, danach Gatekeeper-Pruefung. Mac muss online sein.
-#
-# Reihenfolge ist zwingend: App signieren -> notarisieren -> staplen, ERST DANN
-# die DMG aus der gestaplten App bauen, dann DMG signieren -> notarisieren ->
-# staplen. Sonst landet eine unsignierte App in der DMG.
+#   - ungesetzt -> unsignierter Build (Default fuer Mitwirkende ohne
+#     Apple-Developer-Account).
+#   - gesetzt -> App wird Developer-ID-signiert (Hardened Runtime, sicherer
+#     Timestamp). Die Notarisierung setzt darauf auf und passiert im
+#     Package-Skript, weil sie vor dem DMG-Bau liegen muss.
 #
 set -euo pipefail
 
@@ -32,23 +27,13 @@ cd "$REPO"
 ASSETS="scripts/macos-app"
 DIST="dist"
 APP="$DIST/Yijing.app"
-DMG="$DIST/Yijing.dmg"
 
 # --- Signing-Konfiguration aufloesen (Opt-in) ---------------------------------
 SIGN_IDENTITY="${YIJING_SIGN_IDENTITY:-}"
-NOTARY_PROFILE="${YIJING_NOTARY_PROFILE:-}"
-SIGN_MODE="none"   # none | sign | notarize
 
-if [[ -n "$SIGN_IDENTITY" || -n "$NOTARY_PROFILE" ]]; then
-  if [[ -z "$SIGN_IDENTITY" ]]; then
-    echo "FEHLER: YIJING_NOTARY_PROFILE gesetzt, aber YIJING_SIGN_IDENTITY fehlt" >&2
-    echo "        — ohne Developer-ID-Signatur ist keine Notarisierung moeglich." >&2
-    exit 1
-  fi
-  for tool in codesign xcrun ditto spctl; do
-    command -v "$tool" >/dev/null 2>&1 \
-      || { echo "FEHLT: $tool — fuer Signing/Notarisierung benoetigt"; exit 1; }
-  done
+if [[ -n "$SIGN_IDENTITY" ]]; then
+  command -v codesign >/dev/null 2>&1 \
+    || { echo "FEHLT: codesign — fuer Signing benoetigt"; exit 1; }
   if [[ "$SIGN_IDENTITY" == "auto" ]]; then
     # erste "Developer ID Application"-Identitaet aus dem Keychain ziehen
     SIGN_IDENTITY="$(security find-identity -v -p codesigning \
@@ -60,21 +45,18 @@ if [[ -n "$SIGN_IDENTITY" || -n "$NOTARY_PROFILE" ]]; then
     }
     echo "==> Signing-Identitaet (auto): $SIGN_IDENTITY"
   fi
-  if [[ -n "$NOTARY_PROFILE" ]]; then
-    SIGN_MODE="notarize"
-  else
-    SIGN_MODE="sign"
-  fi
 fi
 
-echo "==> Voraussetzungen pruefen"
-for tool in swiftc lipo sips iconutil hdiutil git tar; do
+echo "==> Voraussetzungen pruefen (Build)"
+for tool in swiftc lipo sips iconutil git tar; do
   command -v "$tool" >/dev/null 2>&1 \
     || { echo "FEHLT: $tool — bitte Xcode Command Line Tools installieren (xcode-select --install)"; exit 1; }
 done
 
 echo "==> Bundle-Grundgeruest (dist/Yijing.app)"
-rm -rf "$APP" "$DMG" "$DIST/Yijing.app.zip"
+# Die DMG aus einem frueheren Lauf faellt mit: sie zeigte den alten Stand und
+# stuende sonst neben einer frisch gebauten App, ohne zu ihr zu gehoeren.
+rm -rf "$APP" "$DIST/Yijing.dmg" "$DIST/Yijing.app.zip"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 echo "==> Web-Assets einbetten (committeter Stand — nur web/, data/, sw.js)"
@@ -123,8 +105,8 @@ cp LICENSE "$APP/Contents/Resources/LICENSE"
 # eingesiegelt und kaeme bei der Verifikation als Fremdkoerper hoch.
 find "$APP" -name '.DS_Store' -delete 2>/dev/null || true
 
-# --- App signieren + notarisieren + staplen (optional) ------------------------
-if [[ "$SIGN_MODE" != "none" ]]; then
+# --- App signieren (optional) -------------------------------------------------
+if [[ -n "$SIGN_IDENTITY" ]]; then
   echo "==> App signieren (Developer ID, Hardened Runtime, sicherer Timestamp)"
   # EINE codesign-Aufrufung auf das Bundle: Yijing.app hat genau ein Mach-O
   # (Contents/MacOS/Yijing) und keinen verschachtelten Code — das Signieren des
@@ -136,63 +118,35 @@ if [[ "$SIGN_MODE" != "none" ]]; then
   # Entitlement-Keys, und WKWebViews JIT laeuft im separaten WebContent-Prozess.
   codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$APP"
   codesign --verify --deep --strict --verbose=2 "$APP"
-  if codesign -dvvv "$APP" 2>&1 | grep -q "Timestamp=none"; then
+  # Ausgabe erst einsammeln, dann pruefen: `codesign ... | grep -q` beendet grep
+  # beim ersten Treffer, codesign stirbt an SIGPIPE (141), und `pipefail` reicht
+  # genau das durch — die Bedingung waere ausgerechnet im Trefferfall falsch.
+  SIGN_INFO="$(codesign -dvvv "$APP" 2>&1 || true)"
+  if [[ "$SIGN_INFO" == *"Timestamp=none"* ]]; then
     echo "FEHLER: Signatur ohne sicheren Timestamp (Mac offline?)." >&2
     echo "        Notarisierung wuerde scheitern — Build abgebrochen." >&2
     exit 1
   fi
-
-  if [[ "$SIGN_MODE" == "notarize" ]]; then
-    echo "==> App notarisieren (notarytool, wartet auf Apple) + staplen"
-    # Ein .app-Bundle laesst sich nicht direkt hochladen -> als .zip einreichen
-    # (das .zip kann notarisiert, aber NIE gestaplet werden). Das Ticket wird
-    # ins .app-Bundle gestaplet, damit es auch offline durch Gatekeeper kommt.
-    APPZIP="$DIST/Yijing.app.zip"
-    ditto -c -k --keepParent "$APP" "$APPZIP"
-    xcrun notarytool submit "$APPZIP" -p "$NOTARY_PROFILE" --wait
-    xcrun stapler staple "$APP"
-    rm -f "$APPZIP"
-  else
-    echo "   (nur signiert, nicht notarisiert — Gatekeeper lehnt heruntergeladene"
-    echo "    Kopien weiterhin ab; YIJING_NOTARY_PROFILE setzen fuer den Vollbuild)"
-  fi
 fi
 
-echo "==> Disk-Image erzeugen"
-STAGING="$DIST/dmg-staging"
-rm -rf "$STAGING"; mkdir -p "$STAGING"
-cp -R "$APP" "$STAGING/Yijing.app"
-cp "$ASSETS/INSTALL.txt" "$STAGING/INSTALL.txt"
-ln -s /Applications "$STAGING/Applications"
-hdiutil create -volname "Yijing Orakel" -srcfolder "$STAGING" \
-  -ov -format UDZO "$DMG" >/dev/null
-rm -rf "$STAGING"
-cp "$ASSETS/INSTALL.txt" "$DIST/INSTALL.txt"
-
-# --- DMG signieren + notarisieren + staplen (optional) ------------------------
-if [[ "$SIGN_MODE" != "none" ]]; then
-  echo "==> DMG signieren (Developer ID, sicherer Timestamp)"
-  codesign --force --timestamp --sign "$SIGN_IDENTITY" "$DMG"
-  if [[ "$SIGN_MODE" == "notarize" ]]; then
-    echo "==> DMG notarisieren + staplen"
-    xcrun notarytool submit "$DMG" -p "$NOTARY_PROFILE" --wait
-    xcrun stapler staple "$DMG"
-    echo "==> Gatekeeper-Pruefung (Versand nur wenn alles 'accepted')"
-    xcrun stapler validate "$DMG"
-    spctl -a -vvv -t open --context context:primary-signature "$DMG" || true
-    spctl -a -vvv -t exec "$APP" || true
+# Beim Aufruf aus package-macos-app.sh entfaellt die Zusammenfassung: sie stuende
+# mitten im Packaging-Lauf und riete dort zu genau dem Skript, das gerade laeuft.
+if [[ -n "${YIJING_PACKAGING:-}" ]]; then
+  if [[ -n "$SIGN_IDENTITY" ]]; then
+    echo "   (App gebaut + Developer-ID-signiert)"
+  else
+    echo "   (App gebaut, unsigniert)"
   fi
+  exit 0
 fi
 
 echo
 echo "Fertig:"
 echo "  App :  $REPO/$APP"
-echo "  DMG :  $REPO/$DMG"
-echo "  Doku:  $REPO/$DIST/INSTALL.txt"
-case "$SIGN_MODE" in
-  notarize) echo "  Sig :  Developer-ID-signiert + notarisiert + gestaplet" ;;
-  sign)     echo "  Sig :  Developer-ID-signiert (NICHT notarisiert)" ;;
-  none)     echo "  Sig :  unsigniert — fuer Notarisierung YIJING_SIGN_IDENTITY + YIJING_NOTARY_PROFILE setzen (docs/MACOS-APP.md)" ;;
-esac
+if [[ -n "$SIGN_IDENTITY" ]]; then
+  echo "  Sig :  Developer-ID-signiert (Notarisierung macht das Package-Skript)"
+else
+  echo "  Sig :  unsigniert — fuer eine signierte App YIJING_SIGN_IDENTITY setzen (docs/MACOS-APP.md)"
+fi
 echo
-echo "Zum Weitergeben: Yijing.dmg verschicken."
+echo "Zum Weitergeben: ./scripts/package-macos-app.sh — baut daraus die DMG."

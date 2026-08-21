@@ -14,7 +14,7 @@ automated sessions.
 - [x] CORE-META-03 — `scripts/capture-web-shots.mjs` re-shoots every README image from the running app, hero included, into the single folder `docs/images/` (see "[Tests / verification](#tests--verification)"); `docs/images/README.md` is the capture contract. (App Store screenshots + preview video remain archived launch assets, commit `69a34b5`.) One `readme_lint` warning stays and is the tool's, not ours — see the note in the contract about `og-image.png`.
 - [x] CORE-GIT-01 — GitHub mirror wired up as the `github` remote (`github.com/johannes-kaindl/Yijing`, SSH). The mirror already existed and was up to date; only the local remote was missing. Measured at the far end per CORE-GIT-01(a) — `git ls-remote` against **each** remote separately, not `@{u}`: `main` and all 9 tags identical on `origin`, `github` and locally (2026-08-21). When re-pushing by hand, use `--follow-tags` (the mirror prunes).
 - [x] PROF-WEB-03 — `scripts/check-syntax.mjs` parses the whole shipped surface (`sw.js`, every `web/*.js`, and the inline `<script>` blocks of every `web/*.html`) — 10 blocks today. See "[Tests / verification](#tests--verification)".
-- [ ] PROF-NAT-01 — Add a separate `scripts/package-native-app.sh` (sign + notarize) for the **macOS AppKit DMG**. *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
+- [x] PROF-NAT-01 — The **macOS AppKit DMG** now has the split: `scripts/build-macos-app.sh` builds and signs `dist/Yijing.app`, `scripts/package-macos-app.sh` notarizes and staples it, wraps it in `dist/Yijing.dmg` and signs/notarizes/staples that. Named per the repo's own `build-macos-app.sh` / `build-ios-app.sh` pattern rather than the convention's `*-native-*`, because two native tracks live here. Notarization sits in the packaging script by necessity: the app's ticket must be stapled **before** the DMG is built from it. See "[Tests / verification](#tests--verification)". *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
 - [x] PROF-NAT-02 — All four target `Info.plist`s now derive `CFBundleShortVersionString` / `CFBundleVersion` from `project.yml`'s `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` (build-setting expansion). A version bump is two lines in `project.yml`, in lockstep by construction — no script needed (done 2026-06-13).
 
 ## Project character
@@ -185,14 +185,18 @@ not current convention.
 
 ## macOS app
 
-`scripts/build-macos-app.sh` bundles the oracle as `Yijing.app` — a
+`scripts/package-macos-app.sh` bundles the oracle as the distributable
+`Yijing.dmg`; it calls `scripts/build-macos-app.sh`, which compiles (and
+optionally Developer-ID-signs) `Yijing.app` — a
 native Swift app (`scripts/macos-app/Yijing.swift` +
 `StaticServer.swift`) that starts an internal HTTP server (Network.framework
 / `NWListener`) and shows the oracle in a WKWebView window.
 No Python and no command-line tools on the user's side — the app
 brings everything itself. The `CFBundleExecutable` **must** be a
 compiled binary — a shell script triggers a Rosetta prompt on Apple
-Silicon. Details: `docs/MACOS-APP.md`. The newer iOS app also builds as a
+Silicon. Signing is opt-in through `YIJING_SIGN_IDENTITY` /
+`YIJING_NOTARY_PROFILE`; without them an unsigned DMG is still a valid
+result. Details: `docs/MACOS-APP.md`. The newer iOS app also builds as a
 native Mac app via Mac Catalyst (`build-ios-app.sh catalyst`) and is the
 long-term Mac path; this legacy AppKit `Yijing.app` still exists but is
 slated to be superseded.
@@ -350,6 +354,21 @@ something:
    asserts what it must show (language, dark theme, index grid open, resulting
    hexagram present), so a wrong frame fails the run instead of landing in the
    README. Needs Google Chrome, nothing else — no npm.
+5. For changes to the macOS AppKit app or its two build scripts:
+   `./scripts/package-macos-app.sh` must run through and produce a mountable
+   `dist/Yijing.dmg` (app + `INSTALL.txt` + Applications alias). The signed
+   path — `YIJING_SIGN_IDENTITY=auto` without a notary profile — is the cheap
+   local check: it exercises signing end to end without uploading anything to
+   Apple. Verify at the artifact, not from the log: `codesign -dvvv
+   dist/Yijing.app` must show `Authority=Developer ID Application`,
+   `flags=0x10000(runtime)` and a real `Timestamp=`.
+
+> **Trap in both scripts (cost a debugging round on 2026-08-21):** never write
+> `codesign … | grep -q …` here. `grep -q` exits at the first match, `codesign`
+> dies of SIGPIPE (141), and `set -o pipefail` passes that on — so the condition
+> is false exactly when it matches. Collect the output into a variable first,
+> then test it with `[[ … == *…* ]]`. The pre-existing `Timestamp=none` guard
+> had this bug and would have stayed silent in the very case it guards.
 
 **OracleKit is the one sanctioned exception to the
 "[no new test frameworks](#what-you-should-not-do)" rule.** It ships an

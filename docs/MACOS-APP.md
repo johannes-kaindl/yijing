@@ -16,16 +16,22 @@ everything along itself.
 ## Building
 
 ```bash
-./scripts/build-macos-app.sh
+./scripts/package-macos-app.sh
 ```
 
 Prerequisite: **Xcode Command Line Tools** (`xcode-select --install`)
-— provides `swiftc`, `sips`, `iconutil`, `hdiutil`. The script produces:
+— provides `swiftc`, `sips`, `iconutil`, `hdiutil`. The build is split in
+two scripts, and the packaging one calls the build one — so the command
+above is all you need:
 
-- `dist/Yijing.app` — the app bundle
-- `dist/Yijing.dmg` — distributable disk image (app + Applications alias +
-  INSTALL.txt)
-- `dist/INSTALL.txt` — installation instructions for end users
+| Script | Produces |
+|---|---|
+| `scripts/build-macos-app.sh` | `dist/Yijing.app` — compiles the app bundle and, with `YIJING_SIGN_IDENTITY` set, signs it |
+| `scripts/package-macos-app.sh` | `dist/Yijing.dmg` + `dist/INSTALL.txt` — notarizes and staples the app, wraps it in the disk image (app + Applications alias + INSTALL.txt), then signs, notarizes and staples that |
+
+Notarization lives in the packaging script rather than the build script
+because its ticket has to be stapled into the app **before** the disk
+image is built from it — see the ordered chain below.
 
 `dist/` is not versioned — build artifacts do not belong in Git.
 
@@ -140,9 +146,10 @@ dialogs.
 
 As of macOS 15 Sequoia / 26 Tahoe, Gatekeeper requires a **Developer ID
 signature plus Apple notarization** for apps distributed outside the Mac
-App Store. `build-macos-app.sh` runs the whole chain when two environment
+App Store. `package-macos-app.sh` runs the whole chain when two environment
 variables are set; without them it produces an unsigned build (the
-default for contributors without a certificate).
+default for contributors without a certificate — unlike some sister repos
+it does not abort, an unsigned DMG stays a valid result).
 
 ### One-time setup
 
@@ -174,14 +181,18 @@ default for contributors without a certificate).
 ```bash
 YIJING_SIGN_IDENTITY="Developer ID Application: <NAME> (<TEAM_ID>)" \
 YIJING_NOTARY_PROFILE="yijing-notary" \
-./scripts/build-macos-app.sh
+./scripts/package-macos-app.sh
 ```
 
-`YIJING_SIGN_IDENTITY="auto"` picks the first *Developer ID Application*
-identity from the keychain. With only `YIJING_SIGN_IDENTITY` set (no
-profile) the script signs but does **not** notarize — useful to test the
-signature locally. The Mac must be **online** (secure timestamp + notary
-upload). The script runs the steps in the one correct order:
+Both variables are read by `package-macos-app.sh` and passed through to
+the build script unchanged. `YIJING_SIGN_IDENTITY="auto"` picks the first
+*Developer ID Application* identity from the keychain; the packaging
+script then reads the resolved identity back out of the signed app, so
+the DMG carries the same signature as the app. With only
+`YIJING_SIGN_IDENTITY` set (no profile) the chain signs but does **not**
+notarize — useful to test the signature locally. The Mac must be
+**online** (secure timestamp + notary upload). The steps run in the one
+correct order:
 
 1. Sign the `.app` — a single `codesign --options runtime --timestamp`
    call (Hardened Runtime + secure timestamp; **no `--deep`**, **no
@@ -228,7 +239,7 @@ New app version:
 1. Commit changes.
 2. Bump `CFBundleShortVersionString` / `CFBundleVersion` in
    `scripts/macos-app/Info.plist` (keep them monotonic), then run
-   `./scripts/build-macos-app.sh` again — for an official release with the
+   `./scripts/package-macos-app.sh` again — for an official release with the
    `YIJING_SIGN_IDENTITY` / `YIJING_NOTARY_PROFILE` variables set (see
    [Signing & notarization](#signing--notarization-developer-id)).
 3. Create a new release with a new tag in the repo and upload the fresh

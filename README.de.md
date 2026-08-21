@@ -110,7 +110,7 @@ Für die Weitergabe an Nutzer ohne Terminal-Erfahrung lässt sich das
 Orakel als doppelklickbare macOS-App bündeln:
 
 ```bash
-./scripts/build-macos-app.sh
+./scripts/package-macos-app.sh
 ```
 
 Das erzeugt `dist/Yijing.dmg` — ein Disk-Image, in dem die `Yijing.app`
@@ -282,7 +282,8 @@ yijing/
 ├── data/                      # 64 Hexagramme + 8 Trigramme als JSON
 │   └── widget-hexagrams.json  # schlanker Hexagramm-Slice für Widget/Watch
 ├── scripts/                   # Build- und Dev-Server-Skripte
-│   ├── build-macos-app.sh     # ältere AppKit-macOS-App (1.5.x)
+│   ├── build-macos-app.sh     # ältere AppKit-macOS-App (1.5.x): bauen + signieren
+│   ├── package-macos-app.sh   #   … notarisieren + als DMG verpacken
 │   └── ios-app/               # universelle iOS-/iPadOS-/Mac-Catalyst-App (1.0.x)
 │       ├── OracleKit/         #   gemeinsamer Swift-Kern (Wurf, Tag, Daten)
 │       ├── Widgets/           #   Tages-Hexagramm-Widget
