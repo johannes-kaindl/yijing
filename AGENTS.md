@@ -148,7 +148,10 @@ working tree. The script snapshots the **committed** state
 (`git archive HEAD` — so commit before deploying), builds the **flat layout**
 in a temp dir (contents of `web/` at the root, `data/` and `sw.js` next to it),
 patches the paths in `app.js` (`../data/` → `data/`, `../sw.js` → `sw.js`),
-verifies no `../` path survived, and rsyncs to the pages host.
+verifies no `../` path survived, and rsyncs to the pages host. It refuses to
+deploy unless `node scripts/check-syntax.mjs` passes — the check runs after the
+clean-tree gate, so the working tree it parses is the committed state that
+actually ships.
 
 Every change to `web/`, `sw.js` or the data needs a deploy run to become
 visible on the live demo.

@@ -45,6 +45,14 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
     exit 1
 fi
 
+# Syntax-Gate (PROF-WEB-03). Steht bewusst NACH dem Clean-Tree-Check: das Gate
+# liest den Arbeitsbaum, deployt wird der committete Stand (git archive HEAD) —
+# erst der Check oben garantiert, dass beides dasselbe ist.
+command -v node >/dev/null \
+    || { echo "Fehler: node fehlt — ohne Syntax-Gate wird nicht deployt." >&2; exit 1; }
+node scripts/check-syntax.mjs \
+    || { echo "Fehler: Syntax-Gate rot — Deploy abgebrochen." >&2; exit 1; }
+
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 SNAP="$STAGE/snap"
