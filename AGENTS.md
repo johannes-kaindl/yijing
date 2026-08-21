@@ -361,7 +361,11 @@ something:
    local check: it exercises signing end to end without uploading anything to
    Apple. Verify at the artifact, not from the log: `codesign -dvvv
    dist/Yijing.app` must show `Authority=Developer ID Application`,
-   `flags=0x10000(runtime)` and a real `Timestamp=`.
+   `flags=0x10000(runtime)` and a real `Timestamp=`. The full chain including
+   the notary upload was run once on 2026-08-21 (both submissions `Accepted`;
+   `spctl` reports `accepted` / `source=Notarized Developer ID` for app and
+   DMG) — it takes a few minutes and needs the Mac online, so keep it for
+   actual releases.
 
 > **Trap in both scripts (cost a debugging round on 2026-08-21):** never write
 > `codesign … | grep -q …` here. `grep -q` exits at the first match, `codesign`
