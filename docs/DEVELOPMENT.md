@@ -51,7 +51,7 @@ yijing/
 │   ├── DEVELOPMENT.md
 │   ├── LLM.md
 │   ├── MACOS-APP.md
-│   ├── screenshots/       # Store/README screenshots
+│   ├── images/            # README images (capture-web-shots.mjs) + contract
 │   └── superpowers/       # Skill/workflow notes
 ├── data/
 │   ├── hexagrams.json     # 64 hexagrams normalized (DE)

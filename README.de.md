@@ -13,6 +13,12 @@
 [![PWA](https://img.shields.io/badge/PWA-installierbar-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://pages.jkaindl.de/yijing/)
 [![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#warum-keine-build-pipeline)
 
+<p align="center">
+  <img src="docs/images/hero-de.png" width="820"
+       alt="Eine geworfene Lesung: die Frage, das Ursprungsbild mit zwei markierten Wandlungslinien, das Zielbild und der Bereich für die KI-Deutung" />
+  <br><em>Eine Lesung im Browser — Ursprungs- und Zielbild, Wandlungslinien markiert.</em>
+</p>
+
 Ein schlankes I-Ging-Orakel als Static-Site mit Wilhelm-Übersetzung und
 optionaler KI-Deutung über lokale LLM-Server (Ollama, MLX, LM Studio,
 vLLM, OpenClaw). Drei-Münzen-Methode, vollständige Wilhelm-Texte
@@ -179,7 +185,7 @@ der **1.5.x**-Linie, die iOS-/Watch-Familie auf ihrer eigenen
 - **Tastatur-Bedienung** für Wurf, Reset und Settings
 
 <p align="center">
-  <img src="docs/screenshots/reader-de.png" width="720"
+  <img src="docs/images/reader-de.png" width="720"
        alt="Das Nachschlagewerk: ein 8×8-Übersichtsgitter aller 64 Hexagramme über dem gewählten Hexagramm mit Figur, chinesischem Namen und vollständigem Wilhelm-Text" />
   <br><em>Nachschlagewerk — alle 64 Hexagramme mit vollständigem Text durchblättern, unabhängig vom Wurf.</em>
 </p>
@@ -230,7 +236,7 @@ MLX und LM Studio sind standardmäßig offen. Details und Fehlersuche:
 ## Wie ein Wurf abläuft
 
 <p align="center">
-  <img src="docs/screenshots/reading-de.png" width="720"
+  <img src="docs/images/reading-de.png" width="720"
        alt="Eine Lesung: die Frage, das Ursprungsbild und das Zielbild mit Markierungen der wandelnden Linien" />
   <br><em>Eine gewürfelte Lesung — Ursprungs- und Zielbild, mit den wandelnden Linien markiert.</em>
 </p>

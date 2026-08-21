@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 Johannes Kaindl
 //
-// Reproducible capture of the README screenshots (CORE-META-03).
+// Reproducible capture of the README images (CORE-META-03).
 //
 //   node scripts/capture-web-shots.mjs                    # all shots
 //   node scripts/capture-web-shots.mjs --only reader-en   # one, by name
 //   node scripts/capture-web-shots.mjs --keep             # leave Chrome open
 //
-// Until now docs/screenshots/*.png were hand-made: nobody could reproduce them
+// Until now the README images were hand-made: nobody could reproduce them
 // after a UI change, so they aged silently. This drives the real app instead.
 //
 // No dependencies. It starts `scripts/serve.py`, launches the installed Google
@@ -33,7 +33,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = join(ROOT, 'docs', 'screenshots');
+// One image folder, the one the workspace image contract points at.
+const IMAGES_DIR = join(ROOT, 'docs', 'images');
 const PORT = Number(process.env.YIJING_SHOT_PORT || 8791);   // not 8765: that is the dev server
 const CDP_PORT = Number(process.env.YIJING_CDP_PORT || 9333);
 const CHROME = process.env.YIJING_CHROME
@@ -75,6 +76,19 @@ const COMMON_EXPECT = (lang) => [
   ['dark theme', `document.documentElement.dataset.theme === 'dark'`],
 ];
 
+// The hero: the app's strongest single frame — the question and both hexagrams
+// side by side. Wider viewport (the image spec's capture_width) with the content
+// column centred in it, cropped to the reading itself.
+const HERO = (lang, question) => ({
+  name: `hero-${lang}`, lang, width: 1200, height: 645,
+  // The crop starts just below the question card and ends below the
+  // interpretation panel, so no card is cut in half at either edge.
+  clipFrom: '#questionEcho', padTop: 34,
+  question,
+  expect: READING_EXPECT,
+  async run(cdp, shot) { await castReading(cdp, shot); },
+});
+
 const SHOTS = [
   {
     name: 'reader-de', lang: 'de', width: 940, height: 1180,
@@ -107,6 +121,8 @@ const SHOTS = [
     question: 'What should I give my attention to right now?',
     async run(cdp, shot) { await castReading(cdp, shot); },
   },
+  HERO('de', 'Worauf sollte ich gerade meine Aufmerksamkeit richten?'),
+  HERO('en', 'What should I give my attention to right now?'),
 ];
 
 async function castReading(cdp, shot) {
@@ -123,7 +139,7 @@ async function castReading(cdp, shot) {
 
 // ── CDP over the built-in WebSocket ──────────────────────────────────────────
 class Cdp {
-  #ws; #id = 0; #pending = new Map(); #pinId = null; #current = 'about:blank';
+  #ws; #id = 0; #pending = new Map(); #pinId = null; #current = 'about:blank'; #closed = false;
 
   static async attach(wsUrl) {
     const c = new Cdp();
@@ -133,6 +149,7 @@ class Cdp {
       c.#ws.addEventListener('error', () => rej(new Error('CDP socket failed')), { once: true });
     });
     c.#ws.addEventListener('message', (ev) => {
+      if (c.#closed) return;
       const msg = JSON.parse(ev.data);
       const p = c.#pending.get(msg.id);
       if (!p) return;
@@ -148,7 +165,14 @@ class Cdp {
     return new Promise((resolve, reject) => this.#pending.set(id, { resolve, reject }));
   }
 
-  close() { this.#ws.close(); }
+  close() {
+    // Chrome can still push events while the socket winds down; once we are done
+    // they are noise, and an unhandled 'error' would print a stack after a
+    // successful run.
+    this.#closed = true;
+    this.#ws.addEventListener('error', () => {});
+    this.#ws.close();
+  }
 
   async metrics(width, height) {
     await this.send('Emulation.setDeviceMetricsOverride', {
@@ -252,12 +276,22 @@ class Cdp {
     await new Promise((r) => setTimeout(r, 400));
   }
 
-  async shoot(width, height) {
+  /** Document-space y of an element, minus a little breathing room. */
+  async topOf(selector, pad) {
+    const y = await this.eval(`(() => { const el = document.querySelector(${JSON.stringify(selector)});
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return Math.max(0, Math.round(r.top + window.scrollY - ${pad})); })()`);
+    if (y === null) throw new Error(`clip anchor not found: ${selector}`);
+    return y;
+  }
+
+  async shoot(width, height, y = 0) {
     const { data } = await this.send('Page.captureScreenshot', {
       format: 'png',
       // scale stays 1: setDeviceMetricsOverride already renders at SCALE.
       // Passing SCALE here too produced 3760x3872 instead of 1880x1936.
-      clip: { x: 0, y: 0, width, height, scale: 1 },
+      clip: { x: 0, y, width, height, scale: 1 },
       captureBeyondViewport: true,
     });
     return Buffer.from(data, 'base64');
@@ -317,7 +351,7 @@ async function main() {
     console.error(`✗ Chrome not found at ${CHROME}\n  Set YIJING_CHROME to its binary.`);
     process.exit(2);
   }
-  mkdirSync(OUT, { recursive: true });
+  mkdirSync(IMAGES_DIR, { recursive: true });
 
   const server = spawn('python3', [join(ROOT, 'scripts', 'serve.py')], {
     cwd: ROOT, env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore',
@@ -355,8 +389,11 @@ async function main() {
       for (const [what, expr] of [...COMMON_EXPECT(shot.lang), ...(shot.expect || [])]) {
         if (!(await cdp.eval(expr))) throw new Error(`${shot.name}: expected ${what}`);
       }
-      const png = await cdp.shoot(shot.width, shot.height);
-      writeFileSync(join(OUT, `${shot.name}.png`), png);
+      // A hero is a crop, not the top of the page: the app's content column is
+      // capped at 760px, so a wide shot from y=0 would be mostly empty margin.
+      const y = shot.clipFrom ? await cdp.topOf(shot.clipFrom, shot.padTop ?? 40) : 0;
+      const png = await cdp.shoot(shot.width, shot.height, y);
+      writeFileSync(join(IMAGES_DIR, `${shot.name}.png`), png);
       console.log(`✓ ${shot.name}.png — ${shot.width * SCALE}x${shot.height * SCALE}, ${(png.length / 1024).toFixed(0)} KB`);
       written++;
     }
@@ -366,7 +403,7 @@ async function main() {
   }
 
   if (!written) { console.error('✗ nothing captured — check --only'); process.exit(1); }
-  console.log(`\n${written} shot(s) written to docs/screenshots/`);
+  console.log(`\n${written} image(s) written to docs/images/`);
 }
 
 main().catch((e) => { console.error('✗', e); process.exit(1); });

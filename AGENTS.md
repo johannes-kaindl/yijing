@@ -344,7 +344,7 @@ something:
 3. For data changes: `python3 scripts/build_data.py` must run through
    without errors, the counters in the output consistent
 4. If the change is visible in the UI: `node scripts/capture-web-shots.mjs`
-   re-shoots the four README screenshots (`docs/screenshots/`) from the running
+   re-shoots the README images (`docs/images/`) from the running
    app — it starts `serve.py`, drives the installed Chrome over CDP, and pins
    language, theme and `Math.random` so runs are byte-identical. Each shot
    asserts what it must show (language, dark theme, index grid open, resulting

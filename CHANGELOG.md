@@ -8,7 +8,7 @@ Versioning follows [SemVer](https://semver.org/).
 ### Added
 
 - **Reproducible README screenshots** — `scripts/capture-web-shots.mjs`
-  re-shoots `docs/screenshots/*.png` from the running app instead of by hand
+  re-shoots `docs/images/*.png` from the running app instead of by hand
   (CORE-META-03). It starts `scripts/serve.py`, drives the installed Google
   Chrome over CDP through Node's built-in WebSocket — no npm, no bundled
   browser — and pins language, theme, `Math.random` and `crypto.randomUUID`

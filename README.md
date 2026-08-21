@@ -13,6 +13,12 @@
 [![PWA](https://img.shields.io/badge/PWA-installable-5a3e7a?style=flat-square&logo=pwa&logoColor=white)](https://pages.jkaindl.de/yijing/)
 [![Build: zero deps](https://img.shields.io/badge/build-zero%20deps-blue?style=flat-square)](#no-build-step)
 
+<p align="center">
+  <img src="docs/images/hero-en.png" width="820"
+       alt="A cast reading: the question, the primary hexagram with two changing lines marked, the resulting hexagram, and the AI interpretation panel" />
+  <br><em>A reading in the browser — primary and resulting hexagram, changing lines marked.</em>
+</p>
+
 A lean I Ching oracle as a static site with the Wilhelm translation and
 optional AI interpretation via local LLM servers (Ollama, MLX, LM Studio,
 vLLM, OpenClaw). Three-coin method, complete Wilhelm texts including all
@@ -175,7 +181,7 @@ the App Store as v1.0 (build 5).
 - **Keyboard operation** for casting, reset and settings
 
 <p align="center">
-  <img src="docs/screenshots/reader-en.png" width="720"
+  <img src="docs/images/reader-en.png" width="720"
        alt="The read-through reference: an 8×8 index grid of all 64 hexagrams above the selected hexagram with its figure, Chinese name and full Wilhelm text" />
   <br><em>Read-through reference — browse all 64 hexagrams with their full text, independent of casting.</em>
 </p>
@@ -226,7 +232,7 @@ MLX and LM Studio are open by default. Details and troubleshooting:
 ## How a reading works
 
 <p align="center">
-  <img src="docs/screenshots/reading-en.png" width="720"
+  <img src="docs/images/reading-en.png" width="720"
        alt="A cast reading: the question, the primary hexagram and the resulting hexagram with changing-line markers" />
   <br><em>A cast reading — the primary and the resulting hexagram, with the changing lines marked.</em>
 </p>
