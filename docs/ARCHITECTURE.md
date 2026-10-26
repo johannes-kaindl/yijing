@@ -66,7 +66,7 @@ Main frontend module. Contains:
 ### `web/vendor/code-kit/` — the transport
 
 Vendored from `code-kit` (the maintainer's cross-project source library, not
-published), pinned in `VENDOR.json`, **never edited here** (see AGENTS.md).
+published), pinned in `VENDOR.json`, **never edited here** (see AGENTS.md and `.claude/rules/vendor.md`).
 The copies are self-contained — nothing here fetches the upstream. Two backend clients behind
 one interface:
 
@@ -82,8 +82,8 @@ and the raw body; network-layer failures stay unwrapped so the caller can tell
 a blocked request from a rejecting server.
 
 Each module is present as a byte-identical `.ts` (what the upstream gate
-compares) and a generated `.js` (what the browser loads) — see AGENTS.md
-"Vendored code (code-kit)".
+compares) and a generated `.js` (what the browser loads) — see
+`.claude/rules/vendor.md`.
 
 ### `web/llm.js`
 

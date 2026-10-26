@@ -1,459 +1,104 @@
 # AGENTS.md
 
-> **Workspace-Standards (maintainer-lokal):** Die verbindliche Leitkonvention steht in `_docs/CONVENTIONS.md`
-> im Multi-Projekt-Workspace des Maintainers, `../_docs` relativ zu diesem Repo — nicht Teil dieses Repos,
-> ignorieren falls im Klon nicht vorhanden. Modell comply-or-explain. Offene Punkte fuer dieses Repo
-> siehe Abschnitt "Offene Konventions-Punkte".
+> **Workspace-Standards (maintainer-lokal):** Die verbindliche Leitkonvention steht in `_docs/CONVENTIONS.md` im Multi-Projekt-Workspace des Maintainers, `../_docs` relativ zu diesem Repo — nicht Teil dieses Repos, ignorieren falls im Klon nicht vorhanden. Modell comply-or-explain.
 
-Conventions for AI agents (Claude Code, Codex, Cursor, …) working on this
-repository. Humans benefit too — but this is primarily aimed at
-automated sessions.
-
-## Offene Konventions-Punkte
-
-- [x] CORE-META-03 — `scripts/capture-web-shots.mjs` re-shoots every README image from the running app, hero included, into the single folder `docs/images/` (see "[Tests / verification](#tests--verification)"); `docs/images/README.md` is the capture contract. (App Store screenshots + preview video remain archived launch assets, commit `69a34b5`.) One `readme_lint` warning stays and is the tool's, not ours — see the note in the contract about `og-image.png`.
-- [x] CORE-GIT-01 — **The GitHub mirror was removed on 2026-09-05**; `origin` (git.jkaindl.de) is the only remote. GitHub stays only where it is functionally required — the Obsidian store chain — and this is not a plugin. What follows is the state while the mirror existed, kept because it documents how it was measured: GitHub mirror wired up as the `github` remote (`github.com/johannes-kaindl/Yijing`, SSH). The mirror already existed and was up to date; only the local remote was missing. Measured at the far end per CORE-GIT-01(a) — `git ls-remote` against **each** remote separately, not `@{u}`: `main` and all 9 tags identical on `origin`, `github` and locally (2026-08-21). When re-pushing by hand, use `--follow-tags` (the mirror prunes).
-- [x] PROF-WEB-03 — `scripts/check-syntax.mjs` parses the whole shipped surface (`sw.js`, every `web/*.js`, and the inline `<script>` blocks of every `web/*.html`) — 10 blocks today. See "[Tests / verification](#tests--verification)".
-- [x] PROF-NAT-01 — The **macOS AppKit DMG** now has the split: `scripts/build-macos-app.sh` builds and signs `dist/Yijing.app`, `scripts/package-macos-app.sh` notarizes and staples it, wraps it in `dist/Yijing.dmg` and signs/notarizes/staples that. Named per the repo's own `build-macos-app.sh` / `build-ios-app.sh` pattern rather than the convention's `*-native-*`, because two native tracks live here. Notarization sits in the packaging script by necessity: the app's ticket must be stapled **before** the DMG is built from it. See "[Tests / verification](#tests--verification)". *(The iOS App Store path needs NO notarization: `build-ios-app.sh archive` now does an `app-store-connect` export + `altool` upload via `exportOptions.plist`, gated on `YIJING_ASC_ISSUER_ID` — done 2026-06-13.)*
-- [x] PROF-NAT-02 — All four target `Info.plist`s now derive `CFBundleShortVersionString` / `CFBundleVersion` from `project.yml`'s `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` (build-setting expansion). A version bump is two lines in `project.yml`, in lockstep by construction — no script needed (done 2026-06-13).
+Conventions for AI agents (Claude Code, Codex, Cursor, …) working on this repository. Humans benefit too — but this is primarily aimed at automated sessions.
 
 ## Project character
 
-Yijing-Orakel is a **hobby project** with a deliberately flat architecture.
-We are on the seventh attempt here, after six discarded predecessors
-(see `_archiv/yijing_1` through `Yijing_6`). All earlier attempts got
-bogged down in structural over-engineering (notebook workflows, Pydantic
-layers, FastAPI wrappers). This attempt is intentionally different.
+Yijing-Orakel is a **hobby project** with a deliberately flat architecture. We are on the seventh attempt here, after six discarded predecessors (see `_archiv/yijing_1` through `Yijing_6`). All earlier attempts got bogged down in structural over-engineering (notebook workflows, Pydantic layers, FastAPI wrappers). This attempt is intentionally different. Before you make an architectural decision, check whether one of the archived attempts already tried the same thing. We are not building the same tower again here.
 
-> **Important:** Before you make an architectural decision, check whether
-> one of the archived attempts already tried the same thing. We are not
-> building the same tower again here.
+The web app is the core. A universal native Apple family (iOS / iPadOS / watchOS, Mac Catalyst deferred) wraps it and has been **live on the App Store** since 2026-06-20: <https://apps.apple.com/app/yijing-i-ching/id6780668644>. There are two version tracks on purpose: the macOS AppKit DMG is on **1.5.x**, the native family under `scripts/ios-app/` on **1.0.x**.
 
 ## Architecture principles
 
 | Principle | Consequence |
 |---|---|
-| **Static site** | No application server, no backend. Pure HTML/CSS/JS, served via `python3 -m http.server`. |
-| **Zero Dependencies** | No npm, no bundler, no framework — nothing to install in order to run, serve or deploy the app. Vanilla ES modules with native `<script type="module">`. The one qualification is the vendored code-kit copy, which arrives as TypeScript and is transpiled by `scripts/build-vendor.mjs` using Node's own type stripping — see "[Vendored code (code-kit)](#vendored-code-code-kit)". |
+| **Static site** | No application server, no backend. Pure HTML/CSS/JS, served via `python3 scripts/serve.py`. |
+| **Zero Dependencies** | No npm, no bundler, no framework — nothing to install in order to run, serve or deploy the app. Vanilla ES modules with native `<script type="module">`. The one qualification is the vendored code-kit copy (`web/vendor/`), transpiled by `scripts/build-vendor.mjs` with Node's own type stripping. |
 | **Data as the source** | Hexagram texts and trigram reference data live as static JSON in `data/`. The build script (`scripts/build_data.py`) reads from `_archiv/` and produces the JSONs. |
 | **Local LLMs only** | The default endpoints are Ollama (11434) and MLX/LM-Studio (8080/v1, 1234/v1). No cloud API keys in the code. |
 | **Persistence in the browser** | History, endpoints, system prompt in `localStorage`. No database, no server-side state. |
 
-## What you should NOT do
-
-- **Do not introduce a framework** (React/Vue/Svelte). Vanilla stays vanilla.
-- **Do not introduce a build step** (Webpack/Vite/esbuild) **for this repo's
-  own code**. If ES modules are not enough, that is a hint to simplify, not to
-  upgrade. `scripts/build-vendor.mjs` is not a counter-example and not a
-  precedent: it exists solely because the vendored code-kit modules arrive as
-  TypeScript, it uses nothing but Node itself, and its output is tracked.
-- **No TypeScript** for code written here. JSDoc is enough for type hints.
-  The `.ts` files under `web/vendor/code-kit/` are the exception and are not
-  ours to rewrite — they are byte-identical copies of their upstream.
-- **No backend** for LLM routing. The browser calls the local servers directly.
-- **`_archiv/`** is **read-only**, never written back to. Not even
-  "cleaned up". It is intentionally raw.
-- **No new test frameworks** for trivial functions. If tests become
-  necessary, prefer `node --check` and targeted ad-hoc smoke tests.
-  Existing sanity test: `node scripts/test-kingwen.mjs` (King-Wen
-  lookups + `data/hexagrams.json` consistency, no dependencies).
-  (OracleKit's XCTest suite is the one sanctioned exception — see
-  "[Tests / verification](#tests--verification)".)
-- **`_archiv/yijing_1/.env`** contains a plaintext Google API key. Never
-  commit it to git, never remove the `_archiv/` `.gitignore` entry.
-- **Do not add an explicit `-sdk`** to the `build-ios-app.sh`
-  simulator/archive/device `xcodebuild` invocations. The embedded
-  watchOS app must build for watchOS via `-destination`; forcing
-  `-sdk iphoneos` breaks it (`WatchKitAppInvalidUIDeviceFamily`).
-- **Do not add a meditation/image widget.** Apple Image Playground
-  (`ImageCreator`) is foreground-only (`backgroundCreationForbidden`),
-  so it cannot run in a WidgetKit timeline.
-- **Do not attempt a custom watch face.** watchOS forbids third-party
-  faces; the daily hexagram ships as a complication, not a face.
-- **Never commit `scripts/ios-app/OracleKit/.build` or
-  `OracleKit/.swiftpm`** — they are build caches (gitignored).
-
-## Code style guidelines
-
-- **UI language: bilingual DE + EN** — see the section
-  "[Languages (DE / EN)](#languages-de--en)". Code identifiers: English.
-  Comments: English or German, both fine — but consistent
-  within a file.
-- **In German string literals, never use straight `"…"` for inner
-  quotation marks.** Set them typographically: `„…"`. Otherwise
-  JavaScript closes the string prematurely — see commit `a164aba` ff.
-- **After every JS edit:** run `node --check <file>` — or `node scripts/check-syntax.mjs`, which covers every shipped file plus the inline `<script>` blocks that `node --check` cannot see.
-- **When editing `app.js`:** test with a browser tab hard-reload (Cmd+Shift+R).
-  The dev server does set `Cache-Control: no-store`, but some browsers
-  still cache ES module imports.
-- **Comments** explain *why*, not *what*. Identifier names explain
-  the what.
-
-## Languages (DE / EN)
-
-The repo is deliberately bilingual — but **selectively**, not everywhere, to
-keep duplicate maintenance low (fits the lean hobby-project character).
-
-| Area | Language policy |
-|---|---|
-| **App** — UI strings (`web/i18n.js`), hexagram texts (`data/`) | **Bilingual DE + EN.** Every new UI string needs both dict entries; every new user-visible data field needs its `*_en` counterpart. |
-| **README** | **Bilingual:** `README.md` (English, **canonical**) + `README.de.md` (German). Carry content changes into both files; preserve the language-toggle line at the top (`🇬🇧 English · 🇩🇪 Deutsch`). |
-| **Everything else** — `docs/`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, release notes | **Single-language, English as the canonical target language.** Do not create `*.de.md` duplicates. |
-
-Existing deep documentation (`docs/`, some meta files) is historically
-still in German. The migration to English proceeds **opportunistically** — when
-a file is being touched anyway, translate it at the same time; **no
-big bang**. This keeps the lean character intact and avoids a
-translation treadmill.
-
-## Rebuild the data
-
-The canonical pipeline runs in order — each step depends on the previous:
+## Commands
 
 ```bash
-python3 scripts/build_data.py             # 1. DE+EN corpus + trigrams
-python3 scripts/apply_neutral.py          # 2. re-merge gender-neutral overrides
+PORT=8765 python3 scripts/serve.py        # dev server, http://localhost:8765/web/index.html
+node scripts/check-syntax.mjs             # syntax gate: sw.js, web/*.js, inline <script> of web/*.html
+node scripts/test-kingwen.mjs             # King-Wen lookups + data/hexagrams.json consistency
+node scripts/build-vendor.mjs --check     # fails if a generated vendor .js is stale
+node scripts/capture-web-shots.mjs        # re-shoot the README images (needs Google Chrome only)
+./scripts/deploy-page.sh                  # live demo; on main, clean tree, after committing
+(cd scripts/ios-app/OracleKit && swift test)   # King-Wen / daily parity gate
+```
+
+The data pipeline runs in this order, each step depends on the previous:
+
+```bash
+python3 scripts/build_data.py             # 1. DE+EN corpus + trigrams (drops *_neutral fields)
+python3 scripts/apply_neutral.py          # 2. re-merge gender-neutral overrides — MUST follow step 1
 python3 scripts/sync_image_seeds_to_en.py # 3. mirror image seeds DE->EN
 python3 scripts/build_widget_slice.py     # 4. slim widget/complication slice
 ```
 
-1. `build_data.py` produces `data/hexagrams.json` + `data/hexagrams.en.json`
-   + `data/trigrams.json` (drops `*_neutral` fields).
-2. `apply_neutral.py` re-merges the committed `*_neutral` / `*_en_neutral`
-   overrides from `scripts/sources/neutral_overrides.json` — a DE rebuild
-   discards them, so this **must** follow `build_data.py`.
-3. `sync_image_seeds_to_en.py` mirrors the language-independent
-   `image_association` seeds DE→EN and drops the obsolete
-   `image_association_en`.
-4. `build_widget_slice.py` produces `data/widget-hexagrams.json` (~26 KB:
-   per-hexagram number/binary/both names + the Judgment Kernsatz, both
-   languages × both registers; slim enough for the widget memory budget).
-   Its `lead()`/Kernsatz trimming mirrors OracleKit `Texts.judgmentLead` —
-   the two must stay in sync.
+Tracked outputs belong to the commit: `data/hexagrams.json`, `data/hexagrams.en.json`, `data/trigrams.json`, `data/widget-hexagrams.json`. Sources and details: `docs/DATA.md`.
 
-Sources: `_archiv/Yijing_6/yijing/resources/hexagram_json/` (Wilhelm texts
-for the 64 hexagrams, two schema variants — see the build script),
-`_archiv/yijing_5/data/processed/` (Chinese names, trigram
-reference data), the curated `IMAGE_SEEDS` table in `build_data.py` (one short English
-meditation-image motif per hexagram, 64/64 — superseding the old
-`_archiv/yijing_3/` filename extraction).
+## What you should NOT do
 
-Tracked outputs (all **belong to the commit** — primary data assets, not
-strict build artifacts): `data/hexagrams.json`, `data/hexagrams.en.json`,
-`data/trigrams.json`, `data/widget-hexagrams.json`.
+- **Do not introduce a framework** (React/Vue/Svelte). Vanilla stays vanilla.
+- **Do not introduce a build step** (Webpack/Vite/esbuild) **for this repo's own code**. If ES modules are not enough, that is a hint to simplify, not to upgrade. `scripts/build-vendor.mjs` is not a counter-example and not a precedent: it exists solely because the vendored code-kit modules arrive as TypeScript, it uses nothing but Node itself, and its output is tracked.
+- **No TypeScript** for code written here. JSDoc is enough for type hints. The `.ts` files under `web/vendor/code-kit/` are the exception and are not ours to rewrite.
+- **Never edit anything under `web/vendor/`.** A fix belongs upstream in code-kit, followed by a re-vendor.
+- **No backend** for LLM routing. The browser calls the local servers directly.
+- **`_archiv/`** is **read-only**, never written back to. Not even "cleaned up". It is intentionally raw.
+- **`_archiv/yijing_1/.env`** contains a plaintext Google API key. Never commit it to git, never remove the `_archiv/` `.gitignore` entry.
+- **No new test frameworks** for trivial functions. If tests become necessary, prefer `node --check` and targeted ad-hoc smoke tests. OracleKit's XCTest suite (`Tests/OracleKitTests/`) is the one sanctioned exception.
+
+## Conventions
+
+- **UI language: bilingual DE + EN.** Every new UI string needs both dict entries in `web/i18n.js`; every new user-visible data field needs its `*_en` counterpart. Code identifiers: English. Comments: English or German, but consistent within a file.
+- **README: bilingual.** `README.md` (English, canonical) + `README.de.md`. Carry content changes into both and keep the language-toggle line at the top (`🇬🇧 English · 🇩🇪 Deutsch`).
+- **Everything else is single-language, English as canonical** (`docs/`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, this file, release notes). Do not create `*.de.md` duplicates. Older German docs migrate opportunistically, when a file is touched anyway.
+- **In German string literals, never use straight `"…"` for inner quotation marks.** Set them typographically: `„…"`. Otherwise JavaScript closes the string prematurely. After every JS edit run `node scripts/check-syntax.mjs` (or `node --check <file>` for one file); the first also covers the inline `<script>` blocks.
+- **After editing `app.js`, hard-reload the tab** (Cmd+Shift+R). The dev server sets `Cache-Control: no-store`, but some browsers still cache ES module imports.
+- **Comments explain *why*, not *what*.** Identifier names explain the what.
+- **For UI-visible changes:** re-run `node scripts/capture-web-shots.mjs` and look at the result. Each shot asserts what it must show, but the run cannot judge composition. The capture contract is `docs/images/README.md`.
+- **For larger changes,** add a short note to `CHANGELOG.md`.
+- **Verification has no web unit-test suite, and that is accepted.** After a change: the syntax gate, a hard-reload reading, "Interpret" against both endpoints (Ollama + MLX), and for data changes a clean `python3 scripts/build_data.py` run with consistent counters.
+
+## Gotchas
+
+- **Three canonical King-Wen copies must stay in sync:** `web/app.js` `BINARY_TO_KING_WEN`, `scripts/build_data.py` `KING_WEN_BINARY` and OracleKit `Casting.swift`. The parity gate is `swift test` in OracleKit plus `node scripts/test-kingwen.mjs`.
+- **`scripts/build_widget_slice.py` `lead()` mirrors OracleKit `Texts.judgmentLead`.** The Kernsatz trimming in the two must stay identical.
+- **`web/app.js` `publishSettings()` must keep posting** `{action:'settings', language, register}` over `window.webkit.messageHandlers.yijing` (on `i18n:changed`, on register change, at load). Widgets and watch follow the app's language/register through it.
+- **Readings are stored with a UUID** in `localStorage["yijing-history-v1"]`, recalled by `#r=<uuid>`. When the schema changes, `loadHistory()` must tolerate old entries or migrate them.
+- **`sw.js` (repo root) is network-first and can cache in the browser.** It sits in the root so its scope covers `web/` and `data/`; keep that in mind when changing `web/`.
+- **Colors are `:root` CSS variables** (Light via `:root[data-theme="light"]`, choice in `localStorage` `yijing-theme`); an inline script in the `<head>` sets the theme before first paint.
+- **Never write `<command> | grep -q …` as a condition under `set -o pipefail`** (CORE-OPS-03). `grep -q` exits at the first match, the producer dies of SIGPIPE, and the condition is false exactly when it matches.
+- **Deploy, iOS build and macOS build all read the committed state** (`git archive HEAD`). Commit before running them.
 
 ## Branch and deployment
 
-There is a **single branch, `main`**. `index.html` lives in the subfolder
-`web/`, the data in `data/` (from `web/`: `../data/`).
+There is a single branch, `main`; `index.html` lives in `web/`, the data in `data/` (from `web/`: `../data/`). `origin` (git.jkaindl.de) is the only remote.
 
-The live demo <https://pages.jkaindl.de/yijing/> is deployed with
-`./scripts/deploy-page.sh` — from the repo root, on `main`, with a clean
-working tree. The script snapshots the **committed** state
-(`git archive HEAD` — so commit before deploying), builds the **flat layout**
-in a temp dir (contents of `web/` at the root, `data/` and `sw.js` next to it),
-patches the paths in `app.js` (`../data/` → `data/`, `../sw.js` → `sw.js`),
-verifies no `../` path survived, and rsyncs to the pages host. It refuses to
-deploy unless `node scripts/check-syntax.mjs` passes — the check runs after the
-clean-tree gate, so the working tree it parses is the committed state that
-actually ships.
+The live demo <https://pages.jkaindl.de/yijing/> is deployed with `./scripts/deploy-page.sh` — from the repo root, on `main`, with a clean working tree. It snapshots the committed state, builds the flat layout in a temp dir (contents of `web/` at the root, `data/` and `sw.js` next to it), patches the paths in `app.js` (`../data/` → `data/`, `../sw.js` → `sw.js`), verifies no `../` path survived and rsyncs to the pages host. It refuses to deploy unless `node scripts/check-syntax.mjs` passes. Every change to `web/`, `sw.js` or the data needs a deploy run to become visible. The two macOS traps (Homebrew `rsync`, `--chmod=D755,F644`) are explained in the script header.
 
-Every change to `web/`, `sw.js` or the data needs a deploy run to become
-visible on the live demo.
+## Context index
 
-> Two things the script is deliberate about, both load-bearing on macOS:
-> it calls **`/opt/homebrew/bin/rsync`** explicitly (Apple's `openrsync` is
-> incompatible with the server-side `rrsync` wrapper and may come first on
-> `PATH`), and it passes **`--chmod=D755,F644`** (a `mktemp` staging dir is
-> `0700`, and `rsync -a` would propagate that to the target — the web server
-> then answers 403).
-
-**Historical note:** until 2026-07-30 the deployment was a second branch,
-`pages`, synced by `scripts/sync-pages.sh` to Codeberg Pages. The script has
-been removed; the `pages` branch still exists (locally and as `origin/pages`)
-but is not maintained any more, and the repo now lives on `git.jkaindl.de`.
-Older entries in `CHANGELOG.md` still mention the old path; that is history,
-not current convention.
-
-## PWA, Service Worker, Theme
-
-- **`sw.js`** (repo root) is a service worker — network-first caching
-  for offline operation. It lives in the root so that its scope covers `web/`
-  and `data/`. When changing `web/`, keep in mind that the SW
-  can cache in the browser.
-- **`web/manifest.webmanifest` + `web/icons/`** make the site installable
-  as a PWA.
-- **Theme:** Dark/Light/System. Colors are `:root` CSS variables,
-  Light via `:root[data-theme="light"]`. The selection is in `localStorage`
-  (`yijing-theme`). An inline script in the `<head>` sets the theme before
-  the first paint.
-
-## macOS app
-
-`scripts/package-macos-app.sh` bundles the oracle as the distributable
-`Yijing.dmg`; it calls `scripts/build-macos-app.sh`, which compiles (and
-optionally Developer-ID-signs) `Yijing.app` — a
-native Swift app (`scripts/macos-app/Yijing.swift` +
-`StaticServer.swift`) that starts an internal HTTP server (Network.framework
-/ `NWListener`) and shows the oracle in a WKWebView window.
-No Python and no command-line tools on the user's side — the app
-brings everything itself. The `CFBundleExecutable` **must** be a
-compiled binary — a shell script triggers a Rosetta prompt on Apple
-Silicon. Signing is opt-in through `YIJING_SIGN_IDENTITY` /
-`YIJING_NOTARY_PROFILE`; without them an unsigned DMG is still a valid
-result. Details: `docs/MACOS-APP.md`. The newer iOS app also builds as a
-native Mac app via Mac Catalyst (`build-ios-app.sh catalyst`) and is the
-long-term Mac path; this legacy AppKit `Yijing.app` still exists but is
-slated to be superseded.
-
-## iOS / iPadOS / Mac / watchOS app (native family)
-
-A universal native family under `scripts/ios-app/` (iOS 17 / iPadOS /
-Mac Catalyst + watchOS 10), on its own **1.0.x** version line — deliberately
-separate from the macOS AppKit DMG's **1.5.x** line (two version tracks).
-As of 2026-06-20 this family is **live on the App Store** as v1.0.0 (build 5):
-<https://apps.apple.com/app/yijing-i-ching/id6780668644> (iPhone / iPad / Apple
-Watch; Mac Catalyst is the deferred long-term Mac path, not part of the shipped
-build).
-The project is generated with **XcodeGen** from `scripts/ios-app/project.yml`;
-there is **no committed `.xcodeproj`**. Details: `scripts/ios-app/README.md`
-and `docs/IOS-APP.md`.
-
-Five targets:
-
-| Target | Bundle suffix | Role |
-|---|---|---|
-| **App** (iOS + macCatalyst) | `page.codeberg.jkaindl.Yijing` | WKWebView hosting the same web app via a loopback `LocalServer` + an OpenAI-compatible shim, so `web/llm.js` is consumed **unchanged**. |
-| **YijingWidgets** | `.widgets` | WidgetKit daily-hexagram widget (systemSmall/Medium + the three Lock-Screen accessory families); timeline reloads at local midnight. |
-| **YijingWatch** | `.watchkitapp` | watchOS app: "Heute" (deterministic daily hexagram) + "Werfen" (full three-coin cast). Offline, no network, no AI. Embedded in the iOS app (`embed:true`) so it installs to the paired watch. |
-| **YijingWatchWidgets** | `.watchkitapp.widgets` | daily-hexagram complication. |
-| **OracleKit** | (local Swift package) | The single shared logic core consumed by all four targets. |
-
-**OracleKit** (`scripts/ios-app/OracleKit/`) holds the shared Swift logic:
-`Casting.swift` (three-coin cast + the 64-entry King-Wen binary→number
-table), `Daily.swift` (deterministic daily hexagram), `Models.swift`
-(Codable, mirrors the JSON schema), `DataStore.swift` (JSON loader),
-`Settings.swift` (App-Group settings), `Texts.swift` (language/register
-accessors incl. `judgmentLead` Kernsatz trimming), `SlimData.swift` (widget
-slice loader).
-
-> There are now **three canonical King-Wen copies** that MUST stay in sync:
-> `web/app.js` `BINARY_TO_KING_WEN`, `scripts/build_data.py`
-> `KING_WEN_BINARY`, and OracleKit `Casting.swift`.
-
-**Build** — `scripts/ios-app/build-ios-app.sh` modes:
-`simulator` (default) | `catalyst` | `watch` | `archive` | `device`.
-Signing is configured by env vars: `YIJING_TEAM_ID` (required for
-`archive`/`device`) and optional `YIJING_DEVICE_ID` (install + launch on a
-device). The build embeds the **committed** `web/` + `data/` via
-`git archive HEAD` — so **commit before building**. `archive` mode leaves the
-`__BUILD__` placeholder so the build badge / dev tooling stays disabled. With
-`YIJING_ASC_ISSUER_ID` set, `archive` also exports (`app-store-connect`) and
-uploads to App Store Connect via `altool` (API key `9NPJZ2DPG6`) using
-`exportOptions.plist`; without it it stops at the `.xcarchive`.
-Prereqs: full Xcode + iOS SDK, `brew install xcodegen`.
-
-**App Group:** `group.page.codeberg.jkaindl.Yijing`, shared by all four
-entitlements files. Each App ID must be **assigned the group individually**
-in the Apple Developer Portal — auto-signing creates the App IDs but does
-**not** assign the group.
-
-**Settings bridge:** `web/app.js` `publishSettings()` posts
-`{action:'settings', language, register}` over
-`window.webkit.messageHandlers.yijing` (on `i18n:changed`, on register
-change, at load). `WebViewController` writes both into the App-Group
-`UserDefaults` and calls `WidgetCenter.reloadAllTimelines()`. `app.js` MUST
-keep posting this so widgets/watch follow the app's language/register.
-
-**Deep link:** `yijing://h/<n>` (custom URL scheme, `CFBundleURLTypes` in
-`Resources/Info.plist`) → `AppDelegate.application(open:)` →
-`WebViewController.openHexagram(n)` → WebView hash `#h=<n>` (the reader on
-hexagram *n*). Cold-launch safe via a deferred `pendingHexagram`. Distinct
-from the web-only `#r=<uuid>` history links.
-
-**Native architecture principles** (decisions recorded so they aren't
-re-attempted):
-
-- **Daily hexagram = one hexagram with NO changing lines** (questionless
-  contemplation). The watch's "Werfen" flow is the full mechanics.
-- **No LLM/AI on widget or watch** — offline only. AI lives in the app
-  foreground (on-device Apple Foundation Models by default, BYO/remote
-  local LLMs as fallback).
-- **Widget/complication bundle only `data/widget-hexagrams.json`** (memory
-  budget); the **watch** bundles the full `hexagrams.json` + `.en.json`.
-
-## Vendored code (code-kit)
-
-`web/vendor/code-kit/` holds the LLM **transport** — the two backend dialects,
-the streaming loop, the SSE/ND-JSON parsers and `LlmHttpError`. It came out of
-this repo's own `web/llm.js` and now lives in
-`code-kit`, the maintainer's cross-project source library, because a second
-repo needed the same code. code-kit is **not published** as of 2026-08-22 — it
-exists only in the maintainer's workspace, so a clone of this repo cannot fetch
-it. That is fine: the vendored copies here are complete and self-contained, and
-nothing in the build reaches for the upstream. It does mean a contributor
-cannot verify the pin, and that upstream fixes arrive only when the maintainer
-re-vendors them. yijing is a registered consumer in code-kit's
-`consumers.json`; a gate there hashes these copies against the pin.
-
-**Never edit anything under `web/vendor/`.** A fix belongs upstream in code-kit,
-followed by a re-vendor here — otherwise the next re-vendor silently throws the
-fix away, and every other consumer keeps the bug.
-
-The folder holds each module twice, and that is deliberate:
-
-| File | Role |
-|---|---|
-| `*.ts` | The **byte-identical** copy code-kit's gate compares against. Never loaded by a browser. |
-| `*.js` | **Generated** from the `.ts` next to it. This is what `web/llm.js` imports. |
-
-The two demands — "byte-identical" and "loadable in a browser" — cannot both
-hold in one file, because code-kit is TypeScript and this repo ships native ES
-modules. So they hold in two. `node scripts/build-vendor.mjs` does the
-transpiling with **Node's own** `module.stripTypeScriptTypes` (`mode:
-"transform"`, which is required: the kit uses TypeScript parameter properties,
-and those are code generation, not annotations). No npm, no network, nothing to
-install; `--check` fails if a generated file is out of date. The build also
-rewrites the kit's extensionless relative imports to explicit `.js` specifiers.
-
-To re-vendor: copy the module(s) from a code-kit checkout, update `sha`/`vendored`
-in `VENDOR.json`, run `node scripts/build-vendor.mjs`, and commit **everything**
-the run touched (`git status --short` — a vendor script tends to move more than
-the file you asked for). Then read code-kit's `CHANGELOG` for what the new copy
-does differently, and carry anything a user would notice into `CHANGELOG.md`
-here: a kit adoption brings exactly the behaviour that was never tested locally.
-
-**What stayed in `web/llm.js`** and belongs to this app: endpoint and prompt
-persistence (`localStorage`), the built-in prompt presets, `buildUserPrompt`,
-`testThinkingMode`, the i18n binding — plus `makeClient()`, the thin adapter
-that maps this app's endpoint schema onto the kit and filters empty deltas, and
-`describeLlmError()` for the display text.
-
-## CORS — important setup note
-
-The browser calls the LLM servers directly. Both must allow CORS for the origin
-of the dev server:
-
-**Ollama:**
-```bash
-export OLLAMA_ORIGINS="*"   # or specific: "http://localhost:8765"
-ollama serve
-```
-
-**MLX/LM Studio:** open by default. With your own `mlx_lm.server`,
-do not set a restrictive `--allowed-origins` flag.
-
-## Reasoning modes
-
-The vendored transport (`web/vendor/code-kit/`, reached via `makeClient()` in
-`web/llm.js`) translates `thinking: true|false|null` into:
-
-| Backend | Parameter |
-|---|---|
-| Ollama `/api/chat` | `think: bool` + `options.num_predict` (32k on, 4k off) |
-| OpenAI-compatible `/v1/chat/completions` | `reasoning_effort: "low"|"none"` + `chat_template_kwargs.enable_thinking: bool` + `max_tokens` |
-
-Reasoning output arrives in different fields depending on the server:
-- Ollama native: `message.thinking`
-- Ollama-OpenAI: `choices[0].delta.reasoning_content`
-- MLX (`mlx_lm.server`): `choices[0].delta.reasoning`
-- DeepSeek style: `reasoning_content`
-
-The vendored `pure/sse.js` reads the OpenAI-shaped variants in a fixed order
-(`reasoning_content` → `reasoning` → `thinking`, one per delta) and falls back
-to `choices[0].message` when a server sends whole messages despite
-`stream: true`; the ND-JSON sibling reads `message.thinking`. Either way the
-text reaches `onThinking(text)`, separate from `onToken(text)` — the UI shows
-reasoning in its own, dimmed `<details>` block. Empty deltas are dropped by
-`makeClient()`, so the block does not open on nothing.
-
-## History, deep links
-
-Readings are stored with a UUID (`localStorage["yijing-history-v1"]`).
-The URL hash `#r=<uuid>` recalls a reading. On reset the hash
-is cleared.
-
-When changing the schema: `loadHistory()` must tolerate old entries
-or offer a migration.
-
-## When you split the code
-
-`app.js` is well past the comfortable upper end of what
-belongs in a single file. As it grows further, only split when a concrete feature
-can be cleanly isolated — not prophylactically. Sensible cuts
-would be:
-
-- `history.js` (loadHistory, saveHistory, renderHistory, applyHashIfAny)
-- `settings.js` (renderEndpointList, openSettings, closeSettings)
-- `export.js` (buildMarkdownExport, downloadFile, print handler)
-- `theme.js` (applyTheme, initTheme, service worker registration)
-
-But: this only works if each cut has a clear public API.
-Otherwise, better leave it.
-
-## Tests / verification
-
-There is no unit test suite **for the web app**. Accepted. If you change
-something:
-
-1. `node scripts/check-syntax.mjs` — the syntax gate over the whole deployable
-   surface (`sw.js`, `web/*.js`, inline `<script>` in `web/*.html`). It exists
-   for the straight-quote trap in German string literals (commit `a164aba` ff.),
-   which is a parse error. `node --check web/<file>.js` still works for a single
-   file.
-2. In the browser hard-reload, make a reading, test "Interpret" with both
-   endpoints (Ollama + MLX)
-3. For data changes: `python3 scripts/build_data.py` must run through
-   without errors, the counters in the output consistent
-4. If the change is visible in the UI: `node scripts/capture-web-shots.mjs`
-   re-shoots the README images (`docs/images/`) from the running
-   app — it starts `serve.py`, drives the installed Chrome over CDP, and pins
-   language, theme and `Math.random` so runs are byte-identical. Each shot
-   asserts what it must show (language, dark theme, index grid open, resulting
-   hexagram present), so a wrong frame fails the run instead of landing in the
-   README. Needs Google Chrome, nothing else — no npm.
-5. For changes under `web/vendor/`: `node scripts/build-vendor.mjs --check` must
-   pass — it fails when a generated `.js` no longer matches the `.ts` beside it.
-   `check-syntax.mjs` parses the generated files too (it walks `web/`
-   recursively), but a stale generated file parses just fine, so the two checks
-   answer different questions.
-6. For changes to the macOS AppKit app or its two build scripts:
-   `./scripts/package-macos-app.sh` must run through and produce a mountable
-   `dist/Yijing.dmg` (app + `INSTALL.txt` + Applications alias). The signed
-   path — `YIJING_SIGN_IDENTITY=auto` without a notary profile — is the cheap
-   local check: it exercises signing end to end without uploading anything to
-   Apple. Verify at the artifact, not from the log: `codesign -dvvv
-   dist/Yijing.app` must show `Authority=Developer ID Application`,
-   `flags=0x10000(runtime)` and a real `Timestamp=`. The full chain including
-   the notary upload was run once on 2026-08-21 (both submissions `Accepted`;
-   `spctl` reports `accepted` / `source=Notarized Developer ID` for app and
-   DMG) — it takes a few minutes and needs the Mac online, so keep it for
-   actual releases.
-
-> **Trap in both scripts (cost a debugging round on 2026-08-21):** never write
-> `codesign … | grep -q …` here. `grep -q` exits at the first match, `codesign`
-> dies of SIGPIPE (141), and `set -o pipefail` passes that on — so the condition
-> is false exactly when it matches. Collect the output into a variable first,
-> then test it with `[[ … == *…* ]]`. The pre-existing `Timestamp=none` guard
-> had this bug and would have stayed silent in the very case it guards.
-
-**OracleKit is the one sanctioned exception to the
-"[no new test frameworks](#what-you-should-not-do)" rule.** It ships an
-XCTest suite (`Tests/OracleKitTests/` — `CastingTests.swift`,
-`DailyTests.swift`, `TextsTests.swift`). Run `swift test` from `scripts/ios-app/OracleKit/`.
-It is the King-Wen / daily-determinism **parity gate**: it proves the Swift
-port is bit-identical to `web/app.js` `BINARY_TO_KING_WEN` and
-`build_data.py` `KING_WEN_BINARY` (mirrors `scripts/test-kingwen.mjs`).
-
-For larger changes, add a short note to `CHANGELOG.md`.
+- Before editing anything under `scripts/ios-app/` (build, signing, widgets, watch): `.claude/rules/ios-app.md`, then `docs/IOS-APP.md` and `scripts/ios-app/README.md`.
+- Before editing `scripts/macos-app/` or the two macOS build scripts: `.claude/rules/macos-app.md`, then `docs/MACOS-APP.md`.
+- Before touching `web/vendor/`, `web/llm.js` or `scripts/build-vendor.mjs`: `.claude/rules/vendor.md`; endpoint and reasoning setup in `docs/LLM.md`.
+- Before a structural change to the web app (modules, data flow, persistence, URL scheme, native bridge): `docs/ARCHITECTURE.md`.
+- Before rebuilding or changing the data: `docs/DATA.md`; setup and workflow: `docs/DEVELOPMENT.md`.
+- Before you adopt a "decided on purpose" at face value, or when you wonder why the hosting looks the way it does: `docs/internal/decisions.md`.
+- Before changing README images: `docs/images/README.md`.
 
 ## Memory
 
-- **SDD artifacts (since 2026-07-16): cockpit, not repo** — specs/plans/task reports live in the
-  maintainer's coding cockpit (`$VAULT/25_Coding/yijing/_SDD/`, CORE-META-14, maintainer-local).
-  They carry working context (vault paths, sister-repo internals) that is useless to anyone in a
-  public repo. The repo keeps the design essence in this file + `CHANGELOG.md`.
+- **SDD artifacts live in the maintainer's coding cockpit, not in this repo** (maintainer-local). The repo keeps the design essence in this file, `docs/internal/decisions.md` and `CHANGELOG.md`.
 - **Legacy stock:** `docs/superpowers/{specs,plans}/` is frozen — do not add anything new there.
-- **Never in the repo:** absolute paths outside the repo (`/Users/…`, vault paths) — use
-  placeholders (`$VAULT/…`, `~/…`, repo-relative). Provenance references as repo name +
-  `file:line` are welcome, though.
+- **Never in the repo:** absolute paths outside the repo (`/Users/…`, vault paths) — use placeholders (`$VAULT/…`, `~/…`, repo-relative). Provenance references as repo name + `file:line` are welcome.
+
+## Abweichungen von der Leitkonvention
+
+Keine. (CORE-META-03, CORE-GIT-01, PROF-WEB-03, PROF-NAT-01 and PROF-NAT-02 are closed; the record is in `docs/internal/decisions.md`.)

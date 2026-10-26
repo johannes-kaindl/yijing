@@ -87,6 +87,8 @@ if grep -q '\.\./' "$OUT"/app.js; then
     exit 1
 fi
 
+# --chmod ist Pflicht: das mktemp-Stagingverzeichnis ist 0700, und `rsync -a`
+# würde das aufs Ziel übertragen — der Webserver antwortet dann mit 403.
 echo "→ rsync nach ${DEST} …"
 "$RSYNC" -az --delete --chmod=D755,F644 \
     --exclude='.DS_Store' --exclude='Thumbs.db' --exclude='*.swp' \
