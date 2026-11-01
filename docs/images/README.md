@@ -22,17 +22,11 @@ The four in-page screenshots come from the same script and the same run:
 | `reading-en.png` | A full cast reading in English, from the question field down to both hexagram cards. | 940×968 CSS at DPR 2 → 1880×1936, embedded at 720 px |
 | `reading-de.png` | The same reading in German. | as above |
 
-One image in the READMEs is **not** a screenshot and deliberately does not live
-here: the social-preview card in `web/assets/og-image.png` (stylised hexagram 1
-with 易經, generated from `og-image.svg`). It is a brand asset that ships with
-the site — the page references it as `og:image` — so moving it into `docs/`
-would either break the site or duplicate the file.
+One image in the READMEs is **not** a screenshot and deliberately does not live here: the social-preview card, generated from `og-image.svg`. It is a brand asset that ships with the site — the page references it as `og:image` — so moving it into `docs/` would either break the site or duplicate the file. The table row below names it with its repo path; a path with a directory part is how the contract declares an image outside this folder, and `readme_lint` checks that the file exists there.
 
-> `readme_lint` has no conforming state for that image: listing it in the table
-> above reports "die Datei fehlt" (it is not in this folder), leaving it out
-> reports "der Vertrag kennt es nicht" (the README embeds it). The warning is
-> the tool's, not the repo's. It would need a way to declare an embedded asset
-> that lives outside the image folder.
+| File | Shows | Frame |
+|---|---|---|
+| `web/assets/og-image.png` | Stylised hexagram 1 with 易經, the social-preview card. | 1200×630, brand asset of the site |
 
 ## Rules the images follow
 
