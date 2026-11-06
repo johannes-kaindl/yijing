@@ -346,6 +346,22 @@ async function waitForHttp(url, timeoutMs = 10000) {
   }
 }
 
+// Quit Chrome cleanly. On macOS Chrome clones its app bundle into /var/folders/…/X/com.google.Chrome.code_sign_clone at every start and
+// only removes the clone on a clean exit: SIGTERM and SIGKILL leave it behind (measured 2026-11-06, Chrome 156). Browser.close over the
+// browser-level DevTools socket is the clean exit; the signal is only the fallback when Chrome does not answer within 10 s.
+async function quitChrome(chrome, port) {
+  if (chrome.exitCode !== null || chrome.signalCode !== null) return;
+  const exited = new Promise((r) => chrome.once('exit', () => r(true)));
+  try {
+    const { webSocketDebuggerUrl } = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+    const browser = new WebSocket(webSocketDebuggerUrl);
+    await new Promise((resolve, reject) => { browser.addEventListener('open', resolve, { once: true }); browser.addEventListener('error', reject, { once: true }); });
+    browser.send(JSON.stringify({ id: 1, method: 'Browser.close' }));
+  } catch { /* already gone or port closed: the race below returns at once or falls back to the signal */ }
+  const ended = await Promise.race([exited, new Promise((r) => setTimeout(() => r(false), 10000))]);
+  if (!ended) chrome.kill();
+}
+
 async function main() {
   if (!existsSync(CHROME)) {
     console.error(`✗ Chrome not found at ${CHROME}\n  Set YIJING_CHROME to its binary.`);
@@ -399,7 +415,7 @@ async function main() {
     }
     cdp.close();
   } finally {
-    if (!KEEP) stop();
+    if (!KEEP) { await quitChrome(chrome, CDP_PORT); stop(); }
   }
 
   if (!written) { console.error('✗ nothing captured — check --only'); process.exit(1); }
